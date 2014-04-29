@@ -1,0 +1,26 @@
+<plugin name='cm-editor' version='0.1' grailsVersion='2.2 &gt; *'>
+  <author>Frank Tröger</author>
+  <authorEmail>frank.troeger@fau.de</authorEmail>
+  <title>Cm Editor Plugin</title>
+  <description>Brief summary/description of the plugin.
+</description>
+  <documentation>http://grails.org/plugin/cm-editor</documentation>
+  <type>CmEditorGrailsPlugin</type>
+  <resources>
+    <resource>CmEditorResources</resource>
+    <resource>de.rrze.cmeditor.CMEditorTagLib</resource>
+  </resources>
+  <repositories>
+    <repository name='grailsCentral' url='http://grails.org/plugins' />
+    <repository name='mavenCentral' url='http://repo1.maven.org/maven2/' />
+    <repository name='rrzeArchiva' url='http://reppo.rrze.uni-erlangen.de:8080/archiva/repository/internal/' />
+  </repositories>
+  <dependencies />
+  <plugins>
+    <compile>
+      <plugin group='org.grails.plugins' name='jquery-ui' version='1.10.3' />
+    </compile>
+  </plugins>
+  <runtimePluginRequirements />
+  <behavior />
+</plugin>
