@@ -433,8 +433,10 @@
 		var keyMap = {
 			"Ctrl-S": function(cm) { cmeditor_${name}_save(cm); },
 			"F11": function(cm) {
+				if (!cm.getOption("readOnly")) {
 		          cm.setOption("fullScreen", !cm.getOption("fullScreen"));
-		        },
+		        }
+		    },
 			//"Ctrl-I": function(cm) { server.showType(cm); },
 			//"Ctrl-Space": function(cm) { server.complete(cm); },
 			//"Alt-.": function(cm) { server.jumpToDef(cm); },

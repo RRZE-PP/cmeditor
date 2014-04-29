@@ -12,8 +12,10 @@
 	function cmeditor_${name}_init() {
 		var keyMap = {
 			"F11": function(cm) {
-		          cm.setOption("fullScreen", !cm.getOption("fullScreen"));
-		        },
+				if (!cm.getOption("readOnly")) {
+					cm.setOption("fullScreen", !cm.getOption("fullScreen"));
+		        }
+		    },
 	  	};
 	  	<g:if test="${options.keywordOverlayVar}">
 			for(name of Object.keys(${options.keywordOverlayVar})) {

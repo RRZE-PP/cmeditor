@@ -26,11 +26,11 @@ modules = {
 		
 		// themes
 		resource url: 'codemirror-4.0/theme/eclipse.css', disposition:'head'
-		resource url: 'css/codemirror-4.0/theme/lesser-dark.css', disposition:'head'
+		resource url: 'codemirror-4.0/theme/lesser-dark.css', disposition:'head'
 		resource url: 'codemirror-4.0/theme/monokai.css', disposition:'head'
-		resource url: 'css/codemirror-4.0/theme/night.css', disposition:'head'
-		resource url: 'css/codemirror-4.0/theme/the-matrix.css', disposition:'head'
-		resource url: 'css/codemirror-4.0/theme/twilight.css', disposition:'head'
+		resource url: 'codemirror-4.0/theme/night.css', disposition:'head'
+		resource url: 'codemirror-4.0/theme/the-matrix.css', disposition:'head'
+		resource url: 'codemirror-4.0/theme/twilight.css', disposition:'head'
 //		resource url: 'css/codemirror-4.0/theme/.css', disposition:'head'
 		
 		// keymaps

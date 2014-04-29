@@ -3,12 +3,8 @@
 	<div id="cmeditor-menu-${name}-donation" class="dialog" title="Donation" style="display: none;">
 		<p>You want the incredible addon?</p>
 		<p>Donate via Coffee?</p>
-		<form>
-		</form>
 	</div>
 	<div id="cmeditor-menu-${name}-open" class="dialog" title="Open" style="display: none;">
-		<form>
-		</form>
 	</div>
 	<ul id="cmeditor-menu-${name}" class="cmeditor-menubar">
 		<li><a href="#">File</a>
@@ -96,7 +92,7 @@
 					}
 				}
 				if (available == true) {
-					s.appendTo("#cmeditor-menu-${name}-open form");
+					s.appendTo("#cmeditor-menu-${name}-open");
 					$('#cmeditor-menu-${name}-open-select').chosen({width:'95%'});
 					myButtons.Open = function() {
 						for (var val of $('#cmeditor-menu-${name}-open-select').val()) {
@@ -136,9 +132,21 @@
 		},
 		};
 	var cmeditor_menu_${name}_view = {
-		readOnly: function(cm) {if (!cm.getOption('readOnly')) cm.setOption('readOnly', 'nocursor'); else cm.setOption('readOnly', false); },
+		readOnly: function(cm) {
+			if (!cm.getOption('readOnly')) {
+				cm.setOption('readOnly', 'nocursor');
+				$("#cmeditor-menu-${name}-view a[value='addonfullscreen']").parent().addClass('ui-state-disabled');
+			} else {
+				cm.setOption('readOnly', false);
+				$("#cmeditor-menu-${name}-view a[value='addonfullscreen']").parent().removeClass('ui-state-disabled');
+			}
+		},
 		diff: function(cm) { if(typeof cmeditor_${name}_diff == 'function') cmeditor_${name}_diff(cm); },
-		addonfullscreen: function(cm) { cm.setOption("fullScreen", true); },
+		addonfullscreen: function(cm) {
+			if (!cm.getOption("readOnly")) {
+				cm.setOption("fullScreen", !cm.getOption("fullScreen"));
+	        }
+	    },
 		modehtmlmixed: function(cm) { cm.setOption("mode", "htmlmixed"); },
 		modehtmlembedded: function(cm) { cm.setOption("mode", "htmlembedded"); },
 		modexml: function(cm) { cm.setOption("mode", "xml"); },
@@ -301,9 +309,11 @@
 		if (cmeditor_${name}.getOption('readOnly')) {
 			console.log("RO");
 			$("#cmeditor-menu-${name}-view a[value='readOnly'] span").addClass('ui-icon ui-icon-check');
+			$("#cmeditor-menu-${name}-view a[value='addonfullscreen']").parent().addClass('ui-state-disabled');
 		} else {
 			console.log("RW");
 			$("#cmeditor-menu-${name}-view a[value='readOnly'] span").removeClass('ui-icon ui-icon-check');
+			$("#cmeditor-menu-${name}-view a[value='addonfullscreen']").parent().removeClass('ui-state-disabled');
 		}
 		console.log("cmeditor_menu_${name}_update was performed.")
 	};
