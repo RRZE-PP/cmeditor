@@ -36,6 +36,7 @@ grails.project.dependency.resolution = {
         }
 			  
 		compile ":jquery-ui:1.10.3"
+		runtime ':jquery:1.10.2'
 		//runtime ":jquery:1.11.0.1"
     }
 }
