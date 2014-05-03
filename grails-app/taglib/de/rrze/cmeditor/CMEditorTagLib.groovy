@@ -28,7 +28,11 @@ class CMEditorTagLib {
 		if (attrs.options) {
 			options.putAll(attrs.options)
 		}
-		def mapping = [:]
+		def mapping = [
+			name:'name',
+			content:'content',
+			mode:'mode',
+			]
 		if (attrs.mapping) {
 			mapping.putAll(attrs.mapping)
 		}

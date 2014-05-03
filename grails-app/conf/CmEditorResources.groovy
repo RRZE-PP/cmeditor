@@ -47,9 +47,30 @@ modules = {
 		resource url: 'codemirror-4.0/addon/search/search.js', disposition:'head'
 		resource url: 'codemirror-4.0/addon/search/searchcursor.js', disposition:'head'
 		resource url: 'codemirror-4.0/addon/mode/overlay.js', disposition:'head'
+		// hint
+		resource url: 'codemirror-4.0/addon/hint/show-hint.css', disposition:'head'
+		resource url: 'codemirror-4.0/addon/hint/show-hint.js', disposition:'head'
+		resource url: 'codemirror-4.0/addon/hint/anyword-hint.js', disposition:'head'
+		resource url: 'codemirror-4.0/addon/hint/css-hint.js', disposition:'head'
+		resource url: 'codemirror-4.0/addon/hint/html-hint.js', disposition:'head'
+		resource url: 'codemirror-4.0/addon/hint/javascript-hint.js', disposition:'head'
+		resource url: 'codemirror-4.0/addon/hint/sql-hint.js', disposition:'head'
+		resource url: 'codemirror-4.0/addon/hint/xml-hint.js', disposition:'head'
+		//resource url: 'codemirror-4.0/addon/hint/python-hint.js', disposition:'head'
+		
+		resource url: 'codemirror-4.0/addon/fold/foldcode.js', disposition:'head'
+		resource url: 'codemirror-4.0/addon/fold/foldgutter.css', disposition:'head'
+		resource url: 'codemirror-4.0/addon/fold/foldgutter.js', disposition:'head'
+		resource url: 'codemirror-4.0/addon/fold/brace-fold.js', disposition:'head'
+		resource url: 'codemirror-4.0/addon/fold/comment-fold.js', disposition:'head'
+		resource url: 'codemirror-4.0/addon/fold/indent-fold.js', disposition:'head'
+		resource url: 'codemirror-4.0/addon/fold/markdown-fold.js', disposition:'head'
+		resource url: 'codemirror-4.0/addon/fold/xml-fold.js', disposition:'head'
 		
 		resource url:'/css/cmeditor.css', disposition:'head'
-		resource url:'/js/cmeditor.js', disposition:'head'
+		resource url:'/js/cmeditor-overlay.js', disposition:'head'
+		resource url:'/js/cmeditor-hint.js', disposition:'head'
+		
 		
 		resource url: 'codemirror-4.0/addon/display/fullscreen.css', disposition:'head'
 		resource url: 'codemirror-4.0/addon/display/fullscreen.js', disposition:'head'
@@ -69,16 +90,6 @@ modules = {
 		dependsOn 'cmeditor, jquery-ui, jsdifflib'
 		
 		resource url:'/js/cmeditor-tabs.js', disposition:'head'
-	}
-	
-	'cmeditorbbx' {
-		defaultBundle false
-		
-		dependsOn 'cmeditor'
-		
-		// custom
-		resource url:'/css/cmeditor.css', disposition:'head'
-		resource url:'/js/cmeditor.js', disposition:'head'
 	}
 	
 	'jsdifflib' {
