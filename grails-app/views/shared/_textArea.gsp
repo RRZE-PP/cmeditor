@@ -11,15 +11,20 @@
 	var cmeditor_${name};
 	function cmeditor_${name}_init() {
 		var keyMap = {
+			"Ctrl-Space": "autocomplete",
+			"Ctrl-Q": function(cm){ cm.foldCode(cm.getCursor()); },
 			"F11": function(cm) {
 				if (!cm.getOption("readOnly")) {
 					cm.setOption("fullScreen", !cm.getOption("fullScreen"));
 		        }
 		    },
 	  	};
-	  	<g:if test="${options.keywordOverlayVar}">
-			for(name of Object.keys(${options.keywordOverlayVar})) {
-				cmeditorall_keyword_overlay(name, ${options.keywordOverlayVar}[name]['baseMode'], ${options.keywordOverlayVar}[name]['keywords']);
+	  	<g:if test="${options.overlayDefinitionsVar}">
+	  		//console.log(Object.keys(${options.overlayDefinitionsVar}));
+			for(var name in ${options.overlayDefinitionsVar}) {
+				//console.log(name+" baseMode: "+ ${options.overlayDefinitionsVar}[name]['baseMode']);
+				//console.log(name+" definition: "+ ${options.overlayDefinitionsVar}[name]['definition']);
+				cmeditorall_add_overlay_definition(name, ${options.overlayDefinitionsVar}[name]['baseMode'], ${options.overlayDefinitionsVar}[name]['definition']);
 			}
 		</g:if>
 		cmeditor_${name} = CodeMirror.fromTextArea($('textarea#${name}')[0], {
@@ -33,6 +38,8 @@
 	        viewportMargin: Infinity,
 			<g:if test="${options.mode}">mode: '${options.mode}',</g:if>
 			<g:if test="${options.defaultReadOnly||options.readOnly}">readOnly: 'nocursor',</g:if>
+			foldGutter: true,
+   			gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
 			extraKeys: keyMap,
 		});
 		

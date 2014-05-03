@@ -294,8 +294,8 @@
 				console.log("mode changed");
 			}
 			if (cmChangeObjects && !cmChangeObjects.propertyIsEnumerable('cmeditor_custom_field')) {// && cmeditor_curDoc_${name}._cmeditorContent != cmeditor_curDoc_${name}._cmeditorDoc.getValue()) {
-			console.log(cmeditor_curDoc_${name}._cmeditorContent);
-			console.log(cmeditor_curDoc_${name}._cmeditorDoc.getValue());
+			//console.log(cmeditor_curDoc_${name}._cmeditorContent);
+			//console.log(cmeditor_curDoc_${name}._cmeditorDoc.getValue());
 				cmeditor_curDoc_${name}._cmeditorContent = cmeditor_curDoc_${name}._cmeditorDoc.getValue();
 				changed = true;
 				console.log("content changed" + cmChangeObjects);
@@ -410,7 +410,7 @@
 				//Close: function() { cmeditor_${name}_unregister_doc(cmeditor_curDoc_${name}); $( this ).dialog( "close" );},
 			};
 		if (addButtons) {
-			for (name of Object.keys(addButtons)) {
+			for (var name in addButtons) {
 				buttons[name] = addButtons[name];
 			}
 		}
@@ -431,7 +431,9 @@
 		
 	function cmeditor_${name}_init() {
 		var keyMap = {
+			"Ctrl-Space": "autocomplete",
 			"Ctrl-S": function(cm) { cmeditor_${name}_save(cm); },
+			"Ctrl-Q": function(cm){ cm.foldCode(cm.getCursor()); },
 			"F11": function(cm) {
 				if (!cm.getOption("readOnly")) {
 		          cm.setOption("fullScreen", !cm.getOption("fullScreen"));
@@ -443,11 +445,15 @@
 			//"Alt-,": function(cm) { server.jumpBack(cm); },
 			//"Ctrl-Q": function(cm) { server.rename(cm); }
 	  	};
-	  	<g:if test="${options.keywordOverlayVar}">
-			for(name of Object.keys(${options.keywordOverlayVar})) {
-				cmeditorall_keyword_overlay(name, ${options.keywordOverlayVar}[name]['baseMode'], ${options.keywordOverlayVar}[name]['keywords']);
+	  	<g:if test="${options.overlayDefinitionsVar}">
+	  		//console.log(Object.keys(${options.overlayDefinitionsVar}));
+			for(var name in ${options.overlayDefinitionsVar}) {
+				//console.log(name+" baseMode: "+ ${options.overlayDefinitionsVar}[name]['baseMode']);
+				//console.log(name+" definition: "+ ${options.overlayDefinitionsVar}[name]['definition']);
+				cmeditorall_add_overlay_definition(name, ${options.overlayDefinitionsVar}[name]['baseMode'], ${options.overlayDefinitionsVar}[name]['definition']);
 			}
 		</g:if>
+		CodeMirror.commands.autocomplete = function(cm, getHints, options) { CodeMirror.showHint(cm, null, {cmeditorDefinitions: ${options.overlayDefinitionsVar}}) };
 		cmeditor_${name} = CodeMirror(document.getElementById("cmeditor-tabs-${name}-form"), {
 			lineNumbers: true,
 			smartIndent: false,
@@ -459,6 +465,8 @@
 	        viewportMargin: Infinity,
 			<g:if test="${options.mode}">mode: '${options.mode}',</g:if>
 			<g:if test="${options.defaultReadOnly||options.readOnly}">readOnly: 'nocursor',</g:if>
+			foldGutter: true,
+   			gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
 			extraKeys: keyMap,
 	  });
 

@@ -95,8 +95,9 @@
 					s.appendTo("#cmeditor-menu-${name}-open");
 					$('#cmeditor-menu-${name}-open-select').chosen({width:'95%'});
 					myButtons.Open = function() {
-						for (var val of $('#cmeditor-menu-${name}-open-select').val()) {
-							cmeditor_${name}_ajax_load(val);
+						var vals = $('#cmeditor-menu-${name}-open-select').val();
+						for (var i in vals) {
+							cmeditor_${name}_ajax_load(vals[i]);
 						}
 						$( this ).dialog( "close" );
 					};
@@ -192,8 +193,8 @@
 					}('${mode}');
 			</g:each>
 		</g:if>
-		<g:if test="${options.keywordOverlayVar}">
-			for(name of Object.keys(${options.keywordOverlayVar})) {
+		<g:if test="${options.overlayDefinitionsVar}">
+			for(var name in ${options.overlayDefinitionsVar}) {
 				var s = $("<li><a href=\"#\" value=\"mode"+name+"\"><span></span>"+name+"</a></li>");
 				s.appendTo("#cmeditor-menu-${name}-modes");
 				cmeditor_menu_${name}_view["mode"+name] = function(name) {
