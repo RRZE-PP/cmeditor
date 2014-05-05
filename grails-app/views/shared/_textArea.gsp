@@ -27,6 +27,7 @@
 				cmeditorall_add_overlay_definition(name, ${options.overlayDefinitionsVar}[name]['baseMode'], ${options.overlayDefinitionsVar}[name]['definition']);
 			}
 		</g:if>
+		CodeMirror.commands.autocomplete = function(cm, getHints, options) { CodeMirror.showHint(cm, null, {cmeditorDefinitions: ${options.overlayDefinitionsVar}}) };
 		cmeditor_${name} = CodeMirror.fromTextArea($('textarea#${name}')[0], {
 			lineNumbers: true,
 			smartIndent: false,
