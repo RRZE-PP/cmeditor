@@ -1,4 +1,4 @@
-<plugin name='cm-editor' version='2.2.4' grailsVersion='2.2 &gt; *'>
+<plugin name='cm-editor' version='2.2.5' grailsVersion='2.2 &gt; *'>
   <author>Frank Tröger</author>
   <authorEmail>frank.troeger@fau.de</authorEmail>
   <title>Cm Editor Plugin</title>
@@ -17,9 +17,6 @@
   </repositories>
   <dependencies />
   <plugins />
-  <runtimePluginRequirements>
-    <plugin name='jquery' version='1.10 &gt; *' />
-    <plugin name='jquery-ui' version='1.10 &gt; *' />
-  </runtimePluginRequirements>
+  <runtimePluginRequirements />
   <behavior />
 </plugin>

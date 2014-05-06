@@ -1,6 +1,6 @@
 class CmEditorGrailsPlugin {
     // the plugin version
-    def version = "2.2.4"
+    def version = "2.2.5"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "2.2 > *"
     // resources that are excluded from plugin packaging
@@ -21,9 +21,9 @@ Brief summary/description of the plugin.
 
     // Extra (optional) plugin metadata
 	
-	def dependsOn = [
-		'jquery': "1.10 > *",
-		'jquery-ui': "1.10 > *"]
+//	def dependsOn = [
+//		'jquery': "1.10 > *",
+//		'jquery-ui': "1.10 > *"]
 
     // License: one of 'APACHE', 'GPL2', 'GPL3'
 //    def license = "APACHE"
