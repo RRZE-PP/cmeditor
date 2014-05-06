@@ -80,35 +80,39 @@
 			$('#cmeditor-menu-${name}-open .chosen-container').remove();
 			<g:if test="${ajax.listURL}">
 			$.get("${ajax.listURL}", function(data){
-				var available = false
-				var myButtons = {
-					Cancel: function() { $( this ).dialog( "close" ); },
-				};
-				for(var i=0; i < data.length; ++i) {
-					//cmeditor_${name}_load_by_name(data[i]);
-					if (cmeditor_${name}_doc_id(data[i]) == undefined) {
-						$("<option />", {value: data[i], text: data[i]}).appendTo(s);
-						available = true;
-					}
-				}
-				if (available == true) {
-					s.appendTo("#cmeditor-menu-${name}-open");
-					$('#cmeditor-menu-${name}-open-select').chosen({width:'95%'});
-					myButtons.Open = function() {
-						var vals = $('#cmeditor-menu-${name}-open-select').val();
-						for (var i in vals) {
-							cmeditor_${name}_ajax_load(vals[i]);
-						}
-						$( this ).dialog( "close" );
+				if (data.success) {
+					var available = false
+					var myButtons = {
+						Cancel: function() { $( this ).dialog( "close" ); },
 					};
+					for(var i=0; i < data.result.length; ++i) {
+						//cmeditor_${name}_load_by_name(data.result[i]);
+						if (cmeditor_${name}_doc_id(data.result[i]) == undefined) {
+							$("<option />", {value: data.result[i], text: data.result[i]}).appendTo(s);
+							available = true;
+						}
+					}
+					if (available == true) {
+						s.appendTo("#cmeditor-menu-${name}-open");
+						$('#cmeditor-menu-${name}-open-select').chosen({width:'95%'});
+						myButtons.Open = function() {
+							var vals = $('#cmeditor-menu-${name}-open-select').val();
+							for (var i in vals) {
+								cmeditor_${name}_ajax_load(vals[i]);
+							}
+							$( this ).dialog( "close" );
+						};
+					} else {
+						s = $("<p id=\"cmeditor-menu-${name}-open-no-files\" name=\"cmeditor-menu-${name}-open-no-files\">No files available.</p>");
+						s.appendTo("#cmeditor-menu-${name}-open");
+					}
+					$('#cmeditor-menu-${name}-open').dialog({
+						height: 300,
+						buttons: myButtons,
+					});
 				} else {
-					s = $("<p id=\"cmeditor-menu-${name}-open-no-files\" name=\"cmeditor-menu-${name}-open-no-files\">No files available.</p>");
-					s.appendTo("#cmeditor-menu-${name}-open");
+					cmeditor_${name}_update_message(data.message);
 				}
-				$('#cmeditor-menu-${name}-open').dialog({
-					height: 300,
-					buttons: myButtons,
-				});
 			});
 			</g:if>
 		},
@@ -193,7 +197,7 @@
 					}('${mode}');
 			</g:each>
 		</g:if>
-		<g:if test="${options.overlayDefinitionsVar}">
+		if (typeof ${options.overlayDefinitionsVar} !== 'undefined') {
 			for(var name in ${options.overlayDefinitionsVar}) {
 				var s = $("<li><a href=\"#\" value=\"mode"+name+"\"><span></span>"+name+"</a></li>");
 				s.appendTo("#cmeditor-menu-${name}-modes");
@@ -201,7 +205,7 @@
 					return function(cm) { cm.setOption("mode", name); };
 					}(name);
 			}
-		</g:if>
+		}
 		//cmeditor_menu_${name}_options['mode'+'dammit'] = function(cm) { cm.setOption("mode", 'dammit'); };
 		$('#cmeditor-menu-${name}').menubar({
 			position: {

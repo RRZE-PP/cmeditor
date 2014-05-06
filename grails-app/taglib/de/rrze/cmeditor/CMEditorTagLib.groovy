@@ -15,6 +15,7 @@ class CMEditorTagLib {
 			binding: 'default',
 			theme: 'default',
 			defaultReadOnly: false,
+			overlayDefinitionsVar: 'overlay_definitions',
 			]
 		if (attrs.mode) {
 			options.mode = attrs.mode
@@ -56,15 +57,19 @@ class CMEditorTagLib {
 			defaultContent: '',
 			defaultMode: 'htmlmixed',
 			defaultReadOnly: false,
+			overlayDefinitionsVar: 'overlay_definitions',
 			defaultDiffBeforeSave: true,
 			idField: 'id',
 			]
-		def mapping = [:]
+		def mapping = [
+			name: 'name',
+			content: 'content',
+			mode: 'mode']
 		def ajax = [
-            listURL:'',
-            getURL:'',
-			updateURL:'',
-			deleteURL:'',
+            listURL:'ajaxList',
+            getURL:'ajaxGet?label=',
+			updateURL:'ajaxUpdate',
+			deleteURL:'ajaxDelete',
 			]
 		if (attrs.mode) {
 			options.mode = attrs.mode

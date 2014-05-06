@@ -90,8 +90,10 @@
 				data:data,
 				url:'${ajax.updateURL}',
 				success:function(data,textStatus){
-					cmeditor_${name}_update_message(data,textStatus);
-					cmeditor_${name}_ajax_reload();
+					if (data.success) {
+						cmeditor_${name}_ajax_reload();
+					}
+					cmeditor_${name}_update_message(data.message, textStatus);
 					},
 				error:function(XMLHttpRequest,textStatus,errorThrown){
 					},
@@ -109,21 +111,32 @@
 	}
 	
 	function cmeditor_${name}_ajax_load(name, readWrite) {
-		$.get("${ajax.getURL}"+name, function(data){
-			data._cmeditorName = data.${mapping.name};
-			data._cmeditorMode = data.${mapping.mode};
-			if (readWrite) {
-				data._cmeditorReadOnly = '';
-			} else {
-				data._cmeditorReadOnly = '${options.readOnly||options.defaultReadOnly?'nocursor':''}';
-			}
-			data._cmeditorContent = data.${mapping.content};
-			data._cmeditorOrigContent = data.${mapping.content};
-			data._cmeditorStatus = 'unchanged';
-			data._cmeditorDoc = new CodeMirror.Doc(data._cmeditorContent, data._cmeditorMode);
-			cmeditor_${name}_register_doc_data(data);
-			console.log("cmeditor_${name}_ajax_load '"+name+"' was performed.");
-			console.log(data.version)
+		$.ajax({
+			type:'GET',
+			url: "${ajax.getURL}"+name,
+			success: function(data){
+				if (data.success && data.result) {
+					data.result._cmeditorName = data.result.${mapping.name};
+					data.result._cmeditorMode = data.result.${mapping.mode} || '${options.defaultMode}';
+					if (readWrite) {
+						data.result._cmeditorReadOnly = '';
+					} else {
+						data.result._cmeditorReadOnly = '${options.readOnly||options.defaultReadOnly?'nocursor':''}';
+					}
+					data.result._cmeditorContent = data.result.${mapping.content};
+					data.result._cmeditorOrigContent = data.result.${mapping.content};
+					data.result._cmeditorStatus = 'unchanged';
+					data.result._cmeditorDoc = new CodeMirror.Doc(data.result._cmeditorContent, data.result._cmeditorMode);
+					cmeditor_${name}_register_doc_data(data.result);
+					console.log("cmeditor_${name}_ajax_load '"+name+"' was performed.");
+					console.log(data.result.version)
+				} else {
+					cmeditor_${name}_update_message(data.message);
+				}
+			},
+			error:function(XMLHttpRequest,textStatus,errorThrown){
+				cmeditor_${name}_update_message(textStatus + ": " + errorThrown);
+			},
 		});
 	}
 	
@@ -137,6 +150,9 @@
 				data:{id:cmeditor_curDoc_${name}["${options.idField}"]},
 				url:'${ajax.deleteURL}',
 				success:function(data,textStatus){
+					if (data.success) {
+						// do sth
+					}
 					cmeditor_${name}_update_message(data,textStatus);
 					cmeditor_${name}_ajax_reload();
 				},
@@ -154,7 +170,9 @@
 		$.ajax({
     		url: "${ajax.listURL}",
     		success: function(json) {
-      			data = json;
+    			if (json.success && json.result) {
+      				data = json.result;
+      			}
     		},
     		async:false
   		});
@@ -217,7 +235,7 @@
 	function cmeditor_${name}_unregister_untitled_doc() {
 		if (cmeditor_docs_${name}.length > 1) {
 			var doc = cmeditor_${name}_find_doc(cmeditor_unregDocName_${name})
-			if (doc && doc._cmeditorDoc.getValue() == '${options.defaultContent}') {
+			if (doc && doc._cmeditorStatus == 'new') {
 				cmeditor_${name}_unregister_doc(doc);
 			}
 		}
@@ -231,6 +249,7 @@
 		var docId = cmeditor_${name}_doc_id(cmeditor_curDoc_${name}._cmeditorName);
 		var oldName = cmeditor_docs_${name}[docId]._cmeditorName;
 		cmeditor_docs_${name}[docId]._cmeditorName = newName;
+		cmeditor_${name}_set_changed_doc(docId);
 		cmeditor_${name}_update_doc();
 		console.log("cmeditor_${name}_rename_doc '"+oldName+"', '"+newName+"' was performed.")
 		</g:else>
@@ -276,6 +295,13 @@
 			}
 			if (cmeditor_curDoc_${name}._cmeditorMode != cmeditor_${name}.getOption('mode')) {
 				cmeditor_curDoc_${name}._cmeditorMode = cmeditor_${name}.getOption('mode');
+				var pos = cmeditor_${name}_doc_id(cmeditor_curDoc_${name}._cmeditorName);
+				cmeditor_${name}_set_changed_doc(pos);
+				if (cmeditor_curDoc_${name}._cmeditorStatus == 'new') {
+					cmeditor_curDoc_${name}._cmeditorStatus = 'unsaved';
+				} else if (cmeditor_curDoc_${name}._cmeditorStatus == 'unchanged') {
+					cmeditor_curDoc_${name}._cmeditorStatus = 'changed';
+				}
 			}
 			cmeditor_${name}_update_doc();
 		}
@@ -325,9 +351,27 @@
 		return changed;
 	}
 	
+	function cmeditor_${name}_set_form_doc_field(elem, val) {
+		if (elem.attr('type') == 'checkbox') {
+			if (val) {
+				elem.prop('checked', true);
+			} else {
+				elem.prop('checked', false);
+			}
+		} else {
+			elem.val(val);
+		}
+	}
+	
 	function cmeditor_${name}_set_form_doc() {
 		$("#cmeditor-tabs-${name}-form .cmeditor-field").each(function(){
-			$(this).val(cmeditor_curDoc_${name}[$(this).attr('id')]||'');
+			var key = $(this).attr('id');
+			if ($(this).attr('data-field-property') && cmeditor_curDoc_${name}[key]) {
+			console.log("BOOOOO " + key);
+				cmeditor_${name}_set_form_doc_field($(this), cmeditor_curDoc_${name}[key][$(this).attr('data-field-property')]||'')
+			} else {
+				cmeditor_${name}_set_form_doc_field($(this), cmeditor_curDoc_${name}[key]||'');
+			}
 		});
 		$("#cmeditor-tabs-${name}-form #${mapping.name}.cmeditor-field").val(cmeditor_curDoc_${name}._cmeditorName||'');
 		$("#cmeditor-tabs-${name}-form #${mapping.mode}.cmeditor-field").val(cmeditor_curDoc_${name}._cmeditorMode||'');
@@ -382,7 +426,7 @@
 		var name = prompt("Name of the new buffer", "");
 		if (name == null) return;
 		if (!name) name = "test";
-		var data = {_cmeditorName: cmeditor_${name}_get_name(name), _cmeditorMode:"${options.defaultMode}", _cmeditorStatus:'new', _cmeditorContent: "${options.defaultContent}"};
+		var data = {_cmeditorName: cmeditor_${name}_get_name(name), _cmeditorMode:"${options.defaultMode}", _cmeditorStatus:'new', _cmeditorContent: '${options.defaultContent}'};
 		data._cmeditorDoc = new CodeMirror.Doc(data._cmeditorContent, data._cmeditorMode);
 		cmeditor_${name}_register_doc_data(data);
 		cmeditor_${name}_select_doc(cmeditor_docs_${name}.length - 1);
@@ -427,8 +471,6 @@
 		return cmeditor_curDoc_${name}._cmeditorMode;
 	}
 	
-	
-		
 	function cmeditor_${name}_init() {
 		var keyMap = {
 			"Ctrl-Space": "autocomplete",
@@ -445,15 +487,15 @@
 			//"Alt-,": function(cm) { server.jumpBack(cm); },
 			//"Ctrl-Q": function(cm) { server.rename(cm); }
 	  	};
-	  	<g:if test="${options.overlayDefinitionsVar}">
+		if (typeof ${options.overlayDefinitionsVar} !== 'undefined') {
 	  		//console.log(Object.keys(${options.overlayDefinitionsVar}));
 			for(var name in ${options.overlayDefinitionsVar}) {
 				//console.log(name+" baseMode: "+ ${options.overlayDefinitionsVar}[name]['baseMode']);
 				//console.log(name+" definition: "+ ${options.overlayDefinitionsVar}[name]['definition']);
 				cmeditorall_add_overlay_definition(name, ${options.overlayDefinitionsVar}[name]['baseMode'], ${options.overlayDefinitionsVar}[name]['definition']);
 			}
-		</g:if>
-		CodeMirror.commands.autocomplete = function(cm, getHints, options) { CodeMirror.showHint(cm, null, {cmeditorDefinitions: ${options.overlayDefinitionsVar}}) };
+			CodeMirror.commands.autocomplete = function(cm, getHints, options) { CodeMirror.showHint(cm, null, {cmeditorDefinitions: ${options.overlayDefinitionsVar}}) };
+		}
 		cmeditor_${name} = CodeMirror(document.getElementById("cmeditor-tabs-${name}-form"), {
 			lineNumbers: true,
 			smartIndent: false,
@@ -504,25 +546,54 @@
 	$(document).ready(function() {
 		cmeditor_${name}_init();
 		
-		<g:if test="${options.menu}">cmeditor_menu_${name}_init();</g:if>
-		cmeditor_${name}_register_untitled_doc();
-		$("#cmeditor-tabs-${name}-form .cmeditor-field").keyup(function() {
+		function cmeditor_${name}_get_custom_field(elem) {
+			if (elem.attr('type') == 'checkbox') {
+				return elem.is(":checked");
+			} else {
+				return elem.val();
+			}
+		}
+		
+		function cmeditor_${name}_custom_change(elem) {
+			var key = elem.attr('id');
+			
 			if (cmeditor_curDoc_${name}) {
-				if ($(this).attr('id') == '${mapping.name}') {
-					cmeditor_${name}_rename_doc($(this).val());
-					//cmeditor_curDoc_${name}._cmeditorName = $(this).val();
-				} else if ($(this).attr('id') == '${mapping.mode}') {
-					cmeditor_curDoc_${name}._cmeditorMode = $(this).val();
+				var old = null;
+				var doUpdate = true;
+				if (key == '${mapping.name}') {
+					cmeditor_${name}_rename_doc(cmeditor_${name}_get_custom_field(elem));
+					doUpdate = false;
+				} else if (key == '${mapping.mode}') {
+					old = cmeditor_curDoc_${name}._cmeditorMode;
+					cmeditor_curDoc_${name}._cmeditorMode = cmeditor_${name}_get_custom_field(elem);
 					<g:if test="${options.menu}">cmeditor_menu_${name}_update();</g:if>
-				} else if ($(this).attr('id') == '${mapping.content}') {
-					cmeditor_curDoc_${name}._cmeditorContent = $(this).val();
+				} else if (key == '${mapping.content}') {
+					old = cmeditor_curDoc_${name}._cmeditorContent;
+					cmeditor_curDoc_${name}._cmeditorContent = cmeditor_${name}_get_custom_field(elem);
 				} else {
-					var old = cmeditor_curDoc_${name}[$(this).attr('id')];
-					cmeditor_curDoc_${name}[$(this).attr('id')] = $(this).val();
-					cmeditor_${name}_update_doc({cmeditor_custom_field: true, old:old, new:$(this).val()});
+					if (elem.attr('data-field-property') && cmeditor_curDoc_${name}[key] !== 'undefined') {
+						if (cmeditor_curDoc_${name}[key]) {
+							old = cmeditor_curDoc_${name}[key][elem.attr('data-field-property')];
+						} else {
+							cmeditor_curDoc_${name}[key] = {};
+						}
+						cmeditor_curDoc_${name}[key][elem.attr('data-field-property')] = cmeditor_${name}_get_custom_field(elem);
+					} else {
+						old = cmeditor_curDoc_${name}[key];
+						cmeditor_curDoc_${name}[key] = cmeditor_${name}_get_custom_field(elem);
+					}
+				}
+				if (doUpdate) {
+					cmeditor_${name}_update_doc({cmeditor_custom_field: true, old:old, new:cmeditor_${name}_get_custom_field(elem)});
 				}
 			}
-		});
+		}
+		
+		<g:if test="${options.menu}">cmeditor_menu_${name}_init();</g:if>
+		cmeditor_${name}_register_untitled_doc();
+		$("#cmeditor-tabs-${name}-form .cmeditor-field").keyup(function() {cmeditor_${name}_custom_change($(this));});
+		$("#cmeditor-tabs-${name}-form select.cmeditor-field").change(function() {cmeditor_${name}_custom_change($(this));});
+		$("#cmeditor-tabs-${name}-form input[type='checkbox'].cmeditor-field").change(function() {cmeditor_${name}_custom_change($(this));});
 		console.log("cmeditor_${name} loaded.")
 	});
 </r:script>
