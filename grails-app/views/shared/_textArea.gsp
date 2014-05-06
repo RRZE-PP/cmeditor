@@ -19,15 +19,15 @@
 		        }
 		    },
 	  	};
-	  	<g:if test="${options.overlayDefinitionsVar}">
+		if (typeof ${options.overlayDefinitionsVar} !== 'undefined') {
 	  		//console.log(Object.keys(${options.overlayDefinitionsVar}));
 			for(var name in ${options.overlayDefinitionsVar}) {
 				//console.log(name+" baseMode: "+ ${options.overlayDefinitionsVar}[name]['baseMode']);
 				//console.log(name+" definition: "+ ${options.overlayDefinitionsVar}[name]['definition']);
 				cmeditorall_add_overlay_definition(name, ${options.overlayDefinitionsVar}[name]['baseMode'], ${options.overlayDefinitionsVar}[name]['definition']);
 			}
-		</g:if>
-		CodeMirror.commands.autocomplete = function(cm, getHints, options) { CodeMirror.showHint(cm, null, {cmeditorDefinitions: ${options.overlayDefinitionsVar}}) };
+			CodeMirror.commands.autocomplete = function(cm, getHints, options) { CodeMirror.showHint(cm, null, {cmeditorDefinitions: ${options.overlayDefinitionsVar}}) };
+		}
 		cmeditor_${name} = CodeMirror.fromTextArea($('textarea#${name}')[0], {
 			lineNumbers: true,
 			smartIndent: false,
