@@ -1,4 +1,4 @@
-<plugin name='cm-editor' version='0.2.3' grailsVersion='2.2 &gt; *'>
+<plugin name='cm-editor' version='2.2.4' grailsVersion='2.2 &gt; *'>
   <author>Frank Tröger</author>
   <authorEmail>frank.troeger@fau.de</authorEmail>
   <title>Cm Editor Plugin</title>
@@ -16,14 +16,10 @@
     <repository name='rrzeArchiva' url='http://reppo.rrze.uni-erlangen.de:8080/archiva/repository/internal/' />
   </repositories>
   <dependencies />
-  <plugins>
-    <compile>
-      <plugin group='org.grails.plugins' name='jquery-ui' version='1.10.3' />
-    </compile>
-    <runtime>
-      <plugin group='org.grails.plugins' name='jquery' version='1.10.2' />
-    </runtime>
-  </plugins>
-  <runtimePluginRequirements />
+  <plugins />
+  <runtimePluginRequirements>
+    <plugin name='jquery' version='1.10 &gt; *' />
+    <plugin name='jquery-ui' version='1.10 &gt; *' />
+  </runtimePluginRequirements>
   <behavior />
 </plugin>
