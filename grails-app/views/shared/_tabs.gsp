@@ -355,8 +355,10 @@
 		if (elem.attr('type') == 'checkbox') {
 			if (val) {
 				elem.prop('checked', true);
+				//elem.attr('value',true);
 			} else {
 				elem.prop('checked', false);
+				//elem.removeAttr('value');
 			}
 		} else {
 			elem.val(val);
