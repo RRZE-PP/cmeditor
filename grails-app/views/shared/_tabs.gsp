@@ -366,6 +366,7 @@
 	}
 	
 	function cmeditor_${name}_set_form_doc() {
+		if (typeof cmeditor_${name}_set_form_doc_before == 'function') cmeditor_${name}_set_form_doc_before();
 		$("#cmeditor-tabs-${name}-form .cmeditor-field").each(function(){
 			var key = $(this).attr('id');
 			if ($(this).attr('data-field-property') && cmeditor_curDoc_${name}[key]) {
@@ -378,6 +379,7 @@
 		$("#cmeditor-tabs-${name}-form #${mapping.name}.cmeditor-field").val(cmeditor_curDoc_${name}._cmeditorName||'');
 		$("#cmeditor-tabs-${name}-form #${mapping.mode}.cmeditor-field").val(cmeditor_curDoc_${name}._cmeditorMode||'');
 		$("#cmeditor-tabs-${name}-form #${mapping.content}.cmeditor-field").val(cmeditor_curDoc_${name}._cmeditorContent||'');
+		if (typeof cmeditor_${name}_set_form_doc_after == 'function') cmeditor_${name}_set_form_doc_after();
 		console.log("cmeditor_${name}_set_form_doc "+cmeditor_curDoc_${name}._cmeditorName+" was performed.")
 	}
 	
