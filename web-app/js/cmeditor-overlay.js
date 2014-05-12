@@ -7,6 +7,10 @@ function cmeditorall_add_overlay_definition(name, baseMode, definition) {
 				token: function(stream, state) {
 					if (state.inObject) {
 						if (stream.eat('.')) {
+							if (stream.eol()) {
+								state.inObject = false;
+								state.words = words;
+							}
 							return;				// skip dot
 						}
 					}
@@ -20,6 +24,10 @@ function cmeditorall_add_overlay_definition(name, baseMode, definition) {
 								} else {
 									return null;
 								}
+							}
+							if (stream.eol()) {
+								state.inObject = false;
+								state.words = words;
 							}
 							return name;
 						}
