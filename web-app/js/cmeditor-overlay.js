@@ -3,8 +3,30 @@ function cmeditorall_add_overlay_definition(name, baseMode, definition) {
 	CodeMirror.defineMode(name, function(config, parserConfig) {
 		var wordOverlay = {
 				hint: 'cmeditor',
-				startState: function() {return {inObject: false, words:words};},
+				startState: function() {return {inObject: false, inBlockComment: false, words:words};},
 				token: function(stream, state) {
+					if (state.inBlockComment) {
+						var maybeEnd = false, ch;
+					    while (ch = stream.next()) {
+					      if (ch == "/" && maybeEnd) {
+					    	state.inBlockComment = false;
+					        break;
+					      }
+					      maybeEnd = (ch == "*");
+					    }
+					    return;
+					}
+					
+					if (stream.match("/*")) {
+				    	state.inBlockComment = true;
+				    	state.inObject = false;
+						state.words = words;
+				        return;
+				    }
+				    if (stream.match("//")) {
+				        stream.skipToEnd();
+				        return;
+				    }
 					if (state.inObject) {
 						if (stream.eat('.')) {
 							if (stream.eol()) {

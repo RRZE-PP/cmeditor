@@ -18,6 +18,9 @@
 					cm.setOption("fullScreen", !cm.getOption("fullScreen"));
 		        }
 		    },
+		    "Alt-Up": function(cm) { cmeditorbase_moveUp(cm); },
+            "Alt-Down": function(cm) { cmeditorbase_moveDown(cm); },
+		    "Ctrl-7": function(cm) { cmeditorbase_comment(cm); },
 	  	};
 		if (typeof ${options.overlayDefinitionsVar} !== 'undefined') {
 	  		//console.log(Object.keys(${options.overlayDefinitionsVar}));
