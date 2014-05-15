@@ -58,6 +58,9 @@ modules = {
 		resource url: 'codemirror-4.0/addon/hint/xml-hint.js', disposition:'head'
 		//resource url: 'codemirror-4.0/addon/hint/python-hint.js', disposition:'head'
 		
+		resource url: 'codemirror-4.0/addon/comment/comment.js', disposition:'head'
+		resource url: 'codemirror-4.0/addon/comment/continuecomment.js', disposition:'head'
+		
 		resource url: 'codemirror-4.0/addon/fold/foldcode.js', disposition:'head'
 		resource url: 'codemirror-4.0/addon/fold/foldgutter.css', disposition:'head'
 		resource url: 'codemirror-4.0/addon/fold/foldgutter.js', disposition:'head'
@@ -75,6 +78,7 @@ modules = {
 		resource url: 'codemirror-4.0/addon/display/fullscreen.css', disposition:'head'
 		resource url: 'codemirror-4.0/addon/display/fullscreen.js', disposition:'head'
 		
+		resource url:'/js/cmeditor.js', disposition:'head'
 	}
 	
 	'cmeditor-menu' {

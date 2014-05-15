@@ -154,7 +154,7 @@
 						// do sth
 					}
 					cmeditor_${name}_update_message(data,textStatus);
-					cmeditor_${name}_ajax_reload();
+					//cmeditor_${name}_ajax_reload();
 				},
 				error:function(XMLHttpRequest,textStatus,errorThrown){
 				}});
@@ -485,6 +485,9 @@
 		          cm.setOption("fullScreen", !cm.getOption("fullScreen"));
 		        }
 		    },
+		    "Alt-Up": function(cm) { cmeditorbase_moveUp(cm); },
+            "Alt-Down": function(cm) { cmeditorbase_moveDown(cm); },
+		    "Ctrl-7": function(cm) { cmeditorbase_comment(cm); },
 			//"Ctrl-I": function(cm) { server.showType(cm); },
 			//"Ctrl-Space": function(cm) { server.complete(cm); },
 			//"Alt-.": function(cm) { server.jumpToDef(cm); },
