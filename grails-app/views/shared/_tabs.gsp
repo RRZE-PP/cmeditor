@@ -90,10 +90,10 @@
 				data:data,
 				url:'${ajax.updateURL}',
 				success:function(data,textStatus){
-					if (data.success) {
+					if (data.status == 'success') {
 						cmeditor_${name}_ajax_reload();
 					}
-					cmeditor_${name}_update_message(data.message, textStatus);
+					cmeditor_${name}_update_message(data.msg, textStatus);
 					},
 				error:function(XMLHttpRequest,textStatus,errorThrown){
 					},
@@ -115,7 +115,7 @@
 			type:'GET',
 			url: "${ajax.getURL}"+name,
 			success: function(data){
-				if (data.success && data.result) {
+				if (data.status == 'success' && data.result) {
 					data.result._cmeditorName = data.result.${mapping.name};
 					data.result._cmeditorMode = data.result.${mapping.mode} || '${options.defaultMode}';
 					if (readWrite) {
@@ -131,7 +131,7 @@
 					console.log("cmeditor_${name}_ajax_load '"+name+"' was performed.");
 					console.log(data.result.version)
 				} else {
-					cmeditor_${name}_update_message(data.message);
+					cmeditor_${name}_update_message(data.msg);
 				}
 			},
 			error:function(XMLHttpRequest,textStatus,errorThrown){
@@ -150,7 +150,7 @@
 				data:{id:cmeditor_curDoc_${name}["${options.idField}"]},
 				url:'${ajax.deleteURL}',
 				success:function(data,textStatus){
-					if (data.success) {
+					if (data.status == 'success') {
 						// do sth
 					}
 					cmeditor_${name}_update_message(data,textStatus);
@@ -170,7 +170,7 @@
 		$.ajax({
     		url: "${ajax.listURL}",
     		success: function(json) {
-    			if (json.success && json.result) {
+    			if (json.status == 'success' && json.result) {
       				data = json.result;
       			}
     		},

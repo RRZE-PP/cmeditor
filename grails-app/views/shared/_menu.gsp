@@ -80,7 +80,7 @@
 			$('#cmeditor-menu-${name}-open .chosen-container').remove();
 			<g:if test="${ajax.listURL}">
 			$.get("${ajax.listURL}", function(data){
-				if (data.success) {
+				if (data.status == 'success') {
 					var available = false
 					var myButtons = {
 						Cancel: function() { $( this ).dialog( "close" ); },
@@ -111,7 +111,7 @@
 						buttons: myButtons,
 					});
 				} else {
-					cmeditor_${name}_update_message(data.message);
+					cmeditor_${name}_update_message(data.msg);
 				}
 			});
 			</g:if>
