@@ -70,6 +70,8 @@ modules = {
 		resource url: 'codemirror-4.0/addon/fold/markdown-fold.js', disposition:'head'
 		resource url: 'codemirror-4.0/addon/fold/xml-fold.js', disposition:'head'
 		
+		resource url: 'codemirror-4.0/addon/selection/active-line.js', disposition:'head'
+		
 		resource url:'/css/cmeditor.css', disposition:'head'
 		resource url:'/js/cmeditor-overlay.js', disposition:'head'
 		resource url:'/js/cmeditor-hint.js', disposition:'head'

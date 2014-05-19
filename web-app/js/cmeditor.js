@@ -1,3 +1,33 @@
+function cmeditorbase_is_int(value){
+  if((parseFloat(value) == parseInt(value)) && !isNaN(value)){
+      return true;
+  } else {
+      return false;
+  }
+}
+
+function cmeditorbase_enableDialogButton(dialog_selector, button_name) {
+	var button = cmeditorbase_getDialogButton( dialog_selector, button_name );
+	if (button) {
+		button.attr('disabled', 'disabled' ).addClass( 'ui-state-disabled' );
+	}
+}
+
+function cmeditorbase_getDialogButton( dialog_selector, button_name )
+{
+  var buttons = $( dialog_selector + ' .ui-dialog-buttonpane button' );
+  for ( var i = 0; i < buttons.length; ++i )
+  {
+     var jButton = $( buttons[i] );
+     if ( jButton.text() == button_name )
+     {
+         return jButton;
+     }
+  }
+
+  return null;
+}
+
 function cmeditorbase_lst(arr) { return arr[arr.length-1]; }
 
 function cmeditorbase_comment(cm) {

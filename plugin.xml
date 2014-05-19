@@ -1,4 +1,4 @@
-<plugin name='cm-editor' version='2.2.9' grailsVersion='2.2 &gt; *'>
+<plugin name='cm-editor' version='2.2.10' grailsVersion='2.2 &gt; *'>
   <author>Frank Tröger</author>
   <authorEmail>frank.troeger@fau.de</authorEmail>
   <title>Cm Editor Plugin</title>
