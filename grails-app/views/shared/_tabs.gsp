@@ -1,6 +1,11 @@
 <r:require modules="cmeditor-tabs" />
 
 <div id="cmeditor-tabs-${name}" class="cmeditor">
+	<div id="cmeditor-tabs-${name}-goto" class="dialog" title="Go to Line" style="display: none;">
+		<p id="cmeditor-tabs-${name}-goto-label"></p>
+		<input type="text" />
+		<p id="cmeditor-tabs-${name}-goto-error">&nbsp;</p>
+	</div>
 	<div id="cmeditor-tabs-${name}-diff" class="dialog" title="diff" style="display: none;">
 		<div id="cmeditor-tabs-${name}-diffoutput"> </div>
 		<p>
@@ -452,6 +457,47 @@
 		}
 	}
 	
+	function cmeditor_${name}_goto(cm) {
+		var buttons = {
+			Cancel: function() { $( this ).dialog( "close" ); },
+			Ok: function() { 
+				var line = parseInt($('#cmeditor-tabs-${name}-goto input').val())-1;
+				cm.doc.setCursor(line, 0);
+				$( this ).dialog( "close" );},
+		}
+		var first = cm.doc.firstLine()+1;
+		var last = cm.doc.lastLine()+1;
+		$('#cmeditor-tabs-${name}-goto-label').text('Enter line number ('+first+'..'+last+'):');
+		$("#cmeditor-tabs-${name}-goto input").val(cm.doc.getCursor().line+1);
+		$('#cmeditor-tabs-${name}-goto').dialog({
+			dialogClass : 'dialog-goto',
+			height: 250,
+			buttons: buttons,
+		});
+		$("#cmeditor-tabs-${name}-goto input").keyup(function() {
+			var lineInput = $(this).val();
+			if (lineInput === '') {
+				$('#cmeditor-tabs-${name}-goto-error').text('');
+				$(".dialog-goto :button:contains('Ok')").prop("disabled", true).addClass("ui-state-disabled");
+			} else {
+				if (cmeditorbase_is_int(lineInput)) {
+					var line = parseInt(lineInput);
+					if(line < first || line > last) {
+						$('#cmeditor-tabs-${name}-goto-error').text('Line number out of range');
+						$(".dialog-goto :button:contains('Ok')").prop("disabled", true).addClass("ui-state-disabled");
+					} else {
+						$('#cmeditor-tabs-${name}-goto-error').text('');
+						$(".dialog-goto :button:contains('Ok')").prop("disabled", false).removeClass("ui-state-disabled");
+					}
+				} else {
+					$('#cmeditor-tabs-${name}-goto-error').text('Not a number');
+					$(".dialog-goto :button:contains('Ok')").prop("disabled", true).addClass("ui-state-disabled");
+				}
+			} 
+		});
+		
+	}
+	
 	function cmeditor_${name}_diff(cm, addButtons) {
 		var buttons = {
 				Cancel: function() { $( this ).dialog( "close" ); },
@@ -488,6 +534,7 @@
 		    "Alt-Up": function(cm) { cmeditorbase_moveUp(cm); },
             "Alt-Down": function(cm) { cmeditorbase_moveDown(cm); },
 		    "Ctrl-7": function(cm) { cmeditorbase_comment(cm); },
+		    "Ctrl-L": function(cm) { cmeditor_${name}_goto(cm); },
 			//"Ctrl-I": function(cm) { server.showType(cm); },
 			//"Ctrl-Space": function(cm) { server.complete(cm); },
 			//"Alt-.": function(cm) { server.jumpToDef(cm); },
@@ -510,6 +557,7 @@
 	        matchBrackets: true,
 	        autoCloseBrackets: true,
 	        autoCloseTags: true,
+	        styleActiveLine: true,
 	        //cursorHeight: 1.0,						   
 	        viewportMargin: Infinity,
 			<g:if test="${options.mode}">mode: '${options.mode}',</g:if>
