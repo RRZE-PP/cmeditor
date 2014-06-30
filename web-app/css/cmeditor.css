@@ -106,7 +106,7 @@ div.cmeditor-menu {
 .cmeditor .cmeditor-main {
     position: relative;
     top: 70px;
-    padding-bottom: 70px;
+    marign-bottom: 70px;
 }
 .cmeditor .cmeditor-button {
     max-width: 10em;
