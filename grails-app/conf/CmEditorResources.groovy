@@ -9,7 +9,7 @@ modules = {
 		resource url: 'codemirror-4.0/lib/codemirror.js', disposition:'head'
 	}
 	
-	'cmeditor' {
+	'cmeditor-main' {
 		defaultBundle false
 		
 		dependsOn 'cmeditor-min'
@@ -72,19 +72,17 @@ modules = {
 		
 		resource url: 'codemirror-4.0/addon/selection/active-line.js', disposition:'head'
 		
-		resource url:'/css/cmeditor.css', disposition:'head'
-		resource url:'/js/cmeditor-overlay.js', disposition:'head'
-		resource url:'/js/cmeditor-hint.js', disposition:'head'
-		
-		
 		resource url: 'codemirror-4.0/addon/display/fullscreen.css', disposition:'head'
 		resource url: 'codemirror-4.0/addon/display/fullscreen.js', disposition:'head'
 		
-		resource url:'/js/cmeditor.js', disposition:'head'
+		resource url:'/css/cmeditor-base.css', disposition:'head'
+		resource url:'/js/cmeditor-base.js', disposition:'head'
+		resource url:'/js/cmeditor-overlay.js', disposition:'head'
+		resource url:'/js/cmeditor-hint.js', disposition:'head'
 	}
 	
 	'cmeditor-menu' {
-		dependsOn 'cmeditor, jquery-ui'
+		dependsOn 'cmeditor-main, jquery-ui'
 		
 		resource url:'/css/jquery/jquery.ui.menubar.css', disposition:'head'
 		resource url:'/js/jquery/jquery.ui.menubar.js', disposition:'head'
@@ -93,9 +91,13 @@ modules = {
 	}
 	
 	'cmeditor-tabs' {
-		dependsOn 'cmeditor, jquery-ui, jsdifflib'
+		dependsOn 'cmeditor-main, jquery-ui, jsdifflib'
 		
 		resource url:'/js/cmeditor-tabs.js', disposition:'head'
+	}
+	
+	'cmeditor' {
+		dependsOn 'cmeditor-main, cmeditor-menu, cmeditor-tabs'
 	}
 	
 	'jsdifflib' {

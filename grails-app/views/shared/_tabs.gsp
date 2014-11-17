@@ -1,5 +1,3 @@
-<r:require modules="cmeditor-tabs" />
-
 <div id="cmeditor-tabs-${name}" class="cmeditor">
 	<div id="cmeditor-tabs-${name}-goto" class="dialog" title="Go to Line" style="display: none;">
 		<p id="cmeditor-tabs-${name}-goto-label"></p>
@@ -40,12 +38,12 @@
 			<g:hiddenField name="_cmeditorReadOnly" class="cmeditor-field" value="" />
 			<g:hiddenField name="_cmeditorOrigContent" class="cmeditor-field" value="" />
 			<g:hiddenField name="_cmeditorContent" class="cmeditor-field" value="" />
-			${body()}
+			${raw(body())}
 			<ul id="cmeditor-tabs-${name}-docs" class="tabs"></ul>
 		</form>
 	</div>
 </div>
-<r:script>
+<script type="text/javascript">
 	function cmeditor_${name}_diffUsingJS(viewType) {
 		"use strict";
 		var byId = function (id) { return document.getElementById(id); },
@@ -651,4 +649,4 @@
 		$("#cmeditor-tabs-${name}-form input[type='checkbox'].cmeditor-field").change(function() {cmeditor_${name}_custom_change($(this));});
 		console.log("cmeditor_${name} loaded.")
 	});
-</r:script>
+</script>

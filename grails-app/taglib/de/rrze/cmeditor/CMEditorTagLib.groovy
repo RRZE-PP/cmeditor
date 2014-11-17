@@ -4,6 +4,8 @@ class CMEditorTagLib {
 
 	static namespace = "cmeditor"
 	
+	static encodeAsForTags = [tabs: 'raw', textArea: 'raw']
+	
 	def textArea = { attrs, body ->
 		def options = [
 			menu: true,
