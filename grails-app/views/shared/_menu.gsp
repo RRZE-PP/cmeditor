@@ -1,4 +1,3 @@
-<r:require modules="cmeditor-menu" />
 <div id="cmeditor-menu-${name}-container" class="cmeditor-menu">
 	<div id="cmeditor-menu-${name}-donation" class="dialog" title="Donation" style="display: none;">
 		<p>You want the incredible addon?</p>
@@ -70,7 +69,7 @@
 		</li>
 	</ul>
 </div>
-<r:script disposition="head">
+<script type="text/javascript">
 	var cmeditor_menu_${name}_file = {
 		new: function(cm) { cmeditor_${name}_new(cm); },
 		open: function(cm) {
@@ -322,4 +321,4 @@
 		}
 		console.log("cmeditor_menu_${name}_update was performed.")
 	};
-</r:script>
+</script>

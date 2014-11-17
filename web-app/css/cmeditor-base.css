@@ -1,14 +1,14 @@
 
-.CodeMirror {
-    border: 1px solid #C0C0C0;
-    font-family: "Ubuntu Mono";
-    font-size: 11pt;
-    height: 400px;
-    width: 100%;
-    max-width:1200px;	
-    line-height: 1.3;
-    z-index: 2;
-}
+/* .CodeMirror { */
+/*     border: 1px solid #C0C0C0; */
+/*     font-family: "Ubuntu Mono"; */
+/*     font-size: 11pt; */
+/*     height: 400px; */
+/*     width: 100%; */
+/*     max-width:1200px;	 */
+/*     line-height: 1.3; */
+/*     z-index: 9; */
+/* } */
 
 /*.CodeMirror-scroll { width: 400px }*/
 

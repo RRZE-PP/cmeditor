@@ -1,6 +1,6 @@
 class CmEditorGrailsPlugin {
     // the plugin version
-    def version = "2.2.12"
+    def version = "2.3.0"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "2.2 > *"
     // resources that are excluded from plugin packaging

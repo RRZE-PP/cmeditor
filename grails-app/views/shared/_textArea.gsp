@@ -1,5 +1,3 @@
-<r:require modules="cmeditor" />
-
 <div class="cmeditor">
 	<g:if test="${options.menu}"><g:render template="/shared/menu" plugin="cm-editor" model="[name:name, options:options]"></g:render></g:if>
 	<div class="cmeditor-settings"></div>
@@ -7,7 +5,7 @@
 		<g:textArea name="${name}" value="${value}" />
 	</div>
 </div>
-<r:script>
+<script type="text/javascript">
 	var cmeditor_${name};
 	function cmeditor_${name}_init() {
 		var keyMap = {
@@ -73,4 +71,4 @@
 		<g:if test="${options.menu}">cmeditor_menu_${name}_init();</g:if>
 		console.log("cmeditor_${name} loaded.")
 	});
-</r:script>
+</script>
