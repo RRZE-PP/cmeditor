@@ -94,7 +94,11 @@
 				url:'${ajax.updateURL}',
 				success:function(data,textStatus){
 					if (data.status == 'success') {
-						cmeditor_${name}_ajax_reload();
+						if (data.newname) {
+							cmeditor_${name}_ajax_reload(data.newname);
+						} else {
+							cmeditor_${name}_ajax_reload();
+						}
 					}
 					cmeditor_${name}_update_message(data.msg, textStatus);
 					},
@@ -105,11 +109,15 @@
 		}
 	}
 	
-	function cmeditor_${name}_ajax_reload() {
+	function cmeditor_${name}_ajax_reload(newname) {
 		if (cmeditor_curDoc_${name}) {
 			var name = cmeditor_curDoc_${name}._cmeditorName;
 			cmeditor_${name}_unregister_doc(cmeditor_curDoc_${name});
-			cmeditor_${name}_ajax_load(name, true);
+			if(typeof newname !== "undefined") {
+				cmeditor_${name}_ajax_load(newname, true);
+			} else {
+				cmeditor_${name}_ajax_load(name, true);
+			}
 		}
 	}
 	
@@ -156,7 +164,7 @@
 					if (data.status == 'success') {
 						// do sth
 					}
-					cmeditor_${name}_update_message(data,textStatus);
+					cmeditor_${name}_update_message(data.msg,textStatus);
 					//cmeditor_${name}_ajax_reload();
 				},
 				error:function(XMLHttpRequest,textStatus,errorThrown){
@@ -453,6 +461,17 @@
 		} else {
 			cmeditor_${name}_unregister_doc(cmeditor_curDoc_${name});
 		}
+	}
+	
+	function cmeditor_${name}_delete(cm) {
+		var status = cmeditor_curDoc_${name}._cmeditorStatus;
+		$('#cmeditor-tabs-${name}-warning').dialog({
+			height: 300,
+			buttons: {
+				Cancel: function() { $( this ).dialog( "close" ); },
+				Close: function() { cmeditor_${name}_ajax_delete(); $( this ).dialog( "close" );},
+			},
+		});
 	}
 	
 	function cmeditor_${name}_goto(cm) {

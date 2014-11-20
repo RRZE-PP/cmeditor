@@ -123,7 +123,7 @@
 			if (!name) name = "test";
 			cmeditor_${name}_rename_doc(cmeditor_${name}_get_name(name));
 		},
-		delete: function(cm) { cmeditor_${name}_ajax_delete(); },
+		delete: function(cm) { cmeditor_${name}_delete(cm); },
 		close: function(cm) { cmeditor_${name}_close(cm); },
 		quit: function(cm) {
 			if (typeof cm.toTextArea == 'function') {
@@ -187,6 +187,7 @@
 		},
 	};
 	function cmeditor_menu_${name}_init() {
+		if (typeof cmeditor_menu_${name}_init_before == 'function') cmeditor_menu_${name}_init_before();
 		<g:if test="${options.addModes}">
 			<g:each in="${options.addModes}" var="mode">
 				var s = $("<li><a href=\"#\" value=\"mode${mode}\"><span></span>${mode}</a></li>");
