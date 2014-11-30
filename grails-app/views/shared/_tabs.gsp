@@ -197,7 +197,12 @@
 		cmeditor_docs_${name}.push(data);
 		var docTabs = document.getElementById("cmeditor-tabs-${name}-docs");
 		var li = docTabs.appendChild(document.createElement("li"));
-		li.appendChild(document.createTextNode(data._cmeditorName));
+		li.appendChild($("<span class='tabName'></span>").text(data._cmeditorName).get(0));
+
+		closeButton = $("<span class='closeButton'>&#10005;</span>");
+		closeButton.on("click", function(){cmeditor_${name}_unregister_doc(cmeditor_${name}_find_doc(data._cmeditorName))});
+		li.appendChild(closeButton.get(0));
+
 		if (cmeditor_${name}.getDoc() == data._cmeditorDoc) {
 			cmeditor_${name}_set_selected_doc(cmeditor_docs_${name}.length - 1);
 			cmeditor_curDoc_${name} = data;
@@ -214,6 +219,11 @@
 		var docTabs = document.getElementById("cmeditor-tabs-${name}-docs");
 		var li = docTabs.appendChild(document.createElement("li"));
 		li.appendChild(document.createTextNode(name));
+
+		closeButton = $(" <span style='cursor:pointer; margin-left:6px; font-weight:bold;'>&#10005;</span>");
+		closeButton.on("click", function(){cmeditor_${name}_unregister_doc(doc)});
+		li.appendChild(closeButton.get(0));
+
 		if (cmeditor_${name}.getDoc() == doc) {
 			setSelectedDoc(cmeditor_docs_${name}.length - 1);
 			cmeditor_curDoc_${name} = data;
@@ -272,14 +282,14 @@
 	}
 
 	function cmeditor_${name}_set_changed_doc(pos, cmChangeObjects) {
-		var docTab = $( "#cmeditor-tabs-${name}-docs li:nth-child("+(pos+1)+")" )
+		var docTab = $( "#cmeditor-tabs-${name}-docs li:nth-child("+(pos+1)+") .tabName" )
 		console.log("changed " + cmeditor_docs_${name}[pos]._cmeditorName);
 		docTab.text("*"+cmeditor_docs_${name}[pos]._cmeditorName);
 		console.log("cmeditor_${name}_set_changed_doc '"+pos+"' was performed.")
 	}
 
 	function cmeditor_${name}_unset_changed_doc(pos) {
-		var docTab = $( "#cmeditor-tabs-${name}-docs li:nth-child("+(pos+1)+")" )
+		var docTab = $( "#cmeditor-tabs-${name}-docs li:nth-child("+(pos+1)+") .tabName" )
 		console.log("unchanged " + cmeditor_docs_${name}[pos]._cmeditorName);
 		docTab.text(cmeditor_docs_${name}[pos]._cmeditorName);
 		console.log("cmeditor_${name}_unset_changed_doc '"+pos+"' was performed.")
