@@ -53,10 +53,10 @@
 			opcodes = sm.get_opcodes(),
 			diffoutputdiv = byId("cmeditor-tabs-${name}-diffoutput"),
 			contextSize = byId("cmeditor-tabs-${name}-diffoutput-contextSize").value;
-	
+
 		diffoutputdiv.innerHTML = "";
 		contextSize = contextSize || null;
-		
+
 		if (opcodes && opcodes.length == 1) {
 			$("#cmeditor-tabs-${name}-diffoutput").html("<p>No changes!</p>");
 		} else {
@@ -73,19 +73,19 @@
 	}
 
 	var cmeditor_${name};
-	
+
 	var cmeditor_docs_${name} = [], cmeditor_curDoc_${name}, cmeditor_unregDocName_${name};
-	
+
 	var cmeditor_diffBeforeSave_${name};
-	
+
 	function cmeditor_${name}_find_doc(name) { return cmeditor_docs_${name}[cmeditor_${name}_doc_id(name)]; }
 	function cmeditor_${name}_doc_id(name) { for (var i = 0; i < cmeditor_docs_${name}.length; ++i) if (cmeditor_docs_${name}[i]._cmeditorName == name) return i; }
-	
+
 	function cmeditor_${name}_update_message(data,textStatus) {
 		$('#cmeditor-tabs-${name}-update').html(data);
 		$("#cmeditor-tabs-${name}-update").toggle('slide', {'direction':'up'}).delay(3000).toggle('slide', {'direction':'up'});
 	}
-	
+
 	function cmeditor_${name}_ajax_update(data) {
 		if (cmeditor_curDoc_${name}) {
 			$.ajax({
@@ -108,7 +108,7 @@
 			return false;
 		}
 	}
-	
+
 	function cmeditor_${name}_ajax_reload(newname) {
 		if (cmeditor_curDoc_${name}) {
 			var name = cmeditor_curDoc_${name}._cmeditorName;
@@ -120,7 +120,7 @@
 			}
 		}
 	}
-	
+
 	function cmeditor_${name}_ajax_load(name, readWrite) {
 		$.ajax({
 			type:'GET',
@@ -150,7 +150,7 @@
 			},
 		});
 	}
-	
+
 	function cmeditor_${name}_ajax_delete() {
 		<g:if test="${options.readOnly}">
 		$('#cmeditor-tabs-${name}-readOnly').dialog({ height: 300, buttons: {Cancel: function() { $( this ).dialog( "close" ); },},});
@@ -174,7 +174,7 @@
 		return false;
 		</g:else>
 	}
-	
+
 	function cmeditor_${name}_get_name(name) {
 		var data = [];
 		<g:if test="${ajax.listURL}">
@@ -192,7 +192,7 @@
   		while (cmeditor_${name}_find_doc(name + (i || "")) || cmeditortabs_is_in_list(data, name + (i || ""))) ++i;
 		return name + (i || "");
 	}
-	
+
 	function cmeditor_${name}_register_doc_data(data) {
 		cmeditor_docs_${name}.push(data);
 		var docTabs = document.getElementById("cmeditor-tabs-${name}-docs");
@@ -206,7 +206,7 @@
 		cmeditor_${name}_unregister_untitled_doc();
 		console.log("cmeditor_${name}_register_doc_data '"+data._cmeditorName+"' was performed. Current doc: "+cmeditor_curDoc_${name})
 	}
-	
+
 	function cmeditor_${name}_register_doc(name, doc) {
 		var data = {_cmeditorName: name, _cmeditorContent:'', _cmeditorStatus:'new'};
 		data._cmeditorDoc = doc;
@@ -222,8 +222,13 @@
 		cmeditor_${name}_unregister_untitled_doc();
 		console.log("cmeditor_${name}_register_doc '"+name+"' was performed. Current doc: "+cmeditor_curDoc_${name})
 	}
-	
+
 	function cmeditor_${name}_unregister_doc(doc) {
+		//ask for confirmation if file is not new or unchanged
+		if(doc._cmeditorStatus != 'new' && doc._cmeditorStatus != "unchanged" &&
+				!confirm("Do you really want to close this buffer? Unsaved changes will be lost."))
+			return;
+
 		for (var i = 0; i < cmeditor_docs_${name}.length && doc != cmeditor_docs_${name}[i]; ++i) {}
 		cmeditor_docs_${name}.splice(i, 1);
 		var docList = document.getElementById("cmeditor-tabs-${name}-docs");
@@ -232,7 +237,7 @@
 		cmeditor_${name}_select_doc(Math.max(0, i - 1));
 		console.log("cmeditor_${name}_unregister_doc "+doc._cmeditorName+" was performed.");
 	}
-	
+
 	function cmeditor_${name}_register_untitled_doc() {
 		if (cmeditor_docs_${name}.length < 1) {
 			cmeditor_unregDocName_${name} = cmeditor_${name}_get_name('Untitled Document');
@@ -242,7 +247,7 @@
 		}
 		console.log("cmeditor_${name}_register_untitled_doc "+cmeditor_curDoc_${name}._cmeditorName+" was performed.");
 	}
-	
+
 	function cmeditor_${name}_unregister_untitled_doc() {
 		if (cmeditor_docs_${name}.length > 1) {
 			var doc = cmeditor_${name}_find_doc(cmeditor_unregDocName_${name})
@@ -252,7 +257,7 @@
 		}
 		console.log("cmeditor_${name}_unregister_untitled_doc was performed.");
 	}
-	
+
 	function cmeditor_${name}_rename_doc(newName) {
 		<g:if test="${options.readOnly}">
 		$('#cmeditor-tabs-${name}-readOnly').dialog({ height: 300, buttons: {Cancel: function() { $( this ).dialog( "close" ); },},});
@@ -265,7 +270,7 @@
 		console.log("cmeditor_${name}_rename_doc '"+oldName+"', '"+newName+"' was performed.")
 		</g:else>
 	}
-	
+
 	function cmeditor_${name}_set_changed_doc(pos, cmChangeObjects) {
 		var docTab = $( "#cmeditor-tabs-${name}-docs li:nth-child("+(pos+1)+")" )
 		console.log("changed " + cmeditor_docs_${name}[pos]._cmeditorName);
@@ -279,14 +284,14 @@
 		docTab.text(cmeditor_docs_${name}[pos]._cmeditorName);
 		console.log("cmeditor_${name}_unset_changed_doc '"+pos+"' was performed.")
 	}
-	
+
 	function cmeditor_${name}_set_selected_doc(pos) {
 		var docTabs = document.getElementById("cmeditor-tabs-${name}-docs");
 		for (var i = 0; i < docTabs.childNodes.length; ++i)
 			docTabs.childNodes[i].className = pos == i ? "selected" : "";
 		console.log("cmeditor_${name}_set_selected_doc "+pos+" was performed.")
 	}
-	
+
 	function cmeditor_${name}_select_doc(pos) {
 		cmeditor_${name}_set_selected_doc(pos);
 		cmeditor_curDoc_${name} = cmeditor_docs_${name}[pos];
@@ -295,7 +300,7 @@
 		<g:if test="${options.menu}">cmeditor_menu_${name}_update();</g:if>
 		console.log("cmeditor_${name}_select_doc "+cmeditor_curDoc_${name}._cmeditorName+" "+pos+" was performed.")
 	}
-	
+
 	function cmeditor_${name}_update() {
 		var docName = 'no curDoc';
 		if (cmeditor_curDoc_${name}) {
@@ -318,7 +323,7 @@
 		}
 		console.log("cmeditor_${name}_update "+docName+" was performed.")
 	}
-	
+
 	function cmeditor_${name}_update_doc(cmChangeObjects) {
 		var docName = 'no curDoc';
 		var changed = false;
@@ -361,7 +366,7 @@
 		console.log("cmeditor_${name}_update_doc "+docName+" was performed.")
 		return changed;
 	}
-	
+
 	function cmeditor_${name}_set_form_doc_field(elem, val) {
 		if (elem.attr('type') == 'checkbox') {
 			if (val) {
@@ -375,7 +380,7 @@
 			elem.val(val);
 		}
 	}
-	
+
 	function cmeditor_${name}_set_form_doc() {
 		if (typeof cmeditor_${name}_set_form_doc_before == 'function') cmeditor_${name}_set_form_doc_before();
 		$("#cmeditor-tabs-${name}-form .cmeditor-field").each(function(){
@@ -393,19 +398,19 @@
 		if (typeof cmeditor_${name}_set_form_doc_after == 'function') cmeditor_${name}_set_form_doc_after();
 		console.log("cmeditor_${name}_set_form_doc "+cmeditor_curDoc_${name}._cmeditorName+" was performed.")
 	}
-	
+
 	function cmeditor_${name}_set_diff_before_save(value) {
 		cmeditor_diffBeforeSave_${name} = value;
 		console.log("cmeditor_${name}_set_diff_before_save "+value+" was performed.")
 	}
-	
+
 	function cmeditor_${name}_save(cm) {
 		<g:if test="${options.readOnly}">
 		$('#cmeditor-tabs-${name}-readOnly').dialog({ height: 300, buttons: {Cancel: function() { $( this ).dialog( "close" ); },},});
 		</g:if><g:else>
 		var pos = cmeditor_${name}_doc_id(cmeditor_curDoc_${name}._cmeditorName)
 		cmeditor_${name}_update_doc();
-		
+
 		if (cmeditor_diffBeforeSave_${name}) {
 		var addButtons = {
 				Save: function() { $('#cmeditor-tabs-${name}-form').submit(); $( this ).dialog( "close" );},
@@ -414,12 +419,12 @@
 		} else {
 			$('#cmeditor-tabs-${name}-form').submit();
 		}
-		
+
 		//cmeditor_${name}_unset_changed_doc(pos);
 		console.log("cmeditor_${name}_save "+cmeditor_curDoc_${name}._cmeditorName+" ("+pos+") was performed.");
 		</g:else>
 	}
-	
+
 	function cmeditor_${name}_saveas(cm) {
 		<g:if test="${options.readOnly}">
 		$('#cmeditor-tabs-${name}-readOnly').dialog({ height: 300, buttons: {Cancel: function() { $( this ).dialog( "close" ); },},});
@@ -433,7 +438,7 @@
 		console.log("cmeditor_${name}_saveas "+cmeditor_curDoc_${name}._cmeditorName+" was performed.");
 		</g:else>
 	}
-	
+
 	function cmeditor_${name}_new(cm) {
 		<g:if test="${options.readOnly}">
 		$('#cmeditor-tabs-${name}-readOnly').dialog({ height: 300, buttons: {Cancel: function() { $( this ).dialog( "close" ); },},});
@@ -447,7 +452,7 @@
 		cmeditor_${name}_select_doc(cmeditor_docs_${name}.length - 1);
 		</g:else>
 	}
-	
+
 	function cmeditor_${name}_close(cm) {
 		var status = cmeditor_curDoc_${name}._cmeditorStatus;
 		if (status == 'changed' || status == 'unsaved') {
@@ -462,7 +467,7 @@
 			cmeditor_${name}_unregister_doc(cmeditor_curDoc_${name});
 		}
 	}
-	
+
 	function cmeditor_${name}_delete(cm) {
 		var status = cmeditor_curDoc_${name}._cmeditorStatus;
 		$('#cmeditor-tabs-${name}-warning').dialog({
@@ -473,11 +478,11 @@
 			},
 		});
 	}
-	
+
 	function cmeditor_${name}_goto(cm) {
 		var buttons = {
 			Cancel: function() { $( this ).dialog( "close" ); },
-			Ok: function() { 
+			Ok: function() {
 				var line = parseInt($('#cmeditor-tabs-${name}-goto input').val())-1;
 				cm.doc.setCursor(line, 0);
 				$( this ).dialog( "close" );},
@@ -510,11 +515,11 @@
 					$('#cmeditor-tabs-${name}-goto-error').text('Not a number');
 					$(".dialog-goto :button:contains('Ok')").prop("disabled", true).addClass("ui-state-disabled");
 				}
-			} 
+			}
 		});
-		
+
 	}
-	
+
 	function cmeditor_${name}_diff(cm, addButtons) {
 		var buttons = {
 				Cancel: function() { $( this ).dialog( "close" ); },
@@ -533,11 +538,11 @@
 			buttons: buttons,
 		});
 	}
-	
+
 	function cmeditor_${name}_get_mode() {
 		return cmeditor_curDoc_${name}._cmeditorMode;
 	}
-	
+
 	function cmeditor_${name}_init() {
 		var keyMap = {
 			"Ctrl-Space": "autocomplete",
@@ -575,7 +580,7 @@
 	        autoCloseBrackets: true,
 	        autoCloseTags: true,
 	        styleActiveLine: true,
-	        //cursorHeight: 1.0,						   
+	        //cursorHeight: 1.0,
 	        viewportMargin: Infinity,
 			<g:if test="${options.mode}">mode: '${options.mode}',</g:if>
 			<g:if test="${options.defaultReadOnly||options.readOnly}">readOnly: 'nocursor',</g:if>
@@ -602,7 +607,7 @@
 		} else {
 			cmeditor_${name}.setOption("vimMode", false);
 		}
-	  
+
 	  cmeditor_${name}.on("changes", function(cm, cmChangeObjects) {
 	  	cmeditor_${name}_update_doc(cmChangeObjects);
 	  });
@@ -614,10 +619,10 @@
 			if (c == target) return cmeditor_${name}_select_doc(i);
 		}
 	});
-	
+
 	$(document).ready(function() {
 		cmeditor_${name}_init();
-		
+
 		function cmeditor_${name}_get_custom_field(elem) {
 			if (elem.attr('type') == 'checkbox') {
 				return elem.is(":checked");
@@ -625,10 +630,10 @@
 				return elem.val();
 			}
 		}
-		
+
 		function cmeditor_${name}_custom_change(elem) {
 			var key = elem.attr('id');
-			
+
 			if (cmeditor_curDoc_${name}) {
 				var old = null;
 				var doUpdate = true;
@@ -660,7 +665,7 @@
 				}
 			}
 		}
-		
+
 		<g:if test="${options.menu}">cmeditor_menu_${name}_init();</g:if>
 		cmeditor_${name}_register_untitled_doc();
 		$("#cmeditor-tabs-${name}-form .cmeditor-field").keyup(function() {cmeditor_${name}_custom_change($(this));});
