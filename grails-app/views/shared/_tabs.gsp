@@ -1,37 +1,12 @@
-<div id="cmeditor-tabs-${name}" class="cmeditor">
-	<div id="cmeditor-tabs-${name}-goto" class="dialog" title="Go to Line" style="display: none;">
-		<p id="cmeditor-tabs-${name}-goto-label"></p>
-		<input type="text" />
-		<p id="cmeditor-tabs-${name}-goto-error">&nbsp;</p>
-	</div>
-	<div id="cmeditor-tabs-${name}-diff" class="dialog" title="diff" style="display: none;">
-		<div id="cmeditor-tabs-${name}-diffoutput"> </div>
-		<p>
-		<strong>Context size (optional):</strong> <input type="text" onKeyUp="if($(this).val()) cmeditor_${name}_diffUsingJS(0);" id="cmeditor-tabs-${name}-diffoutput-contextSize" value="1" />
-		</p>
-		<p>
-		<input type="radio" name="_viewtype" id="sidebyside" onclick="cmeditor_${name}_diffUsingJS(0);" /> <label for="sidebyside">Side by Side Diff</label>
-		&nbsp; &nbsp;
-		<input type="radio" name="_viewtype" id="inline" onclick="cmeditor_${name}_diffUsingJS(1);" /> <label for="inline">Inline Diff</label>
-		</p>
-		<form>
-		</form>
-	</div>
-	<div id="cmeditor-tabs-${name}-readOnly" class="dialog" title="readOnly" style="display: none;">
-		<form>
-		</form>
-	</div>
-	<div id="cmeditor-tabs-${name}-warning" class="dialog" title="warning" style="display: none;">
-		<form>
-		</form>
-	</div>
-	<div id="cmeditor-tabs-${name}-update" class="cmeditor-tab-message" style="display:none;"></div>
+<div id="cmEditor" class="cmeditor">
+	<div class="cmeditor-tab-message" style="display:none;"></div>
+
 	<g:if test="${options.menu}">
 		<g:render template="/shared/menu" plugin="cm-editor" model="[name:name, options:options]"></g:render>
 	</g:if>
 	<div class="cmeditor-settings"></div>
 	<div class="cmeditor-main">
-		<form id="cmeditor-tabs-${name}-form" method="post" onsubmit="cmeditor_${name}_ajax_update($(this).serialize());return false">
+		<form method="post">
 			<g:hiddenField name="_cmeditorName" class="cmeditor-field" value="" />
 			<g:hiddenField name="_cmeditorMode" class="cmeditor-field" value="" />
 			<g:hiddenField name="_cmeditorStatus" class="cmeditor-field" value="" />
@@ -39,601 +14,407 @@
 			<g:hiddenField name="_cmeditorOrigContent" class="cmeditor-field" value="" />
 			<g:hiddenField name="_cmeditorContent" class="cmeditor-field" value="" />
 			${raw(body())}
-			<ul id="cmeditor-tabs-${name}-docs" class="tabs"></ul>
+			<ul class="docs tabs"></ul>
 		</form>
 	</div>
 </div>
 <script type="text/javascript">
-	function cmeditor_${name}_diffUsingJS(viewType) {
-		"use strict";
-		var byId = function (id) { return document.getElementById(id); },
-			base = difflib.stringAsLines(byId("_cmeditorOrigContent").value),
-			newtxt = difflib.stringAsLines(byId("_cmeditorContent").value),
-			sm = new difflib.SequenceMatcher(base, newtxt),
-			opcodes = sm.get_opcodes(),
-			diffoutputdiv = byId("cmeditor-tabs-${name}-diffoutput"),
-			contextSize = byId("cmeditor-tabs-${name}-diffoutput-contextSize").value;
 
-		diffoutputdiv.innerHTML = "";
-		contextSize = contextSize || null;
+	//TODO: Einmal drueber grepen und alle TODOS fixen
+	//TODO: Fuer bessere doku sollten dokumente auch eine klasse sein
+	//TODO: Doku fuer options
+	//TODO: console.log auf ein sinnvolles mass begrenzen und praefixen
+	//TODO: Sachen optimieren? zB mehr dom-objekte speichern, dialoge nicht mit html und jquery erzeugen...
+	//TODO: Anfuehrungszeichen vereinheitlichen
+	//TODO: API vereinheitlichen (entw. ueberall position oder ueberall ein doc oder ueberall ein name...)
 
-		if (opcodes && opcodes.length == 1) {
-			$("#cmeditor-tabs-${name}-diffoutput").html("<p>No changes!</p>");
-		} else {
-			diffoutputdiv.appendChild(diffview.buildView({
-				baseTextLines: base,
-				newTextLines: newtxt,
-				opcodes: opcodes,
-				baseTextName: "Base Text",
-				newTextName: "New Text",
-				contextSize: contextSize,
-				viewType: viewType
-			}));
-		}
-	}
-
-	var cmeditor_${name};
-
-	var cmeditor_docs_${name} = [], cmeditor_curDoc_${name}, cmeditor_unregDocName_${name};
-
-	var cmeditor_diffBeforeSave_${name};
-
-	function cmeditor_${name}_find_doc(name) { return cmeditor_docs_${name}[cmeditor_${name}_doc_id(name)]; }
-	function cmeditor_${name}_doc_id(name) { for (var i = 0; i < cmeditor_docs_${name}.length; ++i) if (cmeditor_docs_${name}[i]._cmeditorName == name) return i; }
-
-	function cmeditor_${name}_update_message(data,textStatus) {
-		$('#cmeditor-tabs-${name}-update').html(data);
-		$("#cmeditor-tabs-${name}-update").toggle('slide', {'direction':'up'}).delay(3000).toggle('slide', {'direction':'up'});
-	}
-
-	function cmeditor_${name}_ajax_update(data) {
-		if (cmeditor_curDoc_${name}) {
-			$.ajax({
-				type:'POST',
-				data:data,
-				url:'${ajax.updateURL}',
-				success:function(data,textStatus){
-					if (data.status == 'success') {
-						if (data.newname) {
-							cmeditor_${name}_ajax_reload(data.newname);
-						} else {
-							cmeditor_${name}_ajax_reload();
-						}
-					}
-					cmeditor_${name}_update_message(data.msg, textStatus);
-					},
-				error:function(XMLHttpRequest,textStatus,errorThrown){
-					},
-			});
-			return false;
-		}
-	}
-
-	function cmeditor_${name}_ajax_reload(newname) {
-		if (cmeditor_curDoc_${name}) {
-			var name = cmeditor_curDoc_${name}._cmeditorName;
-			cmeditor_${name}_unregister_doc(cmeditor_curDoc_${name});
-			if(typeof newname !== "undefined") {
-				cmeditor_${name}_ajax_load(newname, true);
-			} else {
-				cmeditor_${name}_ajax_load(name, true);
-			}
-		}
-	}
-
-	function cmeditor_${name}_ajax_load(name, readWrite) {
-		$.ajax({
-			type:'GET',
-			url: "${ajax.getURL}"+name,
-			success: function(data){
-				if (data.status == 'success' && data.result) {
-					data.result._cmeditorName = data.result.${mapping.name};
-					data.result._cmeditorMode = data.result.${mapping.mode} || '${options.defaultMode}';
-					if (readWrite) {
-						data.result._cmeditorReadOnly = '';
-					} else {
-						data.result._cmeditorReadOnly = '${options.readOnly||options.defaultReadOnly?'nocursor':''}';
-					}
-					data.result._cmeditorContent = data.result.${mapping.content};
-					data.result._cmeditorOrigContent = data.result.${mapping.content};
-					data.result._cmeditorStatus = 'unchanged';
-					data.result._cmeditorDoc = new CodeMirror.Doc(data.result._cmeditorContent, data.result._cmeditorMode);
-					cmeditor_${name}_register_doc_data(data.result);
-					console.log("cmeditor_${name}_ajax_load '"+name+"' was performed.");
-					console.log(data.result.version)
-				} else {
-					cmeditor_${name}_update_message(data.msg);
-				}
-			},
-			error:function(XMLHttpRequest,textStatus,errorThrown){
-				cmeditor_${name}_update_message(textStatus + ": " + errorThrown);
-			},
-		});
-	}
-
-	function cmeditor_${name}_ajax_delete() {
-		<g:if test="${options.readOnly}">
-		$('#cmeditor-tabs-${name}-readOnly').dialog({ height: 300, buttons: {Cancel: function() { $( this ).dialog( "close" ); },},});
-		</g:if><g:else>
-		if (cmeditor_curDoc_${name}["${options.idField}"]) {
-			$.ajax({
-				type:'GET',
-				data:{id:cmeditor_curDoc_${name}["${options.idField}"]},
-				url:'${ajax.deleteURL}',
-				success:function(data,textStatus){
-					if (data.status == 'success') {
-						// do sth
-					}
-					cmeditor_${name}_update_message(data.msg,textStatus);
-					//cmeditor_${name}_ajax_reload();
-				},
-				error:function(XMLHttpRequest,textStatus,errorThrown){
-				}});
-		}
-		cmeditor_${name}_unregister_doc(cmeditor_curDoc_${name});
-		return false;
-		</g:else>
-	}
-
-	function cmeditor_${name}_get_name(name) {
-		var data = [];
-		<g:if test="${ajax.listURL}">
-		$.ajax({
-    		url: "${ajax.listURL}",
-    		success: function(json) {
-    			if (json.status == 'success' && json.result) {
-      				data = json.result;
-      			}
-    		},
-    		async:false
-  		});
-  		</g:if>
-  		var i = 0;
-  		while (cmeditor_${name}_find_doc(name + (i || "")) || cmeditortabs_is_in_list(data, name + (i || ""))) ++i;
-		return name + (i || "");
-	}
-
-	function cmeditor_${name}_register_doc_data(data) {
-		cmeditor_docs_${name}.push(data);
-		var docTabs = document.getElementById("cmeditor-tabs-${name}-docs");
-		var li = docTabs.appendChild(document.createElement("li"));
-		li.appendChild($("<span class='tabName'></span>").text(data._cmeditorName).get(0));
-
-		closeButton = $("<span class='closeButton'>&#10005;</span>");
-		closeButton.on("click", function(){cmeditor_${name}_unregister_doc(cmeditor_${name}_find_doc(data._cmeditorName))});
-		li.appendChild(closeButton.get(0));
-
-		if (cmeditor_${name}.getDoc() == data._cmeditorDoc) {
-			cmeditor_${name}_set_selected_doc(cmeditor_docs_${name}.length - 1);
-			cmeditor_curDoc_${name} = data;
-		}
-		cmeditor_${name}_select_doc(cmeditor_docs_${name}.length - 1);
-		cmeditor_${name}_unregister_untitled_doc();
-		console.log("cmeditor_${name}_register_doc_data '"+data._cmeditorName+"' was performed. Current doc: "+cmeditor_curDoc_${name})
-	}
-
-	function cmeditor_${name}_register_doc(name, doc) {
-		var data = {_cmeditorName: name, _cmeditorContent:'', _cmeditorStatus:'new'};
-		data._cmeditorDoc = doc;
-		cmeditor_docs_${name}.push(data);
-		var docTabs = document.getElementById("cmeditor-tabs-${name}-docs");
-		var li = docTabs.appendChild(document.createElement("li"));
-		li.appendChild(document.createTextNode(name));
-
-		closeButton = $(" <span style='cursor:pointer; margin-left:6px; font-weight:bold;'>&#10005;</span>");
-		closeButton.on("click", function(){cmeditor_${name}_unregister_doc(doc)});
-		li.appendChild(closeButton.get(0));
-
-		if (cmeditor_${name}.getDoc() == doc) {
-			setSelectedDoc(cmeditor_docs_${name}.length - 1);
-			cmeditor_curDoc_${name} = data;
-		}
-		cmeditor_${name}_select_doc(cmeditor_docs_${name}.length - 1);
-		cmeditor_${name}_unregister_untitled_doc();
-		console.log("cmeditor_${name}_register_doc '"+name+"' was performed. Current doc: "+cmeditor_curDoc_${name})
-	}
-
-	function cmeditor_${name}_unregister_doc(doc) {
-		//ask for confirmation if file is not new or unchanged
-		if(doc._cmeditorStatus != 'new' && doc._cmeditorStatus != "unchanged" &&
-				!confirm("Do you really want to close this buffer? Unsaved changes will be lost."))
-			return;
-
-		for (var i = 0; i < cmeditor_docs_${name}.length && doc != cmeditor_docs_${name}[i]; ++i) {}
-		cmeditor_docs_${name}.splice(i, 1);
-		var docList = document.getElementById("cmeditor-tabs-${name}-docs");
-		docList.removeChild(docList.childNodes[i]);
-		cmeditor_${name}_register_untitled_doc();
-		cmeditor_${name}_select_doc(Math.max(0, i - 1));
-		console.log("cmeditor_${name}_unregister_doc "+doc._cmeditorName+" was performed.");
-	}
-
-	function cmeditor_${name}_register_untitled_doc() {
-		if (cmeditor_docs_${name}.length < 1) {
-			cmeditor_unregDocName_${name} = cmeditor_${name}_get_name('Untitled Document');
-			var data = {_cmeditorName:cmeditor_unregDocName_${name}, _cmeditorReadOnly:'${options.readOnly||options.defaultReadOnly?'nocursor':''}', _cmeditorOrigContent:'${options.defaultContent}', _cmeditorContent:'${options.defaultContent}', _cmeditorMode:'${options.defaultMode}', _cmeditorStatus:'new'};
-			data._cmeditorDoc = new CodeMirror.Doc(data._cmeditorContent, "${options.defaultMode}")
-			cmeditor_${name}_register_doc_data(data);
-		}
-		console.log("cmeditor_${name}_register_untitled_doc "+cmeditor_curDoc_${name}._cmeditorName+" was performed.");
-	}
-
-	function cmeditor_${name}_unregister_untitled_doc() {
-		if (cmeditor_docs_${name}.length > 1) {
-			var doc = cmeditor_${name}_find_doc(cmeditor_unregDocName_${name})
-			if (doc && doc._cmeditorStatus == 'new') {
-				cmeditor_${name}_unregister_doc(doc);
-			}
-		}
-		console.log("cmeditor_${name}_unregister_untitled_doc was performed.");
-	}
-
-	function cmeditor_${name}_rename_doc(newName) {
-		<g:if test="${options.readOnly}">
-		$('#cmeditor-tabs-${name}-readOnly').dialog({ height: 300, buttons: {Cancel: function() { $( this ).dialog( "close" ); },},});
-		</g:if><g:else>
-		var docId = cmeditor_${name}_doc_id(cmeditor_curDoc_${name}._cmeditorName);
-		var oldName = cmeditor_docs_${name}[docId]._cmeditorName;
-		cmeditor_docs_${name}[docId]._cmeditorName = newName;
-		cmeditor_${name}_set_changed_doc(docId);
-		cmeditor_${name}_update_doc();
-		console.log("cmeditor_${name}_rename_doc '"+oldName+"', '"+newName+"' was performed.")
-		</g:else>
-	}
-
-	function cmeditor_${name}_set_changed_doc(pos, cmChangeObjects) {
-		var docTab = $( "#cmeditor-tabs-${name}-docs li:nth-child("+(pos+1)+") .tabName" )
-		console.log("changed " + cmeditor_docs_${name}[pos]._cmeditorName);
-		docTab.text("*"+cmeditor_docs_${name}[pos]._cmeditorName);
-		console.log("cmeditor_${name}_set_changed_doc '"+pos+"' was performed.")
-	}
-
-	function cmeditor_${name}_unset_changed_doc(pos) {
-		var docTab = $( "#cmeditor-tabs-${name}-docs li:nth-child("+(pos+1)+") .tabName" )
-		console.log("unchanged " + cmeditor_docs_${name}[pos]._cmeditorName);
-		docTab.text(cmeditor_docs_${name}[pos]._cmeditorName);
-		console.log("cmeditor_${name}_unset_changed_doc '"+pos+"' was performed.")
-	}
-
-	function cmeditor_${name}_set_selected_doc(pos) {
-		var docTabs = document.getElementById("cmeditor-tabs-${name}-docs");
-		for (var i = 0; i < docTabs.childNodes.length; ++i)
-			docTabs.childNodes[i].className = pos == i ? "selected" : "";
-		console.log("cmeditor_${name}_set_selected_doc "+pos+" was performed.")
-	}
-
-	function cmeditor_${name}_select_doc(pos) {
-		cmeditor_${name}_set_selected_doc(pos);
-		cmeditor_curDoc_${name} = cmeditor_docs_${name}[pos];
-		cmeditor_${name}.swapDoc(cmeditor_curDoc_${name}._cmeditorDoc);
-		cmeditor_${name}_update_doc();
-		<g:if test="${options.menu}">cmeditor_menu_${name}_update();</g:if>
-		console.log("cmeditor_${name}_select_doc "+cmeditor_curDoc_${name}._cmeditorName+" "+pos+" was performed.")
-	}
-
-	function cmeditor_${name}_update() {
-		var docName = 'no curDoc';
-		if (cmeditor_curDoc_${name}) {
-			docName = cmeditor_curDoc_${name}._cmeditorName;
-			var pos = cmeditor_${name}_doc_id(cmeditor_curDoc_${name}._cmeditorName);
-			if (cmeditor_curDoc_${name}._cmeditorReadOnly != cmeditor_${name}.getOption('readOnly')) {
-				cmeditor_curDoc_${name}._cmeditorReadOnly = cmeditor_${name}.getOption('readOnly');
-			}
-			if (cmeditor_curDoc_${name}._cmeditorMode != cmeditor_${name}.getOption('mode')) {
-				cmeditor_curDoc_${name}._cmeditorMode = cmeditor_${name}.getOption('mode');
-				var pos = cmeditor_${name}_doc_id(cmeditor_curDoc_${name}._cmeditorName);
-				cmeditor_${name}_set_changed_doc(pos);
-				if (cmeditor_curDoc_${name}._cmeditorStatus == 'new') {
-					cmeditor_curDoc_${name}._cmeditorStatus = 'unsaved';
-				} else if (cmeditor_curDoc_${name}._cmeditorStatus == 'unchanged') {
-					cmeditor_curDoc_${name}._cmeditorStatus = 'changed';
-				}
-			}
-			cmeditor_${name}_update_doc();
-		}
-		console.log("cmeditor_${name}_update "+docName+" was performed.")
-	}
-
-	function cmeditor_${name}_update_doc(cmChangeObjects) {
-		var docName = 'no curDoc';
-		var changed = false;
-		if (cmeditor_curDoc_${name}) {
-			var pos = cmeditor_${name}_doc_id(cmeditor_curDoc_${name}._cmeditorName);
-			docName = cmeditor_curDoc_${name}._cmeditorName;
-			if (cmeditor_curDoc_${name}._cmeditorMode != cmeditor_${name}.getOption("mode")) {
-				cmeditor_${name}.setOption("mode", cmeditor_curDoc_${name}._cmeditorMode);
-				changed = true;
-				console.log("mode changed");
-			}
-			if (cmChangeObjects && !cmChangeObjects.propertyIsEnumerable('cmeditor_custom_field')) {// && cmeditor_curDoc_${name}._cmeditorContent != cmeditor_curDoc_${name}._cmeditorDoc.getValue()) {
-			//console.log(cmeditor_curDoc_${name}._cmeditorContent);
-			//console.log(cmeditor_curDoc_${name}._cmeditorDoc.getValue());
-				cmeditor_curDoc_${name}._cmeditorContent = cmeditor_curDoc_${name}._cmeditorDoc.getValue();
-				changed = true;
-				console.log("content changed" + cmChangeObjects);
-			}
-			if (cmeditor_curDoc_${name}._cmeditorReadOnly != cmeditor_${name}.getOption('readOnly')) {
-				if (cmeditor_curDoc_${name}._cmeditorReadOnly) {
-					cmeditor_${name}.setOption('readOnly', cmeditor_curDoc_${name}._cmeditorReadOnly);
-				} else {
-					cmeditor_${name}.setOption('readOnly', false);
-				}
-			}
-			if (cmChangeObjects && cmChangeObjects.propertyIsEnumerable('cmeditor_custom_field')) {
-				changed = true;
-				console.log("custom field changed")
-			}
-			if (changed || cmChangeObjects) {
-				cmeditor_${name}_set_changed_doc(pos, cmChangeObjects);
-				if (cmeditor_curDoc_${name}._cmeditorStatus == 'new') {
-					cmeditor_curDoc_${name}._cmeditorStatus = 'unsaved';
-				} else if (cmeditor_curDoc_${name}._cmeditorStatus == 'unchanged') {
-					cmeditor_curDoc_${name}._cmeditorStatus = 'changed';
-				}
-			}
-			cmeditor_${name}_set_form_doc();
-		}
-		console.log("cmeditor_${name}_update_doc "+docName+" was performed.")
-		return changed;
-	}
-
-	function cmeditor_${name}_set_form_doc_field(elem, val) {
-		if (elem.attr('type') == 'checkbox') {
-			if (val) {
-				elem.prop('checked', true);
-				//elem.attr('value',true);
-			} else {
-				elem.prop('checked', false);
-				//elem.removeAttr('value');
-			}
-		} else {
-			elem.val(val);
-		}
-	}
-
-	function cmeditor_${name}_set_form_doc() {
-		if (typeof cmeditor_${name}_set_form_doc_before == 'function') cmeditor_${name}_set_form_doc_before();
-		$("#cmeditor-tabs-${name}-form .cmeditor-field").each(function(){
-			var key = $(this).attr('id');
-			if ($(this).attr('data-field-property') && cmeditor_curDoc_${name}[key]) {
-			console.log("BOOOOO " + key);
-				cmeditor_${name}_set_form_doc_field($(this), cmeditor_curDoc_${name}[key][$(this).attr('data-field-property')]||'')
-			} else {
-				cmeditor_${name}_set_form_doc_field($(this), cmeditor_curDoc_${name}[key]||'');
-			}
-		});
-		$("#cmeditor-tabs-${name}-form #${mapping.name}.cmeditor-field").val(cmeditor_curDoc_${name}._cmeditorName||'');
-		$("#cmeditor-tabs-${name}-form #${mapping.mode}.cmeditor-field").val(cmeditor_curDoc_${name}._cmeditorMode||'');
-		$("#cmeditor-tabs-${name}-form #${mapping.content}.cmeditor-field").val(cmeditor_curDoc_${name}._cmeditorContent||'');
-		if (typeof cmeditor_${name}_set_form_doc_after == 'function') cmeditor_${name}_set_form_doc_after();
-		console.log("cmeditor_${name}_set_form_doc "+cmeditor_curDoc_${name}._cmeditorName+" was performed.")
-	}
-
-	function cmeditor_${name}_set_diff_before_save(value) {
-		cmeditor_diffBeforeSave_${name} = value;
-		console.log("cmeditor_${name}_set_diff_before_save "+value+" was performed.")
-	}
-
-	function cmeditor_${name}_save(cm) {
-		<g:if test="${options.readOnly}">
-		$('#cmeditor-tabs-${name}-readOnly').dialog({ height: 300, buttons: {Cancel: function() { $( this ).dialog( "close" ); },},});
-		</g:if><g:else>
-		var pos = cmeditor_${name}_doc_id(cmeditor_curDoc_${name}._cmeditorName)
-		cmeditor_${name}_update_doc();
-
-		if (cmeditor_diffBeforeSave_${name}) {
-		var addButtons = {
-				Save: function() { $('#cmeditor-tabs-${name}-form').submit(); $( this ).dialog( "close" );},
-			};
-		cmeditor_${name}_diff(cmeditor_${name}, addButtons)
-		} else {
-			$('#cmeditor-tabs-${name}-form').submit();
-		}
-
-		//cmeditor_${name}_unset_changed_doc(pos);
-		console.log("cmeditor_${name}_save "+cmeditor_curDoc_${name}._cmeditorName+" ("+pos+") was performed.");
-		</g:else>
-	}
-
-	function cmeditor_${name}_saveas(cm) {
-		<g:if test="${options.readOnly}">
-		$('#cmeditor-tabs-${name}-readOnly').dialog({ height: 300, buttons: {Cancel: function() { $( this ).dialog( "close" ); },},});
-		</g:if><g:else>
-		var name = prompt("Name of the new buffer", "");
-		if (name == null) return;
-		if (!name) name = "test";
-		cmeditor_${name}_rename_doc(cmeditor_${name}_get_name(name));
-		cmeditor_curDoc_${name}["${options.idField}"] = '';
-		cmeditor_${name}_save(cm);
-		console.log("cmeditor_${name}_saveas "+cmeditor_curDoc_${name}._cmeditorName+" was performed.");
-		</g:else>
-	}
-
-	function cmeditor_${name}_new(cm) {
-		<g:if test="${options.readOnly}">
-		$('#cmeditor-tabs-${name}-readOnly').dialog({ height: 300, buttons: {Cancel: function() { $( this ).dialog( "close" ); },},});
-		</g:if><g:else>
-		var name = prompt("Name of the new buffer", "");
-		if (name == null) return;
-		if (!name) name = "test";
-		var data = {_cmeditorName: cmeditor_${name}_get_name(name), _cmeditorMode:"${options.defaultMode}", _cmeditorStatus:'new', _cmeditorContent: '${options.defaultContent}'};
-		data._cmeditorDoc = new CodeMirror.Doc(data._cmeditorContent, data._cmeditorMode);
-		cmeditor_${name}_register_doc_data(data);
-		cmeditor_${name}_select_doc(cmeditor_docs_${name}.length - 1);
-		</g:else>
-	}
-
-	function cmeditor_${name}_close(cm) {
-		var status = cmeditor_curDoc_${name}._cmeditorStatus;
-		if (status == 'changed' || status == 'unsaved') {
-			$('#cmeditor-tabs-${name}-warning').dialog({
-				height: 300,
-				buttons: {
-					Cancel: function() { $( this ).dialog( "close" ); },
-					Close: function() { cmeditor_${name}_unregister_doc(cmeditor_curDoc_${name}); $( this ).dialog( "close" );},
-				},
-			});
-		} else {
-			cmeditor_${name}_unregister_doc(cmeditor_curDoc_${name});
-		}
-	}
-
-	function cmeditor_${name}_delete(cm) {
-		var status = cmeditor_curDoc_${name}._cmeditorStatus;
-		$('#cmeditor-tabs-${name}-warning').dialog({
-			height: 300,
-			buttons: {
-				Cancel: function() { $( this ).dialog( "close" ); },
-				Close: function() { cmeditor_${name}_ajax_delete(); $( this ).dialog( "close" );},
-			},
-		});
-	}
-
-	function cmeditor_${name}_goto(cm) {
-		var buttons = {
-			Cancel: function() { $( this ).dialog( "close" ); },
-			Ok: function() {
-				var line = parseInt($('#cmeditor-tabs-${name}-goto input').val())-1;
-				cm.doc.setCursor(line, 0);
-				$( this ).dialog( "close" );},
-		}
-		var first = cm.doc.firstLine()+1;
-		var last = cm.doc.lastLine()+1;
-		$('#cmeditor-tabs-${name}-goto-label').text('Enter line number ('+first+'..'+last+'):');
-		$("#cmeditor-tabs-${name}-goto input").val(cm.doc.getCursor().line+1);
-		$('#cmeditor-tabs-${name}-goto').dialog({
-			dialogClass : 'dialog-goto',
-			height: 250,
-			buttons: buttons,
-		});
-		$("#cmeditor-tabs-${name}-goto input").keyup(function() {
-			var lineInput = $(this).val();
-			if (lineInput === '') {
-				$('#cmeditor-tabs-${name}-goto-error').text('');
-				$(".dialog-goto :button:contains('Ok')").prop("disabled", true).addClass("ui-state-disabled");
-			} else {
-				if (cmeditorbase_is_int(lineInput)) {
-					var line = parseInt(lineInput);
-					if(line < first || line > last) {
-						$('#cmeditor-tabs-${name}-goto-error').text('Line number out of range');
-						$(".dialog-goto :button:contains('Ok')").prop("disabled", true).addClass("ui-state-disabled");
-					} else {
-						$('#cmeditor-tabs-${name}-goto-error').text('');
-						$(".dialog-goto :button:contains('Ok')").prop("disabled", false).removeClass("ui-state-disabled");
-					}
-				} else {
-					$('#cmeditor-tabs-${name}-goto-error').text('Not a number');
-					$(".dialog-goto :button:contains('Ok')").prop("disabled", true).addClass("ui-state-disabled");
-				}
-			}
-		});
-
-	}
-
-	function cmeditor_${name}_diff(cm, addButtons) {
-		var buttons = {
-				Cancel: function() { $( this ).dialog( "close" ); },
-				//Close: function() { cmeditor_${name}_unregister_doc(cmeditor_curDoc_${name}); $( this ).dialog( "close" );},
-			};
-		if (addButtons) {
-			for (var name in addButtons) {
-				buttons[name] = addButtons[name];
-			}
-		}
-		cmeditor_${name}_diffUsingJS(2);
-		$('#cmeditor-tabs-${name}-diff').dialog({
-			resize:'auto',
-			width: 'auto',
-			height: 'auto',
-			buttons: buttons,
-		});
-	}
-
-	function cmeditor_${name}_get_mode() {
-		return cmeditor_curDoc_${name}._cmeditorMode;
-	}
-
-	function cmeditor_${name}_init() {
-		var keyMap = {
-			"Ctrl-Space": "autocomplete",
-			"Ctrl-S": function(cm) { cmeditor_${name}_save(cm); },
-			"Ctrl-Q": function(cm){ cm.foldCode(cm.getCursor()); },
-			"F11": function(cm) {
-				if (!cm.getOption("readOnly")) {
-		          cm.setOption("fullScreen", !cm.getOption("fullScreen"));
-		        }
-		    },
-		    "Alt-Up": function(cm) { cmeditorbase_moveUp(cm); },
-            "Alt-Down": function(cm) { cmeditorbase_moveDown(cm); },
-		    "Ctrl-7": function(cm) { cmeditorbase_comment(cm); },
-		    "Ctrl-L": function(cm) { cmeditor_${name}_goto(cm); },
-			//"Ctrl-I": function(cm) { server.showType(cm); },
-			//"Ctrl-Space": function(cm) { server.complete(cm); },
-			//"Alt-.": function(cm) { server.jumpToDef(cm); },
-			//"Alt-,": function(cm) { server.jumpBack(cm); },
-			//"Ctrl-Q": function(cm) { server.rename(cm); }
-	  	};
-		if (typeof ${options.overlayDefinitionsVar} !== 'undefined') {
-	  		//console.log(Object.keys(${options.overlayDefinitionsVar}));
-			for(var name in ${options.overlayDefinitionsVar}) {
-				//console.log(name+" baseMode: "+ ${options.overlayDefinitionsVar}[name]['baseMode']);
-				//console.log(name+" definition: "+ ${options.overlayDefinitionsVar}[name]['definition']);
-				cmeditorall_add_overlay_definition(name, ${options.overlayDefinitionsVar}[name]['baseMode'], ${options.overlayDefinitionsVar}[name]['definition']);
-			}
-			CodeMirror.commands.autocomplete = function(cm, getHints, options) { CodeMirror.showHint(cm, null, {cmeditorDefinitions: ${options.overlayDefinitionsVar}}) };
-		}
-		cmeditor_${name} = CodeMirror(document.getElementById("cmeditor-tabs-${name}-form"), {
-			lineNumbers: true,
-			smartIndent: false,
-	        lineWrapping: true,
-	        matchBrackets: true,
-	        autoCloseBrackets: true,
-	        autoCloseTags: true,
-	        styleActiveLine: true,
-	        //cursorHeight: 1.0,
-	        viewportMargin: Infinity,
-			<g:if test="${options.mode}">mode: '${options.mode}',</g:if>
-			<g:if test="${options.defaultReadOnly||options.readOnly}">readOnly: 'nocursor',</g:if>
-			foldGutter: true,
-   			gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
-			extraKeys: keyMap,
-	  });
-
-		cmeditor_${name}.setOption("mode", "${options.mode}");
-		<g:if test="${options.useSession}">
-		if (localStorage['cmeditor-menu-binding']) cmeditor_${name}.setOption("keymap", localStorage['cmeditor-menu-binding']);
-		else cmeditor_${name}.setOption("keymap", "default");
-		if (localStorage['cmeditor-menu-theme']) cmeditor_${name}.setOption("theme", localStorage['cmeditor-menu-theme']);
-		else cmeditor_${name}.setOption("theme", "default");
-		if (localStorage['cmeditor-menu-diffBeforeSave'] === null) cmeditor_${name}_set_diff_before_save(localStorage['cmeditor-menu-diffBeforeSave']);
-		else cmeditor_${name}_set_diff_before_save(${options.defaultDiffBeforeSave});
-		</g:if><g:else>
-		cmeditor_${name}.setOption("keymap", "${options.binding}");
-		cmeditor_${name}.setOption("theme", "${options.theme}");
-		cmeditor_${name}_set_diff_before_save(${options.defaultDiffBeforeSave});
-		</g:else>
-		if (cmeditor_${name}.getOption("keymap") == 'vim') {
-			cmeditor_${name}.setOption("vimMode", true);
-		} else {
-			cmeditor_${name}.setOption("vimMode", false);
-		}
-
-	  cmeditor_${name}.on("changes", function(cm, cmChangeObjects) {
-	  	cmeditor_${name}_update_doc(cmChangeObjects);
-	  });
-	}
-	CodeMirror.on(document.getElementById("cmeditor-tabs-${name}-docs"), "click", function(e) {
-		var target = e.target || e.srcElement;
-		if (target.nodeName.toLowerCase() != "li") return;
-		for (var i = 0, c = target.parentNode.firstChild; ; ++i, (c = c.nextSibling)) {
-			if (c == target) return cmeditor_${name}_select_doc(i);
-		}
-	});
+	var codeMirrorEditor;
 
 	$(document).ready(function() {
-		cmeditor_${name}_init();
+		var codeMirrorEditorOptions = {
+			addModes: "${options.addModes}",
+			ajax:{
+				deleteURL: "${ajax.deleteURL}",
+				updateURL: "${ajax.updateURL}",
+				getURL: "${ajax.getURL}",
+				listURL: "${ajax.listURL}"
+			},
+			binding: "${options.binding}",
+			defaultContent: "${options.defaultContent}",
+			defaultMode: "${options.defaultMode}",
+			defaultDiffBeforeSave: ${options.defaultDiffBeforeSave},
+			idField: "${options.idField}",
+			mapping: {
+				name: "${mapping.name}",
+				mode: "${mapping.mode}",
+				content: "${mapping.content}"
 
-		function cmeditor_${name}_get_custom_field(elem) {
+			},
+			menu: ${options.menu},
+			overlayDefinitionsVar: typeof ${options.overlayDefinitionsVar} !== "undefined" ? ${options.overlayDefinitionsVar} : undefined,
+			readOnly: ${options.readOnly},
+			theme: "${options.theme}",
+			useSession: ${options.useSession}
+		};
+
+		codeMirrorEditor = CMEditor($("#cmEditor"), codeMirrorEditorOptions);
+	});
+
+	this.CMEditor = (function(){
+		function CMEditor(rootElem, options){
+			//allow the user to omit new
+			if (!(this instanceof CMEditor)) return new CMEditor(rootElem, options);
+			var self = this;
+
+			self.rootElem = $(rootElem);
+			self.options  = options  = options !== undefined ? options : {};
+			self.options.ajax = options.ajax !== undefined ? options.ajax : {}
+
+			options.defaultContent = options.defaultContent !== undefined ? options.defaultContent : "";
+
+			self.docs = [];
+
+			initDialogs(self);
+			initEventListeners(self)
+			initCodeMirror(self, options);
+
+			if(options.menu)
+				self.menu = new CMEditorMenu(self, $("#cmEditorMenu"), options);
+
+			insertNewUntitledDocument(self);
+
+			//disable some browser featues when the codeMirror has focus
+			//CLARIFY: wollen wir das?
+			$(document).bind("keydown", function(e){
+				if(e.ctrlKey && self.rootElem.find("CodeMirror-focused").size() !== 0){
+					e.preventDefault();
+				}
+			});
+
+			console.log("cmeditor loaded.")
+		}
+
+		/*
+		 *	Initiates the actual CodeMirror and sets our own key map
+		 *  TODO: make CM options available via our options
+		 */
+		function initCodeMirror(self, options) {
+			var keyMap = {
+				"Ctrl-Space": "autocomplete",
+				"Ctrl-S":     function(cm) { save(self);},
+				"Ctrl-Q":     function(cm){ cm.foldCode(cm.getCursor()); },
+				"F11":        function(cm) {
+				                 if (!cm.getOption("readOnly")) {
+				                 	cm.setOption("fullScreen", !cm.getOption("fullScreen"));
+				                 }
+				               },
+				"Alt-Up":     function(cm) { cmeditorbase_moveUp(cm); },
+				"Alt-Down":   function(cm) { cmeditorbase_moveDown(cm); },
+				"Ctrl-7":     function(cm) { cmeditorbase_comment(cm); },
+				"Ctrl-L":     function(cm) { goto(self); },
+			};
+
+			if (typeof options.overlayDefinitionsVar !== 'undefined') {
+				for(var name in options.overlayDefinitionsVar) {
+					cmeditorall_add_overlay_definition(name, options.overlayDefinitionsVar[name]['baseMode'],
+					                                       options.overlayDefinitionsVar[name]['definition']);
+				}
+				CodeMirror.commands.autocomplete = function(cm, getHints, options) {
+					CodeMirror.showHint(cm, null, {cmeditorDefinitions: options.overlayDefinitionsVar})
+				};
+			}
+
+			var codeMirrorOptions = {
+				lineNumbers: true,
+				smartIndent: false,
+				lineWrapping: true,
+				matchBrackets: true,
+				autoCloseBrackets: true,
+				autoCloseTags: true,
+				styleActiveLine: true,
+				viewportMargin: Infinity,
+				foldGutter: true,
+				gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
+				extraKeys: keyMap,
+			}
+
+			if(options.mode)
+				codeMirrorOptions.mode = options.mode;
+			if(options.defaultReadOnly || options.readOnly)
+				codeMirrorOptions.readOnly = 'nocursor';
+
+			var codeMirror = self.codeMirror = CodeMirror(self.rootElem.find(".cmeditor-main form").get(0), codeMirrorOptions);
+
+			if(options.useSession){
+				if(localStorage['cmeditor-menu-binding'])
+					codeMirror.setOption("keymap", localStorage['cmeditor-menu-binding']);
+				else
+					codeMirror.setOption("keymap", "default");
+
+				if(localStorage['cmeditor-menu-theme'])
+					codeMirror.setOption("theme", localStorage['cmeditor-menu-theme']);
+				else
+					codeMirror.setOption("theme", "default");
+
+				if(localStorage['cmeditor-menu-diffBeforeSave'] === null)
+					setDoDiffBeforeSaving(self, localStorage['cmeditor-menu-diffBeforeSave']);
+				else
+					setDoDiffBeforeSaving(self, options.defaultDiffBeforeSave);
+			}else{
+				codeMirror.setOption("keymap", options.binding);
+				codeMirror.setOption("theme", options.theme);
+				setDoDiffBeforeSaving(self, options.defaultDiffBeforeSave);
+			}
+
+			if (codeMirror.getOption("keymap") == 'vim') {
+				codeMirror.setOption("vimMode", true);
+			} else {
+				codeMirror.setOption("vimMode", false);
+			}
+
+			codeMirror.on("changes", function(cm, cmChangeObjects) {
+				updateCurrentDocument(self, cmChangeObjects);
+			});
+		}
+
+		/*
+		 *	Initiates dialogs for user interaction
+		 */
+		function initDialogs(self){
+			var diff = self.diffDialog = $('<div class="dialog diffDialog" title="diff" style="display: none;"> \
+										<div class="diffoutput"> </div> \
+										<p><strong>Context size (optional):</strong><input name="contextSize" value="1" type="number" /></p> \
+										<p><input type="radio" name="_viewtype" id="sidebyside" checked="checked" /> <label for="sidebyside">Side by Side Diff</label> \
+											&nbsp; &nbsp; <input type="radio" name="_viewtype" id="inline" /> <label for="inline">Inline Diff</label> </p> \
+										</div>');
+
+			diff.find("input[name=contextSize]").on("keyup", function(){decorateDiffDialog(self)});
+			diff.find("input[name=_viewtype]").on("click",   function(){decorateDiffDialog(self)});
+
+			diff.dialog({
+				autoOpen: false,
+				resize:'auto',
+				width: 'auto',
+				height: 'auto',
+			});
+
+
+			var warn = self.warningDialog = $('<div class="dialog warningDialog" title="warning" style="display: none;"></div>');
+			warn.dialog({
+				autoOpen: false,
+				resize:'auto',
+				width: 'auto',
+				height: 'auto',
+			});
+
+
+			var go = self.gotoDialog = $('<div class="dialog gotoDialog" title="Go to Line" style="display: none;"><p class="gotoLabel"></p> \
+										<input type="text" /><p class="gotoError">&nbsp;</p></div>');
+			go.dialog({
+				autoOpen: false,
+				dialogClass: 'dialog-goto',
+				resize:'auto',
+				width: 'auto',
+				height: 'auto',
+				buttons: {Cancel: 	function() { $(this).dialog("close"); },
+						  Ok: 		function() {
+										var line = parseInt(self.gotoDialog.find('input').val())-1;
+										self.codeMirror.doc.setCursor(line, 0);
+										$(this).dialog("close");
+									}
+						  }
+
+			});
+		}
+
+		/*
+		 *	Registers event listeners for user interaction
+		 */
+		function initEventListeners(self){
+			var mainForm = self.rootElem.find(".cmeditor-main form");
+
+			//switch tabs
+			self.rootElem.find(".tabs").on("click", function(e) {
+				var target = e.target;
+				if(target.nodeName.toLowerCase() != "li" && target.parentNode.nodeName.toLowerCase() == "li")
+					target = target.parentNode;
+
+				if (target.nodeName.toLowerCase() != "li") return true;
+				for (var i = 0, c = target.parentNode.firstChild; ; ++i, (c = c.nextSibling)) {
+					if (c == target) return selectDocumentByIndex(self, i);
+				}
+			});
+
+			//save document
+			mainForm.on("submit", function(e){
+				ajax_update(self, $(this).serialize());
+				e.preventDefault();
+			});
+
+			//changes in custom inputs
+			mainForm.find(".cmeditor-field").keyup(function() { customElementChanged(self, $(this));});
+			mainForm.find("select.cmeditor-field").change(function() {customElementChanged(self, $(this));});
+			mainForm.find("input[type='checkbox'].cmeditor-field").change(function() { customElementChanged(self, $(this));});
+		}
+
+		/*************************************************************************
+		 *                    Begin private functions                            *
+		 *************************************************************************/
+
+
+		/*
+		 * Performs the actual deletion
+		 */
+		function ajax_delete(self) {
+			if(self.options.readOnly){
+				displayMessage("This document is read-only and cannot be deleted");
+				return;
+			}
+
+			if (self.curDoc[self.options.idField]) {
+
+				$.ajax({
+					type:'GET',
+					data: {id: self.curDoc[self.options.idField]},
+					url: options.ajax.deleteURL,
+					success:function(data, textStatus){
+						if (data.status == 'success') {
+							// do sth
+						}
+						displayMessage(self, data.msg, textStatus);
+						//cmeditor_${name}_ajax_reload();
+					},
+					error:function(XMLHttpRequest,textStatus,errorThrown){}
+				});
+			}
+
+			removeDocument(self, self.curDoc);
+
+			return false;
+		}
+
+		/*
+		 * Reinitiates the current document from the server
+		 *
+		 * Parameters: newname String: If supplied the document will be replaced by this one
+		 */
+		function ajax_reload(self, newname) {
+			if (self.curDoc) {
+				var name = self.curDoc._cmeditorName;
+				removeDocument(self, self.curDoc);
+
+				if(typeof newname !== "undefined") {
+					ajax_load(self, newname, true);
+				} else {
+					ajax_load(self, name, true);
+				}
+			}
+		}
+
+		/*
+		 *	Triggers an update
+		 *
+		 *  Parameters: data Object: TODO: i don't know yet
+		 */
+		function ajax_update(self, data) {
+			if (self.curDoc) {
+				$.ajax({
+					type: 'POST',
+					data: data,
+					url: self.options.ajax.updateURL,
+					success:function(data,textStatus){
+						if (data.status == 'success') {
+							if (data.newname) {
+								ajax_reload(self, data.newname);
+							}else{
+								ajax_reload(self);
+							}
+						}
+						displayMessage(self, data.msg, textStatus);
+					},
+					error:function(XMLHttpRequest,textStatus,errorThrown){}
+				});
+				return false;
+			}
+		}
+
+		/*
+		 * Triggered, when a custom input was changed
+		 */
+		function customElementChanged(self, elem) {
+			var key = elem.attr('id');
+
+			if (self.curDoc) {
+				var old = null;
+				var doUpdate = true;
+
+				if (key == self.options.mapping.name) {
+					rename(self, getCustomElementValue(self, elem));
+					doUpdate = false;
+
+				} else if (key == self.options.mapping.mode) {
+					old = self.curDoc._cmeditorMode;
+					self.curDoc._cmeditorMode = getCustomElementValue(self, elem);
+					if(self.options.menu)
+						self.menu.update();
+
+				} else if (key == self.options.mapping.content) {
+					old = self.curDoc._cmeditorContent;
+					sef.curDoc._cmeditorContent = getCustomElementValue(self, elem);
+
+				} else {
+					if (elem.attr('data-field-property') && self.curDoc[key] !== 'undefined') {
+						if (self.curDoc[key]) {
+							old = self.curDoc[key][elem.attr('data-field-property')];
+						} else {
+							self.curDoc[key] = {};
+						}
+						self.curDoc[key][elem.attr('data-field-property')] = getCustomElementValue(self, elem);
+					} else {
+						old = self.curDoc[key];
+						self.curDoc[key] = getCustomElementValue(self, elem);
+					}
+				}
+
+				if (doUpdate) {
+					updateCurrentDocument(self, {cmeditor_custom_field: true, old:old, new:getCustomElementValue(self, elem)});
+				}
+			}
+		}
+
+		/*
+		 * Calculates and draws the diff
+		 */
+		function decorateDiffDialog(self) {
+
+			var base    = difflib.stringAsLines(self.rootElem.find("input[name=_cmeditorOrigContent]").eq(0).val()),
+				newtxt  = difflib.stringAsLines(self.rootElem.find("input[name=_cmeditorContent]").eq(0).val()),
+				opcodes = new difflib.SequenceMatcher(base, newtxt).get_opcodes(),
+				diffoutputdiv = self.diffDialog.find(".diffoutput"),
+				contextSize   = self.diffDialog.find("input[name=contextSize]").val();
+
+			diffoutputdiv.text("");
+			contextSize = contextSize || null;
+
+			if (opcodes && opcodes.length == 1) {
+				diffoutputdiv.html("<p>No changes!</p>");
+			} else {
+				diffoutputdiv.append(diffview.buildView({
+					baseTextLines: base,
+					newTextLines: newtxt,
+					opcodes: opcodes,
+					baseTextName: "Base Text",
+					newTextName: "New Text",
+					contextSize: contextSize,
+					viewType: self.diffDialog.find("input[name=viewType]:checked").val()
+				}));
+			}
+		}
+
+		/*
+		 * TODO
+		 */
+		function getCustomElementValue(self, elem) {
 			if (elem.attr('type') == 'checkbox') {
 				return elem.is(":checked");
 			} else {
@@ -641,46 +422,638 @@
 			}
 		}
 
-		function cmeditor_${name}_custom_change(elem) {
-			var key = elem.attr('id');
+		/*
+		 * Gets the document by document name
+		 *
+		 * Parameters: name String: The name of the document
+		 * Returns:    TODO: the document
+		 */
+		function getDocumentByName(self, name) {
+			return self.docs[getDocumentIdByName(self, name)];
+		}
 
-			if (cmeditor_curDoc_${name}) {
-				var old = null;
-				var doUpdate = true;
-				if (key == '${mapping.name}') {
-					cmeditor_${name}_rename_doc(cmeditor_${name}_get_custom_field(elem));
-					doUpdate = false;
-				} else if (key == '${mapping.mode}') {
-					old = cmeditor_curDoc_${name}._cmeditorMode;
-					cmeditor_curDoc_${name}._cmeditorMode = cmeditor_${name}_get_custom_field(elem);
-					<g:if test="${options.menu}">cmeditor_menu_${name}_update();</g:if>
-				} else if (key == '${mapping.content}') {
-					old = cmeditor_curDoc_${name}._cmeditorContent;
-					cmeditor_curDoc_${name}._cmeditorContent = cmeditor_${name}_get_custom_field(elem);
-				} else {
-					if (elem.attr('data-field-property') && cmeditor_curDoc_${name}[key] !== 'undefined') {
-						if (cmeditor_curDoc_${name}[key]) {
-							old = cmeditor_curDoc_${name}[key][elem.attr('data-field-property')];
-						} else {
-							cmeditor_curDoc_${name}[key] = {};
+		/*
+		 * Prompts the user for a line, then sets the line number to that line
+		 */
+		function goto(self) {
+			var first = self.codeMirror.doc.firstLine()+1;
+			var last = self.codeMirror.doc.lastLine()+1;
+
+			self.gotoDialog.find('.gotoLabel').text('Enter line number ('+first+'..'+last+'):');
+			self.gotoDialog.find('input').val(self.codeMirror.doc.getCursor().line+1);
+			self.gotoDialog.find("input").on("keyup", function() {
+				var lineInput = $(this).val();
+
+				var errMsg = '';
+				if (lineInput !== '') {
+					if (cmeditorbase_is_int(lineInput)) {
+						var line = parseInt(lineInput);
+
+						if(line < first || line > last) {
+							errMsg = "Line number out of range";
 						}
-						cmeditor_curDoc_${name}[key][elem.attr('data-field-property')] = cmeditor_${name}_get_custom_field(elem);
 					} else {
-						old = cmeditor_curDoc_${name}[key];
-						cmeditor_curDoc_${name}[key] = cmeditor_${name}_get_custom_field(elem);
+						errMsg = "Not a number";
 					}
 				}
-				if (doUpdate) {
-					cmeditor_${name}_update_doc({cmeditor_custom_field: true, old:old, new:cmeditor_${name}_get_custom_field(elem)});
+
+				if(errMsg !== '' && lineInput !== ''){
+					self.gotoDialog.find(":button:contains('Ok')").prop("disabled", true).addClass("ui-state-disabled");
+				}else{
+					self.gotoDialog.find(":button:contains('Ok')").prop("disabled", true).removeClass("ui-state-disabled");
 				}
+				self.gotoDialog.find(".gotoError").text(errMsg);
+			});
+
+			self.gotoDialog.dialog("open");
+		}
+		/*
+		 * (Private)
+		 * Creates a new tab and sets the supplied document as its content
+		 *
+		 * Parameters: data Object: TODO: don't know
+		 */
+		function insertNewDocument(self, data) {
+			self.docs.push(data);
+
+			var docTabs = self.rootElem.find(".docs").get(0);
+			var li = docTabs.appendChild(document.createElement("li"));
+			li.appendChild($("<span class='tabName'></span>").text(data._cmeditorName).get(0));
+
+			var closeButton = $("<span class='closeButton'>&#10005;</span>");
+			closeButton.on("click", function(){
+										var doc = getDocumentByName(self, data._cmeditorName);
+
+										if(doc._cmeditorStatus == 'changed' || doc._cmeditorStatus == "unsaved"){
+											showWarning(self, "Do you really want to close this buffer? Unsaved changes will be lost.",
+												{Close: function(){removeDocument(self, doc); $(this).dialog("close");}})
+										}else{
+											removeDocument(self, doc)
+										}
+
+									});
+			li.appendChild(closeButton.get(0));
+
+			if (self.codeMirror.getDoc() == data._cmeditorDoc) {
+				markDocumentAsSelected(self, self.docs.length - 1);
+				self.curDoc = data;
+			}
+
+			selectDocumentByIndex(self, self.docs.length - 1);
+			removeUntitledDocument(self);
+
+			console.log("insertNewDocument '"+data._cmeditorName+"' was performed. Current doc: "+self.curDoc)
+		}
+
+		/*
+		 * Creates and registers a new (empty) document if there is none opened
+		 */
+		function insertNewUntitledDocument(self) {
+			if (self.docs.length < 1) {
+				self.unregDocName = getUnambiguousName(self, 'Untitled Document');
+
+				var data = {_cmeditorName: self.unregDocName,
+				            _cmeditorMode: self.options.defaultMode,
+				            _cmeditorStatus:'new',
+				            _cmeditorContent: self.options.defaultContent,
+				            _cmeditorOrigContent: self.options.defaultContent,
+				        	_cmeditorReadOnly: (self.options.readOnly||self.options.defaultReadOnly)?'nocursor':''};
+
+				data._cmeditorDoc = new CodeMirror.Doc(data._cmeditorContent, self.options.defaultMode);
+				insertNewDocument(self, data);
+			}
+			console.log("insertNewUntitledDocument "+self.curDoc._cmeditorName+" was performed.");
+		}
+
+		/*
+		 * Marks a document as changed by placing a star next to its name
+		 *
+		 * Parameters: pos Integer: the index of the document to change
+		 */
+		function markDocumentAsChanged(self, pos) {
+			var docTab = self.rootElem.find(".tabs li:nth-child("+(pos+1)+") .tabName");
+			docTab.text("*"+ self.docs[pos]._cmeditorName);
+
+			console.log("changed " + self.docs[pos]._cmeditorName);
+			console.log("markDocumentAsChanged '"+pos+"' was performed.");
+		}
+
+		/*
+		 * (Private)
+		 * Adds a selected class to a document and removes it from all others
+		 *
+		 * Parameters: pos Integer: the index of the document to add the class to
+		 */
+		function markDocumentAsSelected(self, pos) {
+			var docTabs = self.rootElem.find(".tabs").children();
+			docTabs.removeClass("selected");
+			docTabs.eq(pos).addClass("selected");
+
+			console.log("markDocumentAsSelected "+ pos +" was performed.")
+		}
+
+		/*
+		 * Marks a document as unchanged by removing the star next to its name
+		 *
+		 * Parameters: pos Integer: the index of the document to change
+		 */
+		function markDocumentAsUnchanged(self, pos) {
+			var docTab = self.rootElem.find(".tabs li:nth-child("+(pos+1)+") .tabName");
+			docTab.text(self.docs[pos]._cmeditorName);
+
+			console.log("unchanged " + self.docs[pos]._cmeditorName);
+			console.log("markDocumentAsUnchanged '"+pos+"' was performed.");
+		}
+
+		/*
+		 * Removes a tab
+		 *
+		 * Parameters: doc Object: TODO
+		 */
+		function removeDocument(self, doc) {
+			for (var i = 0; i < self.docs.length && doc != self.docs[i]; ++i) {}
+			self.docs.splice(i, 1);
+
+			var docList = self.rootElem.find(".docs").get(0);
+			docList.removeChild(docList.childNodes[i]);
+
+			insertNewUntitledDocument(self);
+			selectDocumentByIndex(self, Math.max(0, i - 1));
+
+			console.log("removeDocument "+doc._cmeditorName+" was performed.");
+		}
+
+		/*
+		 * (Private)
+		 * Unregisters a document previously created by `insertNewUntitledDocument`
+		 */
+		function removeUntitledDocument(self) {
+			if (self.docs.length > 1) {
+				var doc = getDocumentByName(self, self.unregDocName)
+				if (doc && doc._cmeditorStatus == 'new') {
+					removeDocument(self, doc);
+				}
+			}
+			console.log("removeUntitledDocument was performed.");
+		}
+
+		/*
+		 * Selects a document and displays its contents in the editor
+		 *
+		 * Parameters: pos Integer: the index of the document to select
+		 */
+		function selectDocumentByIndex(self, pos) {
+			markDocumentAsSelected(self, pos);
+			self.curDoc = self.docs[pos];
+
+			self.codeMirror.swapDoc(self.curDoc._cmeditorDoc);
+			updateCurrentDocument(self);
+
+			if(self.options.menu){
+				self.menu.update();
+			}
+			console.log("selectDocumentByIndex "+ self.curDoc._cmeditorName +" "+ pos +" was performed.")
+		}
+
+		/*
+		 * Displays a modal window with a message, a cancel button which closes the dialog
+		 * and optionally further buttons which can trigger functions
+		 *
+		 * Parameters: message String: A message to display
+		 *             additionalButtons Object (optional): keys: Button labels
+		 *                                                  values: callbacks for button click
+		 */
+		function showWarning(self, message, additionalButtons){
+			var buttons = {
+					Cancel: function() { $(this).dialog("close");},
+			};
+
+			if (additionalButtons) {
+				for (var name in additionalButtons) {
+					buttons[name] = additionalButtons[name];
+				}
+			}
+
+			self.warningDialog.text(message);
+			self.warningDialog.dialog("option", "buttons", buttons);
+			self.warningDialog.dialog("open");
+		}
+
+		/*
+		 * TODO
+		 */
+		function set_form_doc(self) {
+			if (typeof self.set_form_doc_before == 'function') self.set_form_doc_before();
+
+			self.rootElem.find("form .cmeditor-field").each(function(){
+				var elem = $(this);
+				var key = elem.attr('name');
+
+				if (elem.attr('data-field-property') && self.curDoc[key]) {
+					set_form_doc_field(self, elem, self.curDoc[key][elem.attr('data-field-property')] || '');
+				} else {
+					set_form_doc_field(self, elem, self.curDoc[key] || '');
+				}
+			});
+
+			self.rootElem.find("form #"+self.options.mapping.name+".cmeditor-field").val(self.curDoc._cmeditorName||'');
+			self.rootElem.find("form #"+self.options.mapping.mode+".cmeditor-field").val(self.curDoc._cmeditorMode||'');
+			self.rootElem.find("form #"+self.options.mapping.content+".cmeditor-field").val(self.curDoc._cmeditorContent||'');
+
+			if (typeof self.set_form_doc_after == 'function') self.set_form_doc_after();
+
+			console.log("set_form_doc "+ self.curDoc._cmeditorName +" was performed.")
+		}
+
+		/*
+		 * Sets the value of `elem` to `val`
+		 *
+		 * Parameters: elem jQuery: the element to set the value on
+		 *             val String or Boolean: the value to set or if elem is a checkbox whether it should be checked or
+		 *                                    unchecked
+		 */
+		function set_form_doc_field(self, elem, val) {
+			if (elem.attr('type') == 'checkbox') {
+				if (val) {
+					elem.prop('checked', true);
+				} else {
+					elem.prop('checked', false);
+				}
+			} else {
+				elem.val(val);
 			}
 		}
 
-		<g:if test="${options.menu}">cmeditor_menu_${name}_init();</g:if>
-		cmeditor_${name}_register_untitled_doc();
-		$("#cmeditor-tabs-${name}-form .cmeditor-field").keyup(function() {cmeditor_${name}_custom_change($(this));});
-		$("#cmeditor-tabs-${name}-form select.cmeditor-field").change(function() {cmeditor_${name}_custom_change($(this));});
-		$("#cmeditor-tabs-${name}-form input[type='checkbox'].cmeditor-field").change(function() {cmeditor_${name}_custom_change($(this));});
-		console.log("cmeditor_${name} loaded.")
-	});
+		/*
+		 * Called on every change of a document inside `self.codeMirror`
+		 *
+		 * Parameters: cmChangeObjects (optional) Object: TODO
+		 * Returns:    Boolean whether this document has changed
+		 */
+		function updateCurrentDocument(self, cmChangeObjects) {
+			var docName = 'no curDoc';
+			var changed = false;
+
+			if (self.curDoc) {
+				docName = self.curDoc._cmeditorName;
+
+				if (self.curDoc._cmeditorMode != self.codeMirror.getOption("mode")) {
+					self.codeMirror.setOption("mode", self.curDoc._cmeditorMode);
+					changed = true;
+					console.log("mode changed");
+				}
+
+				if (cmChangeObjects && !cmChangeObjects.propertyIsEnumerable('cmeditor_custom_field')) {
+					self.curDoc._cmeditorContent = self.curDoc._cmeditorDoc.getValue();
+					changed = true;
+					console.log("content changed" + cmChangeObjects);
+				}
+
+				if (self.curDoc._cmeditorReadOnly != self.codeMirror.getOption('readOnly')) {
+					if (self.curDoc._cmeditorReadOnly) {
+						self.codeMirror.setOption('readOnly', self.curDoc._cmeditorReadOnly);
+					} else {
+						self.codeMirror.setOption('readOnly', false);
+					}
+				}
+
+				if (cmChangeObjects && cmChangeObjects.propertyIsEnumerable('cmeditor_custom_field')) {
+					changed = true;
+					console.log("custom field changed")
+				}
+
+				if (changed || cmChangeObjects) {
+					markDocumentAsChanged(self, getDocumentIdByName(self, self.curDoc._cmeditorName));
+					if (self.curDoc._cmeditorStatus == 'new') {
+						self.curDoc._cmeditorStatus = 'unsaved';
+					} else if (self.curDoc._cmeditorStatus == 'unchanged') {
+						self.curDoc._cmeditorStatus = 'changed';
+					}
+				}
+
+				set_form_doc(self);
+			}
+
+			console.log("updateCurrentDocument "+ docName +" was performed.")
+			return changed;
+		}
+
+
+		/*************************************************************************
+		 *                                                                       *
+		 *                     Begin public functions                            *
+		 *                                                                       *
+		 *************************************************************************/
+
+		/* (Public)
+		 * Loads a document from the server
+		 *
+		 * Parameters: name String: The document name to load
+		 *             readWrite Boolean: If true document will always be writable, else it will be readOnly
+		 *                                if options.readOnly or options.defaultReadOnly is set to true
+		 */
+		function ajax_load(self, name, readWrite) {
+			$.ajax({
+				type:'GET',
+				url: self.options.ajax.getURL+name,
+				success: function(data){
+					if (data.status == 'success' && data.result) {
+						data.result._cmeditorName = data.result[self.options.mapping.name];
+						data.result._cmeditorMode = data.result[self.options.mapping.mode] || options.defaultMode;
+						if (readWrite) {
+							data.result._cmeditorReadOnly = '';
+						} else {
+							data.result._cmeditorReadOnly = (options.readOnly || options.defaultReadOnly) ? 'nocursor' : '';
+						}
+						data.result._cmeditorContent = data.result[self.options.mapping.content];
+						data.result._cmeditorOrigContent = data.result[self.options.mapping.content];
+						data.result._cmeditorStatus = 'unchanged';
+						data.result._cmeditorDoc = new CodeMirror.Doc(data.result._cmeditorContent, data.result._cmeditorMode);
+
+						insertNewDocument(self, data.result);
+
+						console.log("ajax_load '"+name+"' was performed.");
+						console.log(data.result.version)
+					} else {
+						displayMessage(self, data.msg);
+					}
+				},
+				error:function(XMLHttpRequest,textStatus,errorThrown){
+					displayMessage(self, textStatus + ": " + errorThrown);
+				},
+			});
+		}
+
+		/* (Public)
+		 * Closes the currently opened document
+		 */
+		function close(self, cm) {
+			var status = self.curDoc._cmeditorStatus;
+			if (status == 'changed' || status == 'unsaved') {
+				showWarning(self, "The changes to the current document will be lost",
+					{Close: function() {
+								removeDocument(self, self.curDoc);
+								$(this).dialog("close");
+							}
+					});
+			} else {
+				removeDocument(self, self.curDoc);
+			}
+		}
+
+
+		/* (Public)
+		 *	Deletes the currently opened document, asks for confirmation first
+		 */
+		function deleteDoc(self) {
+			showWarning(self, "Are you sure that you want to delete this document?",
+					{Delete: function() {
+								ajax_delete(self);
+								$(this).dialog("close");
+							}
+					});
+		}
+
+		/* (Public)
+		 * Shows a diff of the current document.
+		 *
+		 * Parameters: additionalButtons: Object: The keys are the button labels and the values are the
+		 *                                        callbacks for when the associated button is clicked.
+		 */
+		function diff(self, additionalButtons) {
+			var buttons = {
+					Cancel: function() { $(this).dialog("close");},
+			};
+
+			if (additionalButtons) {
+				for (var name in additionalButtons) {
+					buttons[name] = additionalButtons[name];
+				}
+			}
+
+			decorateDiffDialog(self);
+
+			self.diffDialog.dialog("option", "buttons", buttons);
+			self.diffDialog.dialog("open");
+		}
+
+		/* (Public)
+		 * Displays a message for 3 seconds
+		 *
+		 * Parameters: message String: The message to be displayed
+		 */
+		function displayMessage(self, message) {
+			self.rootElem.find('.cmeditor-tab-message').text(message)
+			                .toggle('slide', {'direction':'up'})
+			                .delay(3000)
+			                .toggle('slide', {'direction':'up'});
+		}
+
+		/* (Public)
+		 *
+		 * Sets focus to the text editor
+		 */
+		function focus(self){
+			self.codeMirror.focus();
+		}
+
+		/* (Public)
+		 *
+		 * Gets the document id by document name
+		 *
+		 * Parameters: name String: The name of the document
+		 * Returns:    Integer: the id of the document
+		 */
+		function getDocumentIdByName(self, name) {
+			for (var i = 0; i < self.docs.length; ++i)
+				if (self.docs[i]._cmeditorName == name) return i;
+		}
+
+
+		/* (Public)
+		 * Returns the mode in which the current document is opened
+		 */
+		function getCurrentCMEditorMode(self) {
+			return self.curDoc._cmeditorMode;
+		}
+
+		/* (Public)
+		 *
+		 * Appends a number to a filename so that it is unambigous
+		 *
+		 * Parameters: name String: The name of the document
+		 */
+		function getUnambiguousName(self, name) {
+			console.log(name);
+			var data = [];
+			if(self.options.ajax.listURL){
+				$.ajax({
+					url: self.options.ajax.listURL,
+					success: function(json) {
+						if (json.status == 'success' && json.result) {
+							data = json.result;
+						}
+					},
+					async:false
+				});
+			}
+
+			var i = 0;
+			while (getDocumentByName(self, name + (i || "")) || cmeditortabs_is_in_list(data, name + (i || ""))) ++i;
+			return name + (i || "");
+		}
+
+		/* (Public)
+		 *
+		 * Returns the underlying codeMirror instance
+		 */
+		function getCodeMirror(self){
+			return self.codeMirror;
+		}
+
+		/* (Public)
+		 * Creates a new document
+		 */
+		function newDoc(self) {
+			console.log("creating new doc");
+			if(self.options.readOnly){
+				displayMessage("This document is opened read only!");
+			}else{
+				var name = prompt("Name of the new buffer", "");
+				if (name == null) return;
+				if (!name) name = "test";
+				var data = {_cmeditorName: getUnambiguousName(self, name),
+				            _cmeditorMode: self.options.defaultMode,
+				            _cmeditorStatus:'new',
+				            _cmeditorContent: self.options.defaultContent};
+				data._cmeditorDoc = new CodeMirror.Doc(data._cmeditorContent, data._cmeditorMode);
+
+				insertNewDocument(self, data);
+				selectDocumentByIndex(self, self.docs.length - 1);
+			}
+		}
+
+		/* (Public)
+		 * Renames the currently opened document. Shows an error message if the document is read only
+		 *
+		 * Parameters: newName String: the new name of the document
+		 */
+		function rename(self, newName) {
+			if(self.options.readOnly){
+				displayMessage("This document is opened read only and cannot be renamed!");
+			}else{
+				var docId = getDocumentIdByName(self, self.curDoc._cmeditorName);
+				var oldName = self.docs[docId]._cmeditorName;
+
+				self.docs[docId]._cmeditorName = newName;
+				markDocumentAsChanged(self, docId);
+				updateCurrentDocument(self);
+
+				console.log("rename '"+oldName+"', '"+newName+"' was performed.");
+			}
+		}
+
+		/* (Public)
+		 * Saves the currently opened document. If it is opened read-only only displays a dialog.
+		 */
+		function save(self) {
+			if(self.options.readOnly === true){
+				displayMessage("This document is opened read only and cannot be saved!");
+				return;
+			}
+
+			var pos = getDocumentIdByName(self, self.curDoc._cmeditorName);
+			updateCurrentDocument(self);
+
+			if (self.doDiffBeforeSaving) {
+				var additionalButtons = {
+						Save: function() { self.rootElem.find(".cmeditor-main form").submit(); $(this).dialog("close"); },
+					};
+				diff(self, additionalButtons);
+			} else {
+				self.rootElem.find(".cmeditor-main form").submit();
+			}
+
+			console.log("save "+ self.curDoc._cmeditorName +" ("+ pos +") was performed.");
+		}
+
+		/* (Public)
+		 * Renames then saves the current document
+		 */
+		function saveas(self) {
+			if(self.options.readOnly){
+				displayMessage("This document is opened read only and cannot be saved!");
+			}
+			var name = prompt("Name of the new buffer", "");
+			if (name == null) return;
+			if (!name) name = "test";
+
+			rename(self, getUnambiguousName(self, name));
+			self.curDoc[self.options.idField] = '';
+
+			save(self);
+			console.log("saveas was performed.");
+		}
+
+		/* (Public)
+		 * Sets whether this CMEditor should show a diff before it saves
+		 */
+		function setDoDiffBeforeSaving(self, value) {
+			self.doDiffBeforeSaving = value;
+			console.log("setDoDiffBeforeSaving " + value + " was performed.")
+		}
+
+		/* (Public)
+		 * Reinitialises some values on the current doc TODO: This docu is crap
+		 */
+		function update(self) {
+			var docName = 'no curDoc';
+			if(self.curDoc){
+				docName = self.curDoc._cmeditorName;
+
+				if(self.curDoc._cmeditorReadOnly != self.codeMirror.getOption('readOnly')){
+					self.curDoc._cmeditorReadOnly = self.codeMirror.getOption('readOnly');
+				}
+
+				if(self.curDoc._cmeditorMode != self.codeMirror.getOption('mode')){
+					self.curDoc._cmeditorMode = self.codeMirror.getOption('mode');
+
+					markDocumentAsChanged(getDocumentIdByName(self, self.curDoc._cmeditorName));
+
+					if (self.curDoc._cmeditorStatus == 'new'){
+						self.curDoc._cmeditorStatus = 'unsaved';
+					}else if(self.curDoc._cmeditorStatus == 'unchanged'){
+						self.curDoc._cmeditorStatus = 'changed';
+					}
+				}
+
+				updateCurrentDocument(self);
+			}
+			console.log("update "+ docName +" was performed.")
+		}
+
+
+		CMEditor.prototype.constructor = CMEditor;
+
+		//Zugegriffen aus Menu
+		CMEditor.prototype.ajax_load      = function(){Array.prototype.unshift.call(arguments, this); return ajax_load.apply(this, arguments)};
+		CMEditor.prototype.close          = function(){Array.prototype.unshift.call(arguments, this); return close.apply(this, arguments)};
+		CMEditor.prototype.diff           = function(){Array.prototype.unshift.call(arguments, this); return diff.apply(this, arguments)};
+		CMEditor.prototype.delete         = function(){Array.prototype.unshift.call(arguments, this); return deleteDoc.apply(this, arguments)};
+		CMEditor.prototype.doc_id         = function(){Array.prototype.unshift.call(arguments, this); return getDocumentIdByName.apply(this, arguments)};
+		CMEditor.prototype.focus          = function(){Array.prototype.unshift.call(arguments, this); return focus.apply(this, arguments)};
+		CMEditor.prototype.get_name       = function(){Array.prototype.unshift.call(arguments, this); return getUnambiguousName.apply(this, arguments)};
+		CMEditor.prototype.get_mode       = function(){Array.prototype.unshift.call(arguments, this); return getCurrentCMEditorMode.apply(this, arguments)};
+		CMEditor.prototype.getCodeMirror  = function(){Array.prototype.unshift.call(arguments, this); return getCodeMirror.apply(this, arguments)};
+		CMEditor.prototype.goto           = function(){Array.prototype.unshift.call(arguments, this); return goto.apply(this, arguments)};
+		CMEditor.prototype.new            = function(){Array.prototype.unshift.call(arguments, this); return newDoc.apply(this, arguments)};
+		CMEditor.prototype.save           = function(){Array.prototype.unshift.call(arguments, this); return save.apply(this, arguments)};
+		CMEditor.prototype.saveas         = function(){Array.prototype.unshift.call(arguments, this); return saveas.apply(this, arguments)};
+		CMEditor.prototype.set_diff_before_save = function(){Array.prototype.unshift.call(arguments, this); return setDoDiffBeforeSaving.apply(this, arguments)};;
+		CMEditor.prototype.rename_doc     = function(){Array.prototype.unshift.call(arguments, this); return rename.apply(this, arguments)};;
+		CMEditor.prototype.update         = function(){Array.prototype.unshift.call(arguments, this); return update.apply(this, arguments)};;
+		CMEditor.prototype.update_message = function(){Array.prototype.unshift.call(arguments, this); return displayMessage.apply(this, arguments)};;
+
+		return CMEditor;
+	})();
 </script>
