@@ -1,4 +1,4 @@
-<div id="cmEditor" class="cmeditor">
+<div id="${name}" class="cmeditor">
 	<div class="cmeditor-tab-message" style="display:none;"></div>
 
 	<g:if test="${options.menu}">
@@ -7,12 +7,12 @@
 	<div class="cmeditor-settings"></div>
 	<div class="cmeditor-main">
 		<form method="post">
-			<g:hiddenField name="_cmeditorName" class="cmeditor-field" value="" />
-			<g:hiddenField name="_cmeditorMode" class="cmeditor-field" value="" />
-			<g:hiddenField name="_cmeditorStatus" class="cmeditor-field" value="" />
-			<g:hiddenField name="_cmeditorReadOnly" class="cmeditor-field" value="" />
-			<g:hiddenField name="_cmeditorOrigContent" class="cmeditor-field" value="" />
-			<g:hiddenField name="_cmeditorContent" class="cmeditor-field" value="" />
+			<g:hiddenField name="_cmeditorContent" data-docField="content" class="cmeditor-field" value="" />
+			<g:hiddenField name="_cmeditorMode" data-docField="mode" class="cmeditor-field" value="" />
+			<g:hiddenField name="_cmeditorName" data-docField="name" class="cmeditor-field" value="" />
+			<g:hiddenField name="_cmeditorOrigContent" data-docField="origContent" class="cmeditor-field" value="" />
+			<g:hiddenField name="_cmeditorReadOnly" data-docField="readOnly" class="cmeditor-field" value="" />
+			<g:hiddenField name="_cmeditorStatus" data-docField="status" class="cmeditor-field" value="" />
 			${raw(body())}
 			<ul class="docs tabs"></ul>
 		</form>
@@ -20,55 +20,54 @@
 </div>
 <script type="text/javascript">
 
-	//TODO: Einmal drueber grepen und alle TODOS fixen
-	//TODO: Fuer bessere doku sollten dokumente auch eine klasse sein
-	//TODO: Doku fuer options
-	//TODO: console.log auf ein sinnvolles mass begrenzen und praefixen
+	//TODO: focus() hat probleme
 	//TODO: Sachen optimieren? zB mehr dom-objekte speichern, dialoge nicht mit html und jquery erzeugen...
-	//TODO: Anfuehrungszeichen vereinheitlichen
-	//TODO: API vereinheitlichen (entw. ueberall position oder ueberall ein doc oder ueberall ein name...)
 
 	var codeMirrorEditor;
 
 	$(document).ready(function() {
 		var codeMirrorEditorOptions = {
-			addModes: "${options.addModes}",
+			addModes: <g:if test="${options.addModes}">${options.addModes}</g:if><g:else>[]</g:else>,
+			                                                         //String[]: additional modes to add to the menu
 			ajax:{
-				deleteURL: "${ajax.deleteURL}",
-				updateURL: "${ajax.updateURL}",
-				getURL: "${ajax.getURL}",
-				listURL: "${ajax.listURL}"
+				deleteURL: "${ajax.deleteURL}",                      //String:  a document deletion ca be triggered via this url
+				updateURL: "${ajax.updateURL}",                      //String:  a document update can be sent to this url
+				getURL: "${ajax.getURL}",                            //String:  a document can be acquired via this url
+				listURL: "${ajax.listURL}"                           //String:  a list of filenames can be acquired via this url
 			},
-			binding: "${options.binding}",
-			defaultContent: "${options.defaultContent}",
-			defaultMode: "${options.defaultMode}",
-			defaultDiffBeforeSave: ${options.defaultDiffBeforeSave},
-			idField: "${options.idField}",
+			binding: "${options.binding}",                           //String:  the initial key-binding of the codeMirror
+			defaultContent: "${options.defaultContent}",             //String:  the default content for the editor
+			defaultMode: "${options.defaultMode}",                   //String:  the default mode (e.g. 'htmlmixed', 'javascript') for the editor
+			defaultDiffBeforeSave: ${options.defaultDiffBeforeSave}, //Boolean: whether a diff should be shown when saving
+			idField: "${options.idField}",                           //String:  the field by which documents can be identified towards the server
 			mapping: {
-				name: "${mapping.name}",
-				mode: "${mapping.mode}",
-				content: "${mapping.content}"
-
+				name: "${mapping.name}",                             //String:  the variable name in ajax calls/responses mapped to the document name
+				mode: "${mapping.mode}",                             //String:  the variable name in ajax calls/responses mapped to the document mode
+				content: "${mapping.content}"                        //String:  the variable name in ajax calls/responses mapped to the document content
 			},
-			menu: ${options.menu},
+			menu: ${options.menu},                                   //Boolean: whether to display a menu or not
 			overlayDefinitionsVar: typeof ${options.overlayDefinitionsVar} !== "undefined" ? ${options.overlayDefinitionsVar} : undefined,
-			readOnly: ${options.readOnly},
-			theme: "${options.theme}",
-			useSession: ${options.useSession}
+                                                                     //Object or undefined: descriptions for additional highlights and completions
+			readOnly: ${options.readOnly},                           //Boolean: whether the whole editor should be read-only
+			theme: "${options.theme}",                               //String:  the default theme to use
+			useSession: ${options.useSession}                        //Boolean: wether to save some data in the browser's localstorage
 		};
 
-		codeMirrorEditor = CMEditor($("#cmEditor"), codeMirrorEditorOptions);
+		${name} = codeMirrorEditor = CMEditor($("#${name}"), codeMirrorEditorOptions);
 	});
 
 	this.CMEditor = (function(){
+
 		function CMEditor(rootElem, options){
 			//allow the user to omit new
 			if (!(this instanceof CMEditor)) return new CMEditor(rootElem, options);
 			var self = this;
+			self.instanceNo = CMEditor.instanciated++;
 
 			self.rootElem = $(rootElem);
-			self.options  = options  = options !== undefined ? options : {};
+			self.options  = options = options !== undefined ? options : {};
 			self.options.ajax = options.ajax !== undefined ? options.ajax : {}
+			self.options.mapping = options.mapping !== undefined ? options.mapping : {}
 
 			options.defaultContent = options.defaultContent !== undefined ? options.defaultContent : "";
 
@@ -79,24 +78,26 @@
 			initCodeMirror(self, options);
 
 			if(options.menu)
-				self.menu = new CMEditorMenu(self, $("#cmEditorMenu"), options);
+				self.menu = new CMEditorMenu(self, self.rootElem.find(".cmeditor-menu"), options);
 
 			insertNewUntitledDocument(self);
 
 			//disable some browser featues when the codeMirror has focus
-			//CLARIFY: wollen wir das?
 			$(document).bind("keydown", function(e){
 				if(e.ctrlKey && self.rootElem.find("CodeMirror-focused").size() !== 0){
 					e.preventDefault();
 				}
 			});
 
-			console.log("cmeditor loaded.")
+			log(self, "cmeditor loaded.");
 		}
+
+		CMEditor.instanciated = 0;
+		function log(self, msg){console.log("CMEditor #"+self.instanceNo+": "+msg);}
+
 
 		/*
 		 *	Initiates the actual CodeMirror and sets our own key map
-		 *  TODO: make CM options available via our options
 		 */
 		function initCodeMirror(self, options) {
 			var keyMap = {
@@ -114,10 +115,10 @@
 				"Ctrl-L":     function(cm) { goto(self); },
 			};
 
-			if (typeof options.overlayDefinitionsVar !== 'undefined') {
+			if (typeof options.overlayDefinitionsVar !== "undefined") {
 				for(var name in options.overlayDefinitionsVar) {
-					cmeditorall_add_overlay_definition(name, options.overlayDefinitionsVar[name]['baseMode'],
-					                                       options.overlayDefinitionsVar[name]['definition']);
+					cmeditorall_add_overlay_definition(name, options.overlayDefinitionsVar[name]["baseMode"],
+					                                       options.overlayDefinitionsVar[name]["definition"]);
 				}
 				CodeMirror.commands.autocomplete = function(cm, getHints, options) {
 					CodeMirror.showHint(cm, null, {cmeditorDefinitions: options.overlayDefinitionsVar})
@@ -141,23 +142,23 @@
 			if(options.mode)
 				codeMirrorOptions.mode = options.mode;
 			if(options.defaultReadOnly || options.readOnly)
-				codeMirrorOptions.readOnly = 'nocursor';
+				codeMirrorOptions.readOnly = "nocursor";
 
 			var codeMirror = self.codeMirror = CodeMirror(self.rootElem.find(".cmeditor-main form").get(0), codeMirrorOptions);
 
 			if(options.useSession){
-				if(localStorage['cmeditor-menu-binding'])
-					codeMirror.setOption("keymap", localStorage['cmeditor-menu-binding']);
+				if(localStorage["cmeditor-menu-binding"])
+					codeMirror.setOption("keymap", localStorage["cmeditor-menu-binding"]);
 				else
 					codeMirror.setOption("keymap", "default");
 
-				if(localStorage['cmeditor-menu-theme'])
-					codeMirror.setOption("theme", localStorage['cmeditor-menu-theme']);
+				if(localStorage["cmeditor-menu-theme"])
+					codeMirror.setOption("theme", localStorage["cmeditor-menu-theme"]);
 				else
 					codeMirror.setOption("theme", "default");
 
-				if(localStorage['cmeditor-menu-diffBeforeSave'] === null)
-					setDoDiffBeforeSaving(self, localStorage['cmeditor-menu-diffBeforeSave']);
+				if(localStorage["cmeditor-menu-diffBeforeSave"] === null)
+					setDoDiffBeforeSaving(self, localStorage["cmeditor-menu-diffBeforeSave"]);
 				else
 					setDoDiffBeforeSaving(self, options.defaultDiffBeforeSave);
 			}else{
@@ -166,7 +167,7 @@
 				setDoDiffBeforeSaving(self, options.defaultDiffBeforeSave);
 			}
 
-			if (codeMirror.getOption("keymap") == 'vim') {
+			if (codeMirror.getOption("keymap") == "vim") {
 				codeMirror.setOption("vimMode", true);
 			} else {
 				codeMirror.setOption("vimMode", false);
@@ -193,18 +194,18 @@
 
 			diff.dialog({
 				autoOpen: false,
-				resize:'auto',
-				width: 'auto',
-				height: 'auto',
+				resize:"auto",
+				width: "auto",
+				height: "auto",
 			});
 
 
 			var warn = self.warningDialog = $('<div class="dialog warningDialog" title="warning" style="display: none;"></div>');
 			warn.dialog({
 				autoOpen: false,
-				resize:'auto',
-				width: 'auto',
-				height: 'auto',
+				resize:"auto",
+				width: "auto",
+				height: "auto",
 			});
 
 
@@ -212,13 +213,13 @@
 										<input type="text" /><p class="gotoError">&nbsp;</p></div>');
 			go.dialog({
 				autoOpen: false,
-				dialogClass: 'dialog-goto',
-				resize:'auto',
-				width: 'auto',
-				height: 'auto',
+				dialogClass: "dialog-goto",
+				resize:"auto",
+				width: "auto",
+				height: "auto",
 				buttons: {Cancel: 	function() { $(this).dialog("close"); },
 						  Ok: 		function() {
-										var line = parseInt(self.gotoDialog.find('input').val())-1;
+										var line = parseInt(self.gotoDialog.find("input").val())-1;
 										self.codeMirror.doc.setCursor(line, 0);
 										$(this).dialog("close");
 									}
@@ -274,11 +275,11 @@
 			if (self.curDoc[self.options.idField]) {
 
 				$.ajax({
-					type:'GET',
+					type:"GET",
 					data: {id: self.curDoc[self.options.idField]},
 					url: options.ajax.deleteURL,
 					success:function(data, textStatus){
-						if (data.status == 'success') {
+						if (data.status == "success") {
 							// do sth
 						}
 						displayMessage(self, data.msg, textStatus);
@@ -300,7 +301,7 @@
 		 */
 		function ajax_reload(self, newname) {
 			if (self.curDoc) {
-				var name = self.curDoc._cmeditorName;
+				var name = self.curDoc.getName();
 				removeDocument(self, self.curDoc);
 
 				if(typeof newname !== "undefined") {
@@ -312,18 +313,18 @@
 		}
 
 		/*
-		 *	Triggers an update
+		 *	Triggers updating the document on server side and then reloads it from the server
 		 *
-		 *  Parameters: data Object: TODO: i don't know yet
+		 *  Parameters: data Object: the data as the server expects it
 		 */
 		function ajax_update(self, data) {
 			if (self.curDoc) {
 				$.ajax({
-					type: 'POST',
+					type: "POST",
 					data: data,
 					url: self.options.ajax.updateURL,
-					success:function(data,textStatus){
-						if (data.status == 'success') {
+					success: function(data,textStatus){
+						if (data.status == "success") {
 							if (data.newname) {
 								ajax_reload(self, data.newname);
 							}else{
@@ -342,7 +343,7 @@
 		 * Triggered, when a custom input was changed
 		 */
 		function customElementChanged(self, elem) {
-			var key = elem.attr('id');
+			var key = elem.attr("id");
 
 			if (self.curDoc) {
 				var old = null;
@@ -353,23 +354,23 @@
 					doUpdate = false;
 
 				} else if (key == self.options.mapping.mode) {
-					old = self.curDoc._cmeditorMode;
-					self.curDoc._cmeditorMode = getCustomElementValue(self, elem);
+					old = self.curDoc.getMode();
+					self.curDoc.setMode(getCustomElementValue(self, elem));
 					if(self.options.menu)
 						self.menu.update();
 
 				} else if (key == self.options.mapping.content) {
-					old = self.curDoc._cmeditorContent;
-					sef.curDoc._cmeditorContent = getCustomElementValue(self, elem);
+					old = self.curDoc.getContent();
+					sef.curDoc.setContent(getCustomElementValue(self, elem));
 
 				} else {
-					if (elem.attr('data-field-property') && self.curDoc[key] !== 'undefined') {
+					if (elem.attr("data-field-property") && self.curDoc[key] !== "undefined") {
 						if (self.curDoc[key]) {
-							old = self.curDoc[key][elem.attr('data-field-property')];
+							old = self.curDoc[key][elem.attr("data-field-property")];
 						} else {
 							self.curDoc[key] = {};
 						}
-						self.curDoc[key][elem.attr('data-field-property')] = getCustomElementValue(self, elem);
+						self.curDoc[key][elem.attr("data-field-property")] = getCustomElementValue(self, elem);
 					} else {
 						old = self.curDoc[key];
 						self.curDoc[key] = getCustomElementValue(self, elem);
@@ -412,10 +413,13 @@
 		}
 
 		/*
-		 * TODO
+		 * Returns the element value of an input resp. if the input is a checkbox whether it is checked or not
+		 *
+		 * Parameters: Elem jQuery: The element to examine
+		 * Returns: String or Boolean: The value of the element
 		 */
 		function getCustomElementValue(self, elem) {
-			if (elem.attr('type') == 'checkbox') {
+			if (elem.attr("type") == "checkbox") {
 				return elem.is(":checked");
 			} else {
 				return elem.val();
@@ -426,10 +430,10 @@
 		 * Gets the document by document name
 		 *
 		 * Parameters: name String: The name of the document
-		 * Returns:    TODO: the document
+		 * Returns:    CMEditor.Doc: The document
 		 */
 		function getDocumentByName(self, name) {
-			return self.docs[getDocumentIdByName(self, name)];
+			return self.docs[getDocumentPositionByName(self, name)];
 		}
 
 		/*
@@ -439,13 +443,13 @@
 			var first = self.codeMirror.doc.firstLine()+1;
 			var last = self.codeMirror.doc.lastLine()+1;
 
-			self.gotoDialog.find('.gotoLabel').text('Enter line number ('+first+'..'+last+'):');
-			self.gotoDialog.find('input').val(self.codeMirror.doc.getCursor().line+1);
+			self.gotoDialog.find(".gotoLabel").text("Enter line number ("+first+".."+last+"):");
+			self.gotoDialog.find("input").val(self.codeMirror.doc.getCursor().line+1);
 			self.gotoDialog.find("input").on("keyup", function() {
 				var lineInput = $(this).val();
 
-				var errMsg = '';
-				if (lineInput !== '') {
+				var errMsg = "";
+				if (lineInput !== "") {
 					if (cmeditorbase_is_int(lineInput)) {
 						var line = parseInt(lineInput);
 
@@ -457,7 +461,7 @@
 					}
 				}
 
-				if(errMsg !== '' && lineInput !== ''){
+				if(errMsg !== "" && lineInput !== ""){
 					self.gotoDialog.find(":button:contains('Ok')").prop("disabled", true).addClass("ui-state-disabled");
 				}else{
 					self.gotoDialog.find(":button:contains('Ok')").prop("disabled", true).removeClass("ui-state-disabled");
@@ -468,23 +472,22 @@
 			self.gotoDialog.dialog("open");
 		}
 		/*
-		 * (Private)
 		 * Creates a new tab and sets the supplied document as its content
 		 *
-		 * Parameters: data Object: TODO: don't know
+		 * Parameters: newDoc CMEditor.Doc: The document to insert
 		 */
-		function insertNewDocument(self, data) {
-			self.docs.push(data);
+		function insertNewDocument(self, newDoc) {
+			self.docs.push(newDoc);
 
 			var docTabs = self.rootElem.find(".docs").get(0);
 			var li = docTabs.appendChild(document.createElement("li"));
-			li.appendChild($("<span class='tabName'></span>").text(data._cmeditorName).get(0));
+			li.appendChild($('<span class="tabName"></span>').text(newDoc.getName()).get(0));
 
-			var closeButton = $("<span class='closeButton'>&#10005;</span>");
+			var closeButton = $('<span class="closeButton">&#10005;</span>');
 			closeButton.on("click", function(){
-										var doc = getDocumentByName(self, data._cmeditorName);
+										var doc = getDocumentByName(self, newDoc.getName());
 
-										if(doc._cmeditorStatus == 'changed' || doc._cmeditorStatus == "unsaved"){
+										if(doc.needsSaving()){
 											showWarning(self, "Do you really want to close this buffer? Unsaved changes will be lost.",
 												{Close: function(){removeDocument(self, doc); $(this).dialog("close");}})
 										}else{
@@ -494,15 +497,15 @@
 									});
 			li.appendChild(closeButton.get(0));
 
-			if (self.codeMirror.getDoc() == data._cmeditorDoc) {
+			if (self.codeMirror.getDoc() == newDoc.getCMDoc()) {
 				markDocumentAsSelected(self, self.docs.length - 1);
-				self.curDoc = data;
+				self.curDoc = newDoc;
 			}
 
 			selectDocumentByIndex(self, self.docs.length - 1);
 			removeUntitledDocument(self);
 
-			console.log("insertNewDocument '"+data._cmeditorName+"' was performed. Current doc: "+self.curDoc)
+			log(self, "insertNewDocument '"+newDoc.getName()+"' was performed. Current doc: "+self.curDoc)
 		}
 
 		/*
@@ -510,19 +513,14 @@
 		 */
 		function insertNewUntitledDocument(self) {
 			if (self.docs.length < 1) {
-				self.unregDocName = getUnambiguousName(self, 'Untitled Document');
+				var name = self.unregDocName = getUnambiguousName(self, "Untitled Document");
 
-				var data = {_cmeditorName: self.unregDocName,
-				            _cmeditorMode: self.options.defaultMode,
-				            _cmeditorStatus:'new',
-				            _cmeditorContent: self.options.defaultContent,
-				            _cmeditorOrigContent: self.options.defaultContent,
-				        	_cmeditorReadOnly: (self.options.readOnly||self.options.defaultReadOnly)?'nocursor':''};
+				var newDoc = new Doc(name, self.options.defaultMode, self.options.defaultContent,
+										(self.options.readOnly||self.options.defaultReadOnly)?"nocursor":"");
 
-				data._cmeditorDoc = new CodeMirror.Doc(data._cmeditorContent, self.options.defaultMode);
-				insertNewDocument(self, data);
+				insertNewDocument(self, newDoc);
 			}
-			console.log("insertNewUntitledDocument "+self.curDoc._cmeditorName+" was performed.");
+			log(self, "insertNewUntitledDocument "+self.curDoc.getName()+" was performed.");
 		}
 
 		/*
@@ -532,14 +530,13 @@
 		 */
 		function markDocumentAsChanged(self, pos) {
 			var docTab = self.rootElem.find(".tabs li:nth-child("+(pos+1)+") .tabName");
-			docTab.text("*"+ self.docs[pos]._cmeditorName);
+			docTab.text("*"+ self.docs[pos].getName());
 
-			console.log("changed " + self.docs[pos]._cmeditorName);
-			console.log("markDocumentAsChanged '"+pos+"' was performed.");
+			log(self, "changed " + self.docs[pos].getName());
+			log(self, "markDocumentAsChanged '"+pos+"' was performed.");
 		}
 
 		/*
-		 * (Private)
 		 * Adds a selected class to a document and removes it from all others
 		 *
 		 * Parameters: pos Integer: the index of the document to add the class to
@@ -549,7 +546,7 @@
 			docTabs.removeClass("selected");
 			docTabs.eq(pos).addClass("selected");
 
-			console.log("markDocumentAsSelected "+ pos +" was performed.")
+			log(self, "markDocumentAsSelected "+ pos +" was performed.")
 		}
 
 		/*
@@ -559,16 +556,16 @@
 		 */
 		function markDocumentAsUnchanged(self, pos) {
 			var docTab = self.rootElem.find(".tabs li:nth-child("+(pos+1)+") .tabName");
-			docTab.text(self.docs[pos]._cmeditorName);
+			docTab.text(self.docs[pos].getName());
 
-			console.log("unchanged " + self.docs[pos]._cmeditorName);
-			console.log("markDocumentAsUnchanged '"+pos+"' was performed.");
+			log(self, "unchanged " + self.docs[pos].getName());
+			log(self, "markDocumentAsUnchanged '"+pos+"' was performed.");
 		}
 
 		/*
-		 * Removes a tab
+		 * Removes a document from the editor and its tab from the DOM
 		 *
-		 * Parameters: doc Object: TODO
+		 * Parameters: doc CMEditor.Doc: The document to remove
 		 */
 		function removeDocument(self, doc) {
 			for (var i = 0; i < self.docs.length && doc != self.docs[i]; ++i) {}
@@ -580,21 +577,20 @@
 			insertNewUntitledDocument(self);
 			selectDocumentByIndex(self, Math.max(0, i - 1));
 
-			console.log("removeDocument "+doc._cmeditorName+" was performed.");
+			log(self, "removeDocument "+doc.getName()+" was performed.");
 		}
 
 		/*
-		 * (Private)
 		 * Unregisters a document previously created by `insertNewUntitledDocument`
 		 */
 		function removeUntitledDocument(self) {
 			if (self.docs.length > 1) {
 				var doc = getDocumentByName(self, self.unregDocName)
-				if (doc && doc._cmeditorStatus == 'new') {
+				if (doc && doc.isNew()) {
 					removeDocument(self, doc);
 				}
 			}
-			console.log("removeUntitledDocument was performed.");
+			log(self, "removeUntitledDocument was performed.");
 		}
 
 		/*
@@ -606,13 +602,15 @@
 			markDocumentAsSelected(self, pos);
 			self.curDoc = self.docs[pos];
 
-			self.codeMirror.swapDoc(self.curDoc._cmeditorDoc);
+			self.codeMirror.swapDoc(self.curDoc.getCMDoc());
 			updateCurrentDocument(self);
 
 			if(self.options.menu){
 				self.menu.update();
 			}
-			console.log("selectDocumentByIndex "+ self.curDoc._cmeditorName +" "+ pos +" was performed.")
+
+			focus(self);
+			log(self, "selectDocumentByIndex "+ self.curDoc.getName() +" "+ pos +" was performed.")
 		}
 
 		/*
@@ -640,29 +638,29 @@
 		}
 
 		/*
-		 * TODO
+		 * Serializes the currently opened document to the editor's form
 		 */
-		function set_form_doc(self) {
-			if (typeof self.set_form_doc_before == 'function') self.set_form_doc_before();
+		function writeCurrentDocToForm(self) {
+			if (typeof self.set_form_doc_before == "function") self.set_form_doc_before();
 
 			self.rootElem.find("form .cmeditor-field").each(function(){
 				var elem = $(this);
-				var key = elem.attr('name');
+				var key = elem.attr("data-docField") || elem.attr("name");
 
-				if (elem.attr('data-field-property') && self.curDoc[key]) {
-					set_form_doc_field(self, elem, self.curDoc[key][elem.attr('data-field-property')] || '');
+				if (elem.attr("data-field-property") && self.curDoc[key]) {
+					setInputValue(self, elem, self.curDoc[key][elem.attr("data-field-property")] || "");
 				} else {
-					set_form_doc_field(self, elem, self.curDoc[key] || '');
+					setInputValue(self, elem, self.curDoc[key] || "");
 				}
 			});
 
-			self.rootElem.find("form #"+self.options.mapping.name+".cmeditor-field").val(self.curDoc._cmeditorName||'');
-			self.rootElem.find("form #"+self.options.mapping.mode+".cmeditor-field").val(self.curDoc._cmeditorMode||'');
-			self.rootElem.find("form #"+self.options.mapping.content+".cmeditor-field").val(self.curDoc._cmeditorContent||'');
+			self.rootElem.find("form #"+self.options.mapping.name+".cmeditor-field").val(self.curDoc.getName()||"");
+			self.rootElem.find("form #"+self.options.mapping.mode+".cmeditor-field").val(self.curDoc.getMode()||"");
+			self.rootElem.find("form #"+self.options.mapping.content+".cmeditor-field").val(self.curDoc.getContent()||"");
 
-			if (typeof self.set_form_doc_after == 'function') self.set_form_doc_after();
+			if (typeof self.set_form_doc_after == "function") self.set_form_doc_after();
 
-			console.log("set_form_doc "+ self.curDoc._cmeditorName +" was performed.")
+			log(self, "writeCurrentDocToForm "+ self.curDoc.getName() +" was performed.")
 		}
 
 		/*
@@ -672,12 +670,12 @@
 		 *             val String or Boolean: the value to set or if elem is a checkbox whether it should be checked or
 		 *                                    unchecked
 		 */
-		function set_form_doc_field(self, elem, val) {
-			if (elem.attr('type') == 'checkbox') {
+		function setInputValue(self, elem, val) {
+			if (elem.attr("type") == "checkbox") {
 				if (val) {
-					elem.prop('checked', true);
+					elem.prop("checked", true);
 				} else {
-					elem.prop('checked', false);
+					elem.prop("checked", false);
 				}
 			} else {
 				elem.val(val);
@@ -685,56 +683,57 @@
 		}
 
 		/*
+		 * Synchronizes the current document with the codeMirror instance.
 		 * Called on every change of a document inside `self.codeMirror`
 		 *
-		 * Parameters: cmChangeObjects (optional) Object: TODO
+		 * Parameters: cmChangeObjects (optional) Object: See codeMirror docu on the 'changes' event
 		 * Returns:    Boolean whether this document has changed
 		 */
 		function updateCurrentDocument(self, cmChangeObjects) {
-			var docName = 'no curDoc';
+			var docName = "no curDoc";
 			var changed = false;
 
 			if (self.curDoc) {
-				docName = self.curDoc._cmeditorName;
+				docName = self.curDoc.getName();
 
-				if (self.curDoc._cmeditorMode != self.codeMirror.getOption("mode")) {
-					self.codeMirror.setOption("mode", self.curDoc._cmeditorMode);
+				if (self.curDoc.getMode() != self.codeMirror.getOption("mode")) {
+					self.codeMirror.setOption("mode", self.curDoc.getMode());
 					changed = true;
-					console.log("mode changed");
+					log(self, "mode changed");
 				}
 
-				if (cmChangeObjects && !cmChangeObjects.propertyIsEnumerable('cmeditor_custom_field')) {
-					self.curDoc._cmeditorContent = self.curDoc._cmeditorDoc.getValue();
+				if (cmChangeObjects && !cmChangeObjects.propertyIsEnumerable("cmeditor_custom_field")) {
+					self.curDoc.setContent(self.curDoc.getCMDoc().getValue());
 					changed = true;
-					console.log("content changed" + cmChangeObjects);
+					log(self, "content changed" + cmChangeObjects);
 				}
 
-				if (self.curDoc._cmeditorReadOnly != self.codeMirror.getOption('readOnly')) {
-					if (self.curDoc._cmeditorReadOnly) {
-						self.codeMirror.setOption('readOnly', self.curDoc._cmeditorReadOnly);
+				if (self.curDoc.getReadOnly() != self.codeMirror.getOption("readOnly")) {
+					if (self.curDoc.getReadOnly()) {
+						self.codeMirror.setOption("readOnly", self.curDoc.getReadOnly());
 					} else {
-						self.codeMirror.setOption('readOnly', false);
+						self.codeMirror.setOption("readOnly", false);
 					}
 				}
 
-				if (cmChangeObjects && cmChangeObjects.propertyIsEnumerable('cmeditor_custom_field')) {
+				if (cmChangeObjects && cmChangeObjects.propertyIsEnumerable("cmeditor_custom_field")) {
 					changed = true;
-					console.log("custom field changed")
+					log(self, "custom field changed")
 				}
 
 				if (changed || cmChangeObjects) {
-					markDocumentAsChanged(self, getDocumentIdByName(self, self.curDoc._cmeditorName));
-					if (self.curDoc._cmeditorStatus == 'new') {
-						self.curDoc._cmeditorStatus = 'unsaved';
-					} else if (self.curDoc._cmeditorStatus == 'unchanged') {
-						self.curDoc._cmeditorStatus = 'changed';
+					markDocumentAsChanged(self, getDocumentPositionByName(self, self.curDoc.getName()));
+					if (self.curDoc.isNew()) {
+						self.curDoc.markUnsaved();
+					} else if (self.curDoc.isUnchanged()) {
+						self.curDoc.markChanged()
 					}
 				}
 
-				set_form_doc(self);
+				writeCurrentDocToForm(self);
 			}
 
-			console.log("updateCurrentDocument "+ docName +" was performed.")
+			log(self, "updateCurrentDocument "+ docName +" was performed.")
 			return changed;
 		}
 
@@ -754,26 +753,20 @@
 		 */
 		function ajax_load(self, name, readWrite) {
 			$.ajax({
-				type:'GET',
+				type:"GET",
 				url: self.options.ajax.getURL+name,
 				success: function(data){
-					if (data.status == 'success' && data.result) {
-						data.result._cmeditorName = data.result[self.options.mapping.name];
-						data.result._cmeditorMode = data.result[self.options.mapping.mode] || options.defaultMode;
-						if (readWrite) {
-							data.result._cmeditorReadOnly = '';
-						} else {
-							data.result._cmeditorReadOnly = (options.readOnly || options.defaultReadOnly) ? 'nocursor' : '';
-						}
-						data.result._cmeditorContent = data.result[self.options.mapping.content];
-						data.result._cmeditorOrigContent = data.result[self.options.mapping.content];
-						data.result._cmeditorStatus = 'unchanged';
-						data.result._cmeditorDoc = new CodeMirror.Doc(data.result._cmeditorContent, data.result._cmeditorMode);
+					if (data.status == "success" && data.result) {
+						var newDoc = new Doc(data.result[self.options.mapping.name],
+						                        data.result[self.options.mapping.mode] || options.defaultMode,
+						                        data.result[self.options.mapping.content],
+						                        readWrite ? "" : ((options.readOnly || options.defaultReadOnly) ? "nocursor" : ""));
+						newDoc[self.options.idField] = data.result[self.options.idField];
+						newDoc.markUnchanged();
+						insertNewDocument(self, newDoc);
 
-						insertNewDocument(self, data.result);
-
-						console.log("ajax_load '"+name+"' was performed.");
-						console.log(data.result.version)
+						log(self, "ajax_load '"+name+"' was performed.");
+						log(self, data.result.version)
 					} else {
 						displayMessage(self, data.msg);
 					}
@@ -788,8 +781,7 @@
 		 * Closes the currently opened document
 		 */
 		function close(self, cm) {
-			var status = self.curDoc._cmeditorStatus;
-			if (status == 'changed' || status == 'unsaved') {
+			if (self.curDoc.needsSaving()) {
 				showWarning(self, "The changes to the current document will be lost",
 					{Close: function() {
 								removeDocument(self, self.curDoc);
@@ -843,10 +835,10 @@
 		 * Parameters: message String: The message to be displayed
 		 */
 		function displayMessage(self, message) {
-			self.rootElem.find('.cmeditor-tab-message').text(message)
-			                .toggle('slide', {'direction':'up'})
+			self.rootElem.find(".cmeditor-tab-message").text(message)
+			                .toggle("slide", {"direction":"up"})
 			                .delay(3000)
-			                .toggle('slide', {'direction':'up'});
+			                .toggle("slide", {"direction":"up"});
 		}
 
 		/* (Public)
@@ -854,7 +846,8 @@
 		 * Sets focus to the text editor
 		 */
 		function focus(self){
-			self.codeMirror.focus();
+			//FIXME: warum funktioniert das nicht sofort?
+			window.setTimeout(function(){self.codeMirror.focus()}, 50);
 		}
 
 		/* (Public)
@@ -864,17 +857,16 @@
 		 * Parameters: name String: The name of the document
 		 * Returns:    Integer: the id of the document
 		 */
-		function getDocumentIdByName(self, name) {
+		function getDocumentPositionByName(self, name) {
 			for (var i = 0; i < self.docs.length; ++i)
-				if (self.docs[i]._cmeditorName == name) return i;
+				if (self.docs[i].getName() == name) return i;
 		}
-
 
 		/* (Public)
 		 * Returns the mode in which the current document is opened
 		 */
 		function getCurrentCMEditorMode(self) {
-			return self.curDoc._cmeditorMode;
+			return self.curDoc.getMode();
 		}
 
 		/* (Public)
@@ -884,13 +876,13 @@
 		 * Parameters: name String: The name of the document
 		 */
 		function getUnambiguousName(self, name) {
-			console.log(name);
+			log(self, name);
 			var data = [];
 			if(self.options.ajax.listURL){
 				$.ajax({
 					url: self.options.ajax.listURL,
 					success: function(json) {
-						if (json.status == 'success' && json.result) {
+						if (json.status == "success" && json.result) {
 							data = json.result;
 						}
 					},
@@ -912,23 +904,21 @@
 		}
 
 		/* (Public)
-		 * Creates a new document
+		 * Creates a new document with a name supplied by the user
 		 */
 		function newDoc(self) {
-			console.log("creating new doc");
+			log(self, "creating new doc");
 			if(self.options.readOnly){
-				displayMessage("This document is opened read only!");
+				displayMessage("This editor read only!");
 			}else{
 				var name = prompt("Name of the new buffer", "");
-				if (name == null) return;
-				if (!name) name = "test";
-				var data = {_cmeditorName: getUnambiguousName(self, name),
-				            _cmeditorMode: self.options.defaultMode,
-				            _cmeditorStatus:'new',
-				            _cmeditorContent: self.options.defaultContent};
-				data._cmeditorDoc = new CodeMirror.Doc(data._cmeditorContent, data._cmeditorMode);
+				if (name == null || name == "") return;
+				name = getUnambiguousName(self, name);
 
-				insertNewDocument(self, data);
+				var newDoc = new Doc(name, self.options.defaultMode, self.options.defaultContent,
+										(self.options.readOnly || self.options.defaultReadOnly) ? "nocursor":"");
+
+				insertNewDocument(self, newDoc);
 				selectDocumentByIndex(self, self.docs.length - 1);
 			}
 		}
@@ -942,14 +932,14 @@
 			if(self.options.readOnly){
 				displayMessage("This document is opened read only and cannot be renamed!");
 			}else{
-				var docId = getDocumentIdByName(self, self.curDoc._cmeditorName);
-				var oldName = self.docs[docId]._cmeditorName;
+				var docId = getDocumentPositionByName(self, self.curDoc.getName());
+				var oldName = self.docs[docId].getName();
 
-				self.docs[docId]._cmeditorName = newName;
+				self.docs[docId].setName(newName);
 				markDocumentAsChanged(self, docId);
 				updateCurrentDocument(self);
 
-				console.log("rename '"+oldName+"', '"+newName+"' was performed.");
+				log(self, "rename '"+oldName+"', '"+newName+"' was performed.");
 			}
 		}
 
@@ -962,7 +952,7 @@
 				return;
 			}
 
-			var pos = getDocumentIdByName(self, self.curDoc._cmeditorName);
+			var pos = getDocumentPositionByName(self, self.curDoc.getName());
 			updateCurrentDocument(self);
 
 			if (self.doDiffBeforeSaving) {
@@ -974,7 +964,7 @@
 				self.rootElem.find(".cmeditor-main form").submit();
 			}
 
-			console.log("save "+ self.curDoc._cmeditorName +" ("+ pos +") was performed.");
+			log(self, "save "+ self.curDoc.getName() +" ("+ pos +") was performed.");
 		}
 
 		/* (Public)
@@ -989,10 +979,10 @@
 			if (!name) name = "test";
 
 			rename(self, getUnambiguousName(self, name));
-			self.curDoc[self.options.idField] = '';
+			self.curDoc[self.options.idField] = "";
 
 			save(self);
-			console.log("saveas was performed.");
+			log(self, "saveas was performed.");
 		}
 
 		/* (Public)
@@ -1000,36 +990,37 @@
 		 */
 		function setDoDiffBeforeSaving(self, value) {
 			self.doDiffBeforeSaving = value;
-			console.log("setDoDiffBeforeSaving " + value + " was performed.")
+			log(self, "setDoDiffBeforeSaving " + value + " was performed.")
 		}
 
 		/* (Public)
-		 * Reinitialises some values on the current doc TODO: This docu is crap
+		 * Updates mode and read-onlyness of the current document to the corresponding properties
+		 * of the underlying codeMirror
 		 */
 		function update(self) {
-			var docName = 'no curDoc';
+			var docName = "no curDoc";
 			if(self.curDoc){
-				docName = self.curDoc._cmeditorName;
+				docName = self.curDoc.getName();
 
-				if(self.curDoc._cmeditorReadOnly != self.codeMirror.getOption('readOnly')){
-					self.curDoc._cmeditorReadOnly = self.codeMirror.getOption('readOnly');
+				if(self.curDoc.getReadOnly() != self.codeMirror.getOption("readOnly")){
+					self.curDoc.setReadOnly(self.codeMirror.getOption("readOnly"));
 				}
 
-				if(self.curDoc._cmeditorMode != self.codeMirror.getOption('mode')){
-					self.curDoc._cmeditorMode = self.codeMirror.getOption('mode');
+				if(self.curDoc.getMode() != self.codeMirror.getOption("mode")){
+					self.curDoc.setMode(self.codeMirror.getOption("mode"));
 
-					markDocumentAsChanged(getDocumentIdByName(self, self.curDoc._cmeditorName));
+					markDocumentAsChanged(self, getDocumentPositionByName(self, self.curDoc.getName()));
 
-					if (self.curDoc._cmeditorStatus == 'new'){
-						self.curDoc._cmeditorStatus = 'unsaved';
-					}else if(self.curDoc._cmeditorStatus == 'unchanged'){
-						self.curDoc._cmeditorStatus = 'changed';
+					if (self.curDoc.isNew()){
+						self.curDoc.markUnsaved();
+					}else if(self.curDoc.isUnchanged()){
+						self.curDoc.markChanged();
 					}
 				}
 
 				updateCurrentDocument(self);
 			}
-			console.log("update "+ docName +" was performed.")
+			log(self, "update "+ docName +" was performed.")
 		}
 
 
@@ -1040,7 +1031,7 @@
 		CMEditor.prototype.close          = function(){Array.prototype.unshift.call(arguments, this); return close.apply(this, arguments)};
 		CMEditor.prototype.diff           = function(){Array.prototype.unshift.call(arguments, this); return diff.apply(this, arguments)};
 		CMEditor.prototype.delete         = function(){Array.prototype.unshift.call(arguments, this); return deleteDoc.apply(this, arguments)};
-		CMEditor.prototype.doc_id         = function(){Array.prototype.unshift.call(arguments, this); return getDocumentIdByName.apply(this, arguments)};
+		CMEditor.prototype.doc_id         = function(){Array.prototype.unshift.call(arguments, this); return getDocumentPositionByName.apply(this, arguments)};
 		CMEditor.prototype.focus          = function(){Array.prototype.unshift.call(arguments, this); return focus.apply(this, arguments)};
 		CMEditor.prototype.get_name       = function(){Array.prototype.unshift.call(arguments, this); return getUnambiguousName.apply(this, arguments)};
 		CMEditor.prototype.get_mode       = function(){Array.prototype.unshift.call(arguments, this); return getCurrentCMEditorMode.apply(this, arguments)};
@@ -1053,6 +1044,49 @@
 		CMEditor.prototype.rename_doc     = function(){Array.prototype.unshift.call(arguments, this); return rename.apply(this, arguments)};;
 		CMEditor.prototype.update         = function(){Array.prototype.unshift.call(arguments, this); return update.apply(this, arguments)};;
 		CMEditor.prototype.update_message = function(){Array.prototype.unshift.call(arguments, this); return displayMessage.apply(this, arguments)};;
+
+
+		var Doc = CMEditor.Doc = function Doc(name, mode, content, readOnly, cmDoc){
+			this.content = content;
+			this.mode = mode;
+			this.name = name;
+			this.origContent = content;
+			this.readOnly = readOnly;
+			this.status = "new";
+
+			if(cmDoc === undefined)
+				this.codeMirrorDoc = new CodeMirror.Doc(content, mode);
+			else
+				this.codeMirrorDoc = cmDoc;
+		}
+
+		Doc.status = {NEW: "new",             // the document has never been saved and has not been changed yet
+					  UNSAVED: "unsaved",     // the document has never been saved and has been changed
+					  CHANGED: "changed",     // the document has been saved or opened and has been changed since
+					  UNCHANGED: "unchanged", // the document has been saved or opened and not been changed since
+					 };
+
+		Doc.prototype.constructor = Doc;
+
+		Doc.prototype.getCMDoc    = function(){return this.codeMirrorDoc};
+		Doc.prototype.getContent  = function(){return this.content};
+		Doc.prototype.getMode     = function(){return this.mode};
+		Doc.prototype.getName     = function(){return this.name};
+		Doc.prototype.getReadOnly = function(){return this.readOnly};
+		Doc.prototype.isNew       = function(){return this.status == Doc.status.NEW};
+		Doc.prototype.isChanged   = function(){return this.status == Doc.status.CHANGED};
+		Doc.prototype.isUnchanged = function(){return this.status == Doc.status.UNCHANGED};
+		Doc.prototype.isUnsaved   = function(){return this.status == Doc.status.UNSAVED};
+		Doc.prototype.needsSaving = function(){return this.status == Doc.status.UNSAVED || this.status == Doc.status.CHANGED};
+
+		Doc.prototype.markNew       = function(){this.status = Doc.status.NEW};
+		Doc.prototype.markChanged   = function(){this.status = Doc.status.CHANGED};
+		Doc.prototype.markUnsaved   = function(){this.status = Doc.status.UNSAVED};
+		Doc.prototype.markUnchanged = function(){this.status = Doc.status.UNCHANGED};
+		Doc.prototype.setContent    = function(content){this.content = content};
+		Doc.prototype.setMode       = function(mode){this.mode = mode};
+		Doc.prototype.setName       = function(name){this.name = name};
+		Doc.prototype.setReadOnly   = function(readOnly){this.readOnly = readOnly};
 
 		return CMEditor;
 	})();
