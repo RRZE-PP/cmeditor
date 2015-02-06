@@ -20,3 +20,6 @@
 //= require cmeditor-base
 //= require cmeditor-overlay
 //= require cmeditor-hint
+//= require CMEditorMenu
+//= require CMEditor
+//= require textAreaCMEditor

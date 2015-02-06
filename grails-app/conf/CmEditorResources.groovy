@@ -97,7 +97,7 @@ modules = {
 	}
 	
 	'cmeditor' {
-		dependsOn 'cmeditor-main, cmeditor-menu, cmeditor-tabs'
+		dependsOn 'cmeditor-main, cmeditor-menu, cmeditor-tabs, CMEditor, CMEditorMenu, textAreaCMEditor'
 	}
 	
 	'jsdifflib' {
