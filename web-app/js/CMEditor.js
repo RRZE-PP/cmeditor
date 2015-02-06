@@ -654,32 +654,6 @@ this.CMEditor = (function(){
 	}
 
 	/*
-	 * Serializes the currently opened document to the editor's form
-	 */
-	function writeCurrentDocToForm(self) {
-		executeHooks(self, "preSerializeDoc", self.rootElem, [self.curDoc]);
-
-		self.rootElem.find("form .cmeditor-field").each(function(){
-			var elem = $(this);
-			var key = elem.attr("data-docField") || elem.attr("name");
-
-			if (elem.attr("data-field-property") && self.curDoc[key]) {
-				setInputValue(self, elem, self.curDoc[key][elem.attr("data-field-property")] || "");
-			} else {
-				setInputValue(self, elem, self.curDoc[key] || "");
-			}
-		});
-
-		self.rootElem.find("form #"+self.options.mapping.name+".cmeditor-field").val(self.curDoc.getName()||"");
-		self.rootElem.find("form #"+self.options.mapping.mode+".cmeditor-field").val(self.curDoc.getMode()||"");
-		self.rootElem.find("form #"+self.options.mapping.content+".cmeditor-field").val(self.curDoc.getContent()||"");
-
-		executeHooks(self, "postSerializeDoc", self.rootElem, [self.curDoc]);
-
-		log(self, "writeCurrentDocToForm "+ self.curDoc.getName() +" was performed.")
-	}
-
-	/*
 	 * Sets the value of `elem` to `val`
 	 *
 	 * Parameters: elem jQuery: the element to set the value on
@@ -1074,6 +1048,33 @@ this.CMEditor = (function(){
 		log(self, "update "+ docName +" was performed.")
 	}
 
+	/* (Public)
+	 * Serializes the currently opened document to the editor's form
+	 */
+	function writeCurrentDocToForm(self) {
+		executeHooks(self, "preSerializeDoc", self.rootElem, [self.curDoc]);
+
+		self.rootElem.find("form .cmeditor-field").each(function(){
+			var elem = $(this);
+			var key = elem.attr("data-docField") || elem.attr("name");
+
+			if (elem.attr("data-field-property") && self.curDoc[key]) {
+				setInputValue(self, elem, self.curDoc[key][elem.attr("data-field-property")] || "");
+			} else {
+				setInputValue(self, elem, self.curDoc[key] || "");
+			}
+		});
+
+		self.rootElem.find("form #"+self.options.mapping.name+".cmeditor-field").val(self.curDoc.getName()||"");
+		self.rootElem.find("form #"+self.options.mapping.mode+".cmeditor-field").val(self.curDoc.getMode()||"");
+		self.rootElem.find("form #"+self.options.mapping.content+".cmeditor-field").val(self.curDoc.getContent()||"");
+
+		executeHooks(self, "postSerializeDoc", self.rootElem, [self.curDoc]);
+
+		log(self, "writeCurrentDocToForm "+ self.curDoc.getName() +" was performed.")
+	}
+
+
 
 	CMEditor.prototype.constructor = CMEditor;
 
@@ -1096,6 +1097,7 @@ this.CMEditor = (function(){
 	CMEditor.prototype.rename_doc     = function(){Array.prototype.unshift.call(arguments, this); return rename.apply(this, arguments)};
 	CMEditor.prototype.update         = function(){Array.prototype.unshift.call(arguments, this); return update.apply(this, arguments)};
 	CMEditor.prototype.update_message = function(){Array.prototype.unshift.call(arguments, this); return displayMessage.apply(this, arguments)};
+	CMEditor.prototype.writeCurrentDocToForm = function(){Array.prototype.unshift.call(arguments, this); return writeCurrentDocToForm.apply(this, arguments)};
 
 	var Doc = CMEditor.Doc = function Doc(name, mode, content, readOnly, cmDoc){
 		this.content = content;
