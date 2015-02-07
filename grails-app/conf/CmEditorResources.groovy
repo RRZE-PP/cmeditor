@@ -88,16 +88,24 @@ modules = {
 		resource url:'/js/jquery/jquery.ui.menubar.js', disposition:'head'
 		resource url:'/css/jquery/chosen.css', disposition:'head'
 		resource url:'/js/jquery/chosen.jquery.js', disposition:'head'
+		resource url:'/js/CMEditorMenu.js', disposition:'head'
 	}
 	
 	'cmeditor-tabs' {
 		dependsOn 'cmeditor-main, jquery-ui, jsdifflib'
 		
 		resource url:'/js/cmeditor-tabs.js', disposition:'head'
+		resource url:'/js/CMEditor.js', disposition:'head'
+	}
+	
+	'cmeditor-textarea' {
+		dependsOn 'cmeditor-main, jquery-ui, jsdifflib'
+		
+		resource url:'/js/textAreaCMEditor.js', disposition:'head'
 	}
 	
 	'cmeditor' {
-		dependsOn 'cmeditor-main, cmeditor-menu, cmeditor-tabs, CMEditor, CMEditorMenu, textAreaCMEditor'
+		dependsOn 'cmeditor-main, cmeditor-menu, cmeditor-tabs'
 	}
 	
 	'jsdifflib' {
