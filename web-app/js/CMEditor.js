@@ -1,8 +1,10 @@
 this.CMEditor = (function(){
 
 	//FIXME: IE kann kein Function.name (siehe log())
+	//FIXME: custom elements funktionieren noch nicht
 	//TODO: focus() hat probleme
 	//TODO: Sachen optimieren? zB mehr dom-objekte speichern, dialoge nicht mit html und jquery erzeugen...
+	//TODO: add loglevel
 
 	function CMEditor(rootElem, options, instanceName){
 		//allow the user to omit new
@@ -279,7 +281,7 @@ this.CMEditor = (function(){
 			$.ajax({
 				type:"GET",
 				data: {id: self.curDoc[self.options.idField]},
-				url: options.ajax.deleteURL,
+				url: self.options.ajax.deleteURL,
 				success:function(data, textStatus){
 					if (data.status == "success") {
 						// do sth
@@ -366,16 +368,16 @@ this.CMEditor = (function(){
 				sef.curDoc.setContent(getCustomElementValue(self, elem));
 
 			} else {
-				if (elem.attr("data-field-property") && self.curDoc[key] !== "undefined") {
-					if (self.curDoc[key]) {
-						old = self.curDoc[key][elem.attr("data-field-property")];
+				if (elem.attr("data-field-property")) {
+					if (self.curDoc.getCustomData(key)) {
+						old = self.curDoc.getCustomData(key)[elem.attr("data-field-property")];
 					} else {
-						self.curDoc[key] = {};
+						self.curDoc.setCustomData(key, {});
 					}
-					self.curDoc[key][elem.attr("data-field-property")] = getCustomElementValue(self, elem);
+					self.curDoc.getCustomData(key)[elem.attr("data-field-property")] = getCustomElementValue(self, elem);
 				} else {
-					old = self.curDoc[key];
-					self.curDoc[key] = getCustomElementValue(self, elem);
+					old = self.curDoc.getCustomData(key);
+					self.curDoc.setCustomData(key, getCustomElementValue(self, elem));
 				}
 			}
 
@@ -748,10 +750,19 @@ this.CMEditor = (function(){
 			success: function(data){
 				if (data.status == "success" && data.result) {
 					var newDoc = new Doc(data.result[self.options.mapping.name],
-					                        data.result[self.options.mapping.mode] || options.defaultMode,
+					                        data.result[self.options.mapping.mode] || self.options.defaultMode,
 					                        data.result[self.options.mapping.content],
-					                        readWrite ? "" : ((options.readOnly || options.defaultReadOnly) ? "nocursor" : ""));
+					                        readWrite ? "" : ((self.options.readOnly || self.options.defaultReadOnly) ? "nocursor" : ""));
 					newDoc[self.options.idField] = data.result[self.options.idField];
+
+					//insert custom data
+					self.rootElem.find("form .cmeditor-field").not("[data-docField]").each(function(){
+						var elem = $(this);
+						var key = elem.attr("name");
+
+						newDoc.setCustomData(key, data.result[key]);
+					});
+
 					newDoc.markUnchanged();
 					insertNewDocument(self, newDoc);
 
@@ -1058,16 +1069,12 @@ this.CMEditor = (function(){
 			var elem = $(this);
 			var key = elem.attr("data-docField") || elem.attr("name");
 
-			if (elem.attr("data-field-property") && self.curDoc[key]) {
-				setInputValue(self, elem, self.curDoc[key][elem.attr("data-field-property")] || "");
+			if (elem.attr("data-field-property") && self.curDoc.getCustomData(key)) {
+				setInputValue(self, elem, self.curDoc.getCustomData(key)[elem.attr("data-field-property")] || "");
 			} else {
-				setInputValue(self, elem, self.curDoc[key] || "");
+				setInputValue(self, elem, self.curDoc[key] || self.curDoc.getCustomData(key) || "");
 			}
 		});
-
-		self.rootElem.find("form #"+self.options.mapping.name+".cmeditor-field").val(self.curDoc.getName()||"");
-		self.rootElem.find("form #"+self.options.mapping.mode+".cmeditor-field").val(self.curDoc.getMode()||"");
-		self.rootElem.find("form #"+self.options.mapping.content+".cmeditor-field").val(self.curDoc.getContent()||"");
 
 		executeHooks(self, "postSerializeDoc", self.rootElem, [self.curDoc]);
 
@@ -1078,26 +1085,51 @@ this.CMEditor = (function(){
 
 	CMEditor.prototype.constructor = CMEditor;
 
-	//accessed from the menu
-	CMEditor.prototype.ajax_load      = function(){Array.prototype.unshift.call(arguments, this); return ajax_load.apply(this, arguments)};
-	CMEditor.prototype.close          = function(){Array.prototype.unshift.call(arguments, this); return close.apply(this, arguments)};
-	CMEditor.prototype.diff           = function(){Array.prototype.unshift.call(arguments, this); return diff.apply(this, arguments)};
-	CMEditor.prototype.delete         = function(){Array.prototype.unshift.call(arguments, this); return deleteDoc.apply(this, arguments)};
-	CMEditor.prototype.doc_id         = function(){Array.prototype.unshift.call(arguments, this); return getDocumentPositionByName.apply(this, arguments)};
-	CMEditor.prototype.focus          = function(){Array.prototype.unshift.call(arguments, this); return focus.apply(this, arguments)};
-	CMEditor.prototype.get_name       = function(){Array.prototype.unshift.call(arguments, this); return getUnambiguousName.apply(this, arguments)};
-	CMEditor.prototype.get_mode       = function(){Array.prototype.unshift.call(arguments, this); return getCurrentCMEditorMode.apply(this, arguments)};
-	CMEditor.prototype.getCodeMirror  = function(){Array.prototype.unshift.call(arguments, this); return getCodeMirror.apply(this, arguments)};
-	CMEditor.prototype.goto           = function(){Array.prototype.unshift.call(arguments, this); return goto.apply(this, arguments)};
-	CMEditor.prototype.new            = function(){Array.prototype.unshift.call(arguments, this); return newDoc.apply(this, arguments)};
-	CMEditor.prototype.on             = function(){Array.prototype.unshift.call(arguments, this); return on.apply(this, arguments)};
-	CMEditor.prototype.save           = function(){Array.prototype.unshift.call(arguments, this); return save.apply(this, arguments)};
-	CMEditor.prototype.saveas         = function(){Array.prototype.unshift.call(arguments, this); return saveas.apply(this, arguments)};
-	CMEditor.prototype.set_diff_before_save = function(){Array.prototype.unshift.call(arguments, this); return setDoDiffBeforeSaving.apply(this, arguments)};
-	CMEditor.prototype.rename_doc     = function(){Array.prototype.unshift.call(arguments, this); return rename.apply(this, arguments)};
-	CMEditor.prototype.update         = function(){Array.prototype.unshift.call(arguments, this); return update.apply(this, arguments)};
-	CMEditor.prototype.update_message = function(){Array.prototype.unshift.call(arguments, this); return displayMessage.apply(this, arguments)};
-	CMEditor.prototype.writeCurrentDocToForm = function(){Array.prototype.unshift.call(arguments, this); return writeCurrentDocToForm.apply(this, arguments)};
+	//public methods
+	CMEditor.prototype.ajax_load                 = function(){Array.prototype.unshift.call(arguments, this); return ajax_load.apply(this, arguments)};
+	CMEditor.prototype.closeDoc                  = function(){Array.prototype.unshift.call(arguments, this); return close.apply(this, arguments)};
+	CMEditor.prototype.diff                      = function(){Array.prototype.unshift.call(arguments, this); return diff.apply(this, arguments)};
+	CMEditor.prototype.deleteDoc                 = function(){Array.prototype.unshift.call(arguments, this); return deleteDoc.apply(this, arguments)};
+	CMEditor.prototype.getDocumentPositionByName = function(){Array.prototype.unshift.call(arguments, this); return getDocumentPositionByName.apply(this, arguments)};
+	CMEditor.prototype.focus                     = function(){Array.prototype.unshift.call(arguments, this); return focus.apply(this, arguments)};
+	CMEditor.prototype.getUnambiguousName        = function(){Array.prototype.unshift.call(arguments, this); return getUnambiguousName.apply(this, arguments)};
+	CMEditor.prototype.getCurrentCMEditorMode    = function(){Array.prototype.unshift.call(arguments, this); return getCurrentCMEditorMode.apply(this, arguments)};
+	CMEditor.prototype.getCodeMirror             = function(){Array.prototype.unshift.call(arguments, this); return getCodeMirror.apply(this, arguments)};
+	CMEditor.prototype.goto                      = function(){Array.prototype.unshift.call(arguments, this); return goto.apply(this, arguments)};
+	CMEditor.prototype.newDoc                    = function(){Array.prototype.unshift.call(arguments, this); return newDoc.apply(this, arguments)};
+	CMEditor.prototype.on                        = function(){Array.prototype.unshift.call(arguments, this); return on.apply(this, arguments)};
+	//todo save ,renameDoc &saveas deprecated
+	CMEditor.prototype.saveDoc                   = function(){Array.prototype.unshift.call(arguments, this); return save.apply(this, arguments)};
+	CMEditor.prototype.saveDocAs                 = function(){Array.prototype.unshift.call(arguments, this); return saveas.apply(this, arguments)};
+	CMEditor.prototype.setDoDiffBeforeSaving     = function(){Array.prototype.unshift.call(arguments, this); return setDoDiffBeforeSaving.apply(this, arguments)};
+	CMEditor.prototype.renameDoc                 = function(){Array.prototype.unshift.call(arguments, this); return rename.apply(this, arguments)};
+	CMEditor.prototype.update                    = function(){Array.prototype.unshift.call(arguments, this); return update.apply(this, arguments)};
+	CMEditor.prototype.displayMessage            = function(){Array.prototype.unshift.call(arguments, this); return displayMessage.apply(this, arguments)};
+	CMEditor.prototype.writeCurrentDocToForm     = function(){Array.prototype.unshift.call(arguments, this); return writeCurrentDocToForm.apply(this, arguments)};
+
+	//public methods, deprecated; use the corresponding from above
+	CMEditor.prototype.close                     = function(){console.log("WARN: using close is deprecated. use closeDoc instead");
+                                                              Array.prototype.unshift.call(arguments, this); return close.apply(this, arguments)};
+	CMEditor.prototype.delete                    = function(){console.log("WARN: using delete is deprecated. use deleteDoc instead");
+                                                              Array.prototype.unshift.call(arguments, this); return deleteDoc.apply(this, arguments)};
+	CMEditor.prototype.doc_id                    = function(){console.log("WARN: using doc_id is deprecated. use getDocumentPositionByName instead");
+                                                              Array.prototype.unshift.call(arguments, this); return getDocumentPositionByName.apply(this, arguments)};
+	CMEditor.prototype.get_name                  = function(){console.log("WARN: using get_name is deprecated. use getUnambiguousName instead");
+                                                              Array.prototype.unshift.call(arguments, this); return getUnambiguousName.apply(this, arguments)};
+	CMEditor.prototype.get_mode                  = function(){console.log("WARN: using get_mode is deprecated. use getCurrentCMEditorMode instead");
+                                                              Array.prototype.unshift.call(arguments, this); return getCurrentCMEditorMode.apply(this, arguments)};
+	CMEditor.prototype.new                       = function(){console.log("WARN: using new is deprecated. use newDoc instead");
+                                                              Array.prototype.unshift.call(arguments, this); return newDoc.apply(this, arguments)};
+	CMEditor.prototype.set_diff_before_save      = function(){console.log("WARN: using set_diff_before_save is deprecated. use setDoDiffBeforeSaving instead");
+                                                              Array.prototype.unshift.call(arguments, this); return setDoDiffBeforeSaving.apply(this, arguments)};
+	CMEditor.prototype.save                      = function(){console.log("WARN: using save is deprecated. use saveDoc instead");
+                                                              Array.prototype.unshift.call(arguments, this); return save.apply(this, arguments)};
+	CMEditor.prototype.saveas                    = function(){console.log("WARN: using saveas is deprecated. use saveDocAs instead");
+                                                              Array.prototype.unshift.call(arguments, this); return saveas.apply(this, arguments)};
+	CMEditor.prototype.rename_doc                = function(){console.log("WARN: using rename_doc is deprecated. use renameDoc instead");
+                                                              Array.prototype.unshift.call(arguments, this); return rename.apply(this, arguments)};
+	CMEditor.prototype.update_message            = function(){console.log("WARN: using update_message is deprecated. use displayMessage instead");
+                                                              Array.prototype.unshift.call(arguments, this); return displayMessage.apply(this, arguments)};
 
 	var Doc = CMEditor.Doc = function Doc(name, mode, content, readOnly, cmDoc){
 		this.content = content;
@@ -1106,6 +1138,7 @@ this.CMEditor = (function(){
 		this.origContent = content;
 		this.readOnly = readOnly;
 		this.status = "new";
+		this.customData = {};
 
 		if(cmDoc === undefined)
 			this.codeMirrorDoc = new CodeMirror.Doc(content, mode);
@@ -1121,8 +1154,10 @@ this.CMEditor = (function(){
 
 	Doc.prototype.constructor = Doc;
 
+	//Getter
 	Doc.prototype.getCMDoc    = function(){return this.codeMirrorDoc};
 	Doc.prototype.getContent  = function(){return this.content};
+	Doc.prototype.getCustomData = function(key){return this.customData[key]};
 	Doc.prototype.getMode     = function(){return this.mode};
 	Doc.prototype.getName     = function(){return this.name};
 	Doc.prototype.getReadOnly = function(){return this.readOnly};
@@ -1132,6 +1167,8 @@ this.CMEditor = (function(){
 	Doc.prototype.isUnsaved   = function(){return this.status == Doc.status.UNSAVED};
 	Doc.prototype.needsSaving = function(){return this.status == Doc.status.UNSAVED || this.status == Doc.status.CHANGED};
 
+	//Setter
+	Doc.prototype.setCustomData = function(key, value){this.customData[key] = value};
 	Doc.prototype.markNew       = function(){this.status = Doc.status.NEW};
 	Doc.prototype.markChanged   = function(){this.status = Doc.status.CHANGED};
 	Doc.prototype.markUnsaved   = function(){this.status = Doc.status.UNSAVED};

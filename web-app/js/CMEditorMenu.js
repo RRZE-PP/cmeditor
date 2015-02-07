@@ -114,7 +114,7 @@ this.CMEditorMenu = (function(){
 		}
 
 		self.fileMenu = {
-			new: function(cm) { self.cmeditor.new(); },
+			new: function(cm) { self.cmeditor.newDoc(); },
 			open: function(cm) {
 
 				var s = $("<select class=\"fileSelect\" name=\"cmeditor-menu-open-select\" multiple=\"true\" />");
@@ -130,7 +130,7 @@ this.CMEditorMenu = (function(){
 								Cancel: function() { $(this).dialog( "close" ); },
 							};
 							for(var i=0; i < data.result.length; ++i) {
-								if (self.cmeditor.doc_id(data.result[i]) == undefined) {
+								if (self.cmeditor.getDocumentPositionByName(data.result[i]) == undefined) {
 									$("<option />", {value: data.result[i], text: data.result[i]}).appendTo(s);
 									available = true;
 								}
@@ -154,23 +154,23 @@ this.CMEditorMenu = (function(){
 							self.openDialog.dialog("open");
 							log(self, "opened");
 						} else {
-							self.cmeditor.update_message(data.msg);
+							self.cmeditor.displayMessage(data.msg);
 						}
 					});
 				}
 			},
-			save: function(cm) { self.cmeditor.save(); },
-			saveas: function(cm) { self.cmeditor.saveas(); },
+			save: function(cm) { self.cmeditor.saveDoc(); },
+			saveas: function(cm) { self.cmeditor.saveDocAs(); },
 			rename: function(cm) {
 				var name = prompt("Name of the new buffer", "");
 				log(self, name);
 				if (name == null) return;
 				if (!name) name = "test";
-				log(self, self.cmeditor.get_name(name));
-				self.cmeditor.rename_doc(self.cmeditor.get_name(name));
+				log(self, self.cmeditor.getUnambiguousName(name));
+				self.cmeditor.renameDoc(self.cmeditor.getUnambiguousName(name));
 			},
-			delete: function(cm) { self.cmeditor.delete(); },
-			close: function(cm) { self.cmeditor.close(); },
+			delete: function(cm) { self.cmeditor.deleteDoc(); },
+			close: function(cm) { self.cmeditor.closeDoc(); },
 			quit: function(cm) {
 				if (typeof cm.toTextArea == "function") {
 					cm.toTextArea();
@@ -209,8 +209,8 @@ this.CMEditorMenu = (function(){
 		}
 		self.optionsMenu = {
 			diffBeforeSave: function(cm) {
-				if(typeof self.cmeditor.set_diff_before_save == "function")
-					self.cmeditor.set_diff_before_save(self.rootElem.find(".optionsMenu a[value='diffBeforeSave']").children("span").hasClass("ui-icon-check")); },
+				if(typeof self.cmeditor.setDoDiffBeforeSaving == "function")
+					self.cmeditor.setDoDiffBeforeSaving(self.rootElem.find(".optionsMenu a[value='diffBeforeSave']").children("span").hasClass("ui-icon-check")); },
 			bindingdefault: function(cm) { cm.setOption("keymap", "default"); cm.setOption("vimMode", false); },
 			bindingvim: function(cm) { cm.setOption("keymap", "vim"); cm.setOption("vimMode", true); },
 			bindingemacs: function(cm) { cm.setOption("keymap", "emacs"); cm.setOption("vimMode", false); },
@@ -404,7 +404,7 @@ this.CMEditorMenu = (function(){
 
 	function update(self) {
 		self.rootElem.find(".modesMenu").find("span").removeClass("ui-icon ui-icon-check");
-		self.rootElem.find(".modesMenu a[value='mode"+self.cmeditor.get_mode()+"']").children("span").addClass("ui-icon ui-icon-check");
+		self.rootElem.find(".modesMenu a[value='mode"+self.cmeditor.getCurrentCMEditorMode()+"']").children("span").addClass("ui-icon ui-icon-check");
 
 		if (self.cmeditor.getCodeMirror().getOption("readOnly")) {
 			log(self, "RO");
