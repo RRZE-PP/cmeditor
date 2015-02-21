@@ -28,7 +28,7 @@ Available options here are:
   * _options_: a collection defining additional options:
   * _binding_: String, overrides the _binding_-attribute
   * _defaultReadOnly_: Boolean, whether to open files read only; _default_:false (not yet supported)
-    * _menu_: Boolean, whether to display a menu bar or not; _default_: true
+  * _menu_: Boolean, whether to display a menu bar or not; _default_: true
   * _menuFile_: Boolean, whether to display a file menu or not; _default_: false
   * _menuView_: Boolean, whether to display a view menu or not; _default_: true
   * _mode_: String, overrides the _mode_-attribute (not yet supported)
@@ -62,7 +62,7 @@ Available options are:
   * _defaultMode_: the default mode for the editor to use (e.g. htmlmixed)
   * _defaultReadOnly_: Boolean, whether to open files read only; _default_: false
   * _idField_: String, the variable name of the mapped document to use as id; _default_: id
-    * _menu_: Boolean, whether to display a menu bar or not; _default_: true
+  * _menu_: Boolean, whether to display a menu bar or not; _default_: true
   * _menuFile_: Boolean, whether to display a file menu or not; _default_: false
   * _menuView_: Boolean, whether to display a view menu or not; _default_: true
   * _mode_: String, overrides the _mode_-attribute (not yet supported)
