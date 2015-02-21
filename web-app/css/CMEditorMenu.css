@@ -1,0 +1,6 @@
+/*
+*= require jquery-theme
+*= require jquery/jquery.ui.menubar
+*= require jquery/chosen
+*/
+/* TODO: move menu specific stuff from cmeditor-common.css to here, this currently works because this is not standalone */

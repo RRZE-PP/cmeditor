@@ -1,3 +1,7 @@
+//= require jquery
+//= require jquery-ui
+//=require cmeditor-dependencies
+
 this.textAreaCMEditor = function (){
 
     function textAreaCMEditor(rootElem, options, instanceName){

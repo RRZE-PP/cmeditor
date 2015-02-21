@@ -1,3 +1,8 @@
+//= require jquery
+//= require jquery-ui
+
+//= require cmeditor-dependencies
+
 this.CMEditor = (function(){
 
 	//FIXME: IE kann kein Function.name (siehe log())
@@ -675,6 +680,22 @@ this.CMEditor = (function(){
 	}
 
 	/*
+	 * Checks whether the list `data` has an entry with the value `name`. Type conversion is performed.
+	 *
+	 * Parameters: data List: the list of which to check the values
+	 *             name Object: the value to look for
+	 *
+	 * Returns:    true if the entry is found, else false
+	 */
+	function listContainsElem(self, data, name) {
+		for (var i = 0; i < data.length; ++i)
+			if (data[i] == name)
+				return true;
+
+		return false
+	}
+
+	/*
 	 * Synchronizes the current document with the codeMirror instance.
 	 * Called on every change of a document inside `self.codeMirror`
 	 *
@@ -892,7 +913,7 @@ this.CMEditor = (function(){
 		}
 
 		var i = 0;
-		while (getDocumentByName(self, name + (i || "")) || cmeditortabs_is_in_list(data, name + (i || ""))) ++i;
+		while (getDocumentByName(self, name + (i || "")) || listContainsElem(self, data, name + (i || ""))) ++i;
 		return name + (i || "");
 	}
 
