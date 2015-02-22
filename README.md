@@ -4,6 +4,9 @@ If your model requires additional fields this is supported, too.
 
 For example managing your library could be done by mapping filename to "$author - $title". The tabbed editor then could manage everything: Author, title, publication year and - of course - the books content in a nice-to-use CodeMirror editor. You could even edit multiple books simultaneously.
 
+##Cloning and checking out
+After cloning this repo you'll have to run `grails upgrade` to regenerate some files in the web-app/WEB-INF folder. 
+
 ##Usage
 Add cmeditor as a plugin to your grails project's conf/BuildConfig.groovy:
 ```
