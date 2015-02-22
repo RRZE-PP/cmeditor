@@ -5,7 +5,7 @@ If your model requires additional fields this is supported, too.
 For example managing your library could be done by mapping filename to "$author - $title". The tabbed editor then could manage everything: Author, title, publication year and - of course - the books content in a nice-to-use CodeMirror editor. You could even edit multiple books simultaneously.
 
 ##Cloning and checking out
-After cloning this repo you'll have to run `grails upgrade` to regenerate some files in the web-app/WEB-INF folder. 
+After cloning this repo you'll have to run `grails upgrade` to regenerate some files in the web-app/WEB-INF folder.
 
 ##Usage
 Add cmeditor as a plugin to your grails project's conf/BuildConfig.groovy:
@@ -22,23 +22,24 @@ You can substitute a `<g:textArea name=""/>` with `<cmeditor:textArea name=""/>`
 Available options here are:
   * _ajax_: ajax locations (not yet supported)
   * _binding_: the initial key-binding of the editor (e.g. vim)
-  * _mode_:    the default mode for the editor to use (e.g. htmlmixed) (not yet supported)
-  * _theme_:   the initial theme to use
   * _mapping_: a collection defining the mapping for your document model (respectively the generated json):
     * _name_: the filename's variable name
     * _content_: the file content's variable name
     * _mode_: the content's mode's variable name
+  * _mode_:    the default mode for the editor to use (e.g. htmlmixed) (not yet supported)
   * _options_: a collection defining additional options:
-  * _binding_: String, overrides the _binding_-attribute
-  * _defaultReadOnly_: Boolean, whether to open files read only; _default_:false (not yet supported)
-  * _menu_: Boolean, whether to display a menu bar or not; _default_: true
-  * _menuFile_: Boolean, whether to display a file menu or not; _default_: false
-  * _menuView_: Boolean, whether to display a view menu or not; _default_: true
-  * _mode_: String, overrides the _mode_-attribute (not yet supported)
-  * _overlayDefinitionsVar_: String, a js-variable name in which you can define additional CodeMirror overlays
-  * _readOnly_: Boolean, whether to make the textArea readOnly; _default_: false (not yet supported)
-  * _theme_: String, overrides the _theme_-attribute
-  * _useSession_: Boolean, whether to save editor state in the user's browser; _default_: true (not yet supported) _default_: true
+    * _binding_: String, overrides the _binding_-attribute
+    * _defaultReadOnly_: Boolean, whether to open files read only; _default_: false (not yet supported)
+    * _menu_: Boolean, whether to display a menu bar or not; _default_: true
+    * _menuFile_: Boolean, whether to display a file menu or not; _default_: false
+    * _menuView_: Boolean, whether to display a view menu or not; _default_: true
+    * _mode_: String, overrides the _mode_-attribute (not yet supported)
+    * _overlayDefinitionsVar_: String, a js-variable name in which you can define additional CodeMirror overlays
+    * _readOnly_: Boolean, whether to make the textArea readOnly; _default_: false (not yet supported)
+    * _theme_: String, overrides the _theme_-attribute
+    * _useSession_: Boolean, whether to save editor state in the user's browser; _default_: true (not yet supported) _default_: true
+  * _theme_:   the initial theme to use
+  * _value_: The initial value to put in the text area
 
 So for example use: `<g:textArea name="foobar" binding="vim" options="[readOnly: true"] />`
 
@@ -52,27 +53,27 @@ Available options are:
     * updateURL: POST, location to call to save a document; it's passed the document's id; _default_: 'ajaxUpdate',
     * deleteURL: POST, location to call to delete a document; it's passed the document's id; _default_: 'ajaxDelete',
   * _binding_: the initial key-binding of the editor (e.g. vim)
-  * _mode_:    the default mode for the editor to use (e.g. htmlmixed) (not yet supported)
-  * _theme_:   the initial theme to use
   * _mapping_: a collection defining the mapping for your document model (respectively the generated json):
     * _name_: the filename's variable name
     * _content_: the file content's variable name
     * _mode_: the content's mode's variable name
+  * _mode_:    the default mode for the editor to use (e.g. htmlmixed) (not yet supported)
   * _options_: a collection defining additional options:
-  * _binding_: String, overrides the _binding_-attribute
-  * _defaultContent_: String, the default content of a new file; _default_: '' (empty string)
-  * _defaultDiffBeforeSave_: Boolean, whether to display a diff before saving; _default_: true
-  * _defaultMode_: the default mode for the editor to use (e.g. htmlmixed)
-  * _defaultReadOnly_: Boolean, whether to open files read only; _default_: false
-  * _idField_: String, the variable name of the mapped document to use as id; _default_: id
-  * _menu_: Boolean, whether to display a menu bar or not; _default_: true
-  * _menuFile_: Boolean, whether to display a file menu or not; _default_: false
-  * _menuView_: Boolean, whether to display a view menu or not; _default_: true
-  * _mode_: String, overrides the _mode_-attribute (not yet supported)
-  * _overlayDefinitionsVar_: String, a js-variable name in which you can define additional CodeMirror overlays
-  * _readOnly_: Boolean, whether to make the whole editor readOnly; _default_: false
-  * _theme_: String, overrides the _theme_-attribute
-  * _useSession_: Boolean, whether to save editor state in the user's browser; _default_: true (not yet supported) _default_: true
+    * _binding_: String, overrides the _binding_-attribute
+    * _defaultContent_: String, the default content of a new file; _default_: '' (empty string)
+    * _defaultDiffBeforeSave_: Boolean, whether to display a diff before saving; _default_: true
+    * _defaultMode_: the default mode for the editor to use (e.g. htmlmixed)
+    * _defaultReadOnly_: Boolean, whether to open files read only; _default_: false
+    * _idField_: String, the variable name of the mapped document to use as id; _default_: id
+    * _menu_: Boolean, whether to display a menu bar or not; _default_: true
+    * _menuFile_: Boolean, whether to display a file menu or not; _default_: false
+    * _menuView_: Boolean, whether to display a view menu or not; _default_: true
+    * _mode_: String, overrides the _mode_-attribute (not yet supported)
+    * _overlayDefinitionsVar_: String, a js-variable name in which you can define additional CodeMirror overlays
+    * _readOnly_: Boolean, whether to make the whole editor readOnly; _default_: false
+    * _theme_: String, overrides the _theme_-attribute
+    * _useSession_: Boolean, whether to save editor state in the user's browser; _default_: true (not yet supported) _default_: true
+  * _theme_:   the initial theme to use
 
 If you need additional input fields, you can provide them in the body of the tag. They will be serialized using their name as key and sent along with the document's content.
 

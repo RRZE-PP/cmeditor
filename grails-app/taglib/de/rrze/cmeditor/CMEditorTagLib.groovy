@@ -19,11 +19,23 @@ class CMEditorTagLib {
 			defaultReadOnly: false,
 			overlayDefinitionsVar: 'overlay_definitions',
 			]
-		if (attrs.mode) {
-			options.mode = attrs.mode
+		def ajax = [:]
+		def mapping = [
+			name:'name',
+			content:'content',
+			mode:'mode',
+			]
+		if (attrs.ajax) {
+			ajax.putAll(attrs.ajax)
 		}
 		if (attrs.binding) {
 			options.binding = attrs.binding
+		}
+		if (attrs.mapping) {
+			mapping.putAll(attrs.mapping)
+		}
+		if (attrs.mode) {
+			options.mode = attrs.mode
 		}
 		if (attrs.theme) {
 			options.theme = attrs.theme
@@ -31,19 +43,7 @@ class CMEditorTagLib {
 		if (attrs.options) {
 			options.putAll(attrs.options)
 		}
-		def mapping = [
-			name:'name',
-			content:'content',
-			mode:'mode',
-			]
-		if (attrs.mapping) {
-			mapping.putAll(attrs.mapping)
-		}
-		def ajax = [:]
-		if (attrs.ajax) {
-			ajax.putAll(attrs.ajax)
-		}
-		out << render(template:"/shared/textArea", plugin:'cm-editor', model:[name: attrs.name, value: attrs.value, mode:attrs.mode, options:options, mapping:mapping, ajax:ajax, body: body])
+		out << render(template:"/shared/textArea", plugin:'cmeditor', model:[name: attrs.name, value: attrs.value, mode:attrs.mode, options:options, mapping:mapping, ajax:ajax, body: body])
 	}
 	
 	def tabs = { attrs, body ->
@@ -63,21 +63,27 @@ class CMEditorTagLib {
 			defaultDiffBeforeSave: true,
 			idField: 'id',
 			]
-		def mapping = [
-			name: 'name',
-			content: 'content',
-			mode: 'mode']
 		def ajax = [
             listURL:'ajaxList',
             getURL:'ajaxGet?label=',
 			updateURL:'ajaxUpdate',
 			deleteURL:'ajaxDelete',
 			]
-		if (attrs.mode) {
-			options.mode = attrs.mode
+		def mapping = [
+			name: 'name',
+			content: 'content',
+			mode: 'mode']
+		if (attrs.ajax) {
+			ajax.putAll(attrs.ajax)
 		}
 		if (attrs.binding) {
 			options.binding = attrs.binding
+		}
+		if (attrs.mapping) {
+			mapping.putAll(attrs.mapping)
+		}
+		if (attrs.mode) {
+			options.mode = attrs.mode
 		}
 		if (attrs.theme) {
 			options.theme = attrs.theme
@@ -85,12 +91,6 @@ class CMEditorTagLib {
 		if (attrs.options) {
 			options.putAll(attrs.options)
 		}
-		if (attrs.mapping) {
-			mapping.putAll(attrs.mapping)
-		}
-		if (attrs.ajax) {
-			ajax.putAll(attrs.ajax)
-		}
-		out << render(template:"/shared/tabs", plugin:'cm-editor', model:[name: attrs.name, value: attrs.value, mode:attrs.mode, options:options, mapping:mapping, ajax:ajax, body: body])
+		out << render(template:"/shared/tabs", plugin:'cmeditor', model:[name: attrs.name, value: attrs.value, mode:attrs.mode, options:options, mapping:mapping, ajax:ajax, body: body])
 	}
 }
