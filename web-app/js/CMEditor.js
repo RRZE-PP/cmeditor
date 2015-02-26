@@ -281,11 +281,11 @@ this.CMEditor = (function(){
 			return;
 		}
 
-		if (self.curDoc[self.options.idField]) {
+		if (self.curDoc[self.options.mapping.idField]) {
 
 			$.ajax({
 				type:"GET",
-				data: {id: self.curDoc[self.options.idField]},
+				data: {id: self.curDoc[self.options.mapping.idField]},
 				url: self.options.ajax.deleteURL,
 				success:function(data, textStatus){
 					if (data.status == "success") {
@@ -774,7 +774,7 @@ this.CMEditor = (function(){
 					                        data.result[self.options.mapping.mode] || self.options.defaultMode,
 					                        data.result[self.options.mapping.content],
 					                        readWrite ? "" : ((self.options.readOnly || self.options.defaultReadOnly) ? "nocursor" : ""));
-					newDoc[self.options.idField] = data.result[self.options.idField];
+					newDoc[self.options.mapping.idField] = data.result[self.options.mapping.idField];
 
 					//insert custom data
 					self.rootElem.find("form .cmeditor-field").not("[data-docField]").each(function(){
@@ -1036,7 +1036,7 @@ this.CMEditor = (function(){
 		if (!name) name = "test";
 
 		rename(self, getUnambiguousName(self, name));
-		self.curDoc[self.options.idField] = "";
+		self.curDoc[self.options.mapping.idField] = "";
 
 		save(self);
 		log(self, "saveas was performed.");

@@ -23,9 +23,10 @@ Available options here are:
   * _ajax_: ajax locations (not yet supported)
   * _binding_: the initial key-binding of the editor (e.g. vim)
   * _mapping_: a collection defining the mapping for your document model (respectively the generated json):
-    * _name_: the filename's variable name
     * _content_: the file content's variable name
+    * _idField_: String, the variable name of the mapped document to use as id; _default_: id
     * _mode_: the content's mode's variable name
+    * _name_: the filename's variable name
   * _mode_:    the default mode for the editor to use (e.g. htmlmixed) (not yet supported)
   * _options_: a collection defining additional options:
     * _binding_: String, overrides the _binding_-attribute
@@ -54,9 +55,10 @@ Available options are:
     * deleteURL: POST, location to call to delete a document; it's passed the document's id; _default_: 'ajaxDelete',
   * _binding_: the initial key-binding of the editor (e.g. vim)
   * _mapping_: a collection defining the mapping for your document model (respectively the generated json):
-    * _name_: the filename's variable name
     * _content_: the file content's variable name
+    * _idField_: String, the variable name of the mapped document to use as id; _default_: id
     * _mode_: the content's mode's variable name
+    * _name_: the filename's variable name
   * _mode_:    the default mode for the editor to use (e.g. htmlmixed) (not yet supported)
   * _options_: a collection defining additional options:
     * _binding_: String, overrides the _binding_-attribute
@@ -64,7 +66,6 @@ Available options are:
     * _defaultDiffBeforeSave_: Boolean, whether to display a diff before saving; _default_: true
     * _defaultMode_: the default mode for the editor to use (e.g. htmlmixed)
     * _defaultReadOnly_: Boolean, whether to open files read only; _default_: false
-    * _idField_: String, the variable name of the mapped document to use as id; _default_: id
     * _menu_: Boolean, whether to display a menu bar or not; _default_: true
     * _menuFile_: Boolean, whether to display a file menu or not; _default_: false
     * _menuView_: Boolean, whether to display a view menu or not; _default_: true
@@ -75,7 +76,7 @@ Available options are:
     * _useSession_: Boolean, whether to save editor state in the user's browser; _default_: true (not yet supported) _default_: true
   * _theme_:   the initial theme to use
 
-If you need additional input fields, you can provide them in the body of the tag. They will be serialized using their name as key and sent along with the document's content.
+If you need additional input fields, you can provide them in the body of the tag. All elements with the class `cmeditor-field` there will be serialized using their name as key and sent along with the document's content.
 
 So for example:
 ```gsp

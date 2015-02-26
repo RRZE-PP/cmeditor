@@ -43,11 +43,11 @@
 				"preSerializeDoc": function(){if(typeof cmeditor_${name}_preSerializeDoc != "undefined"){cmeditor_${name}_preSerializeDoc.apply(this, arguments)}},
 				"postSerializeDoc": function(){if(typeof cmeditor_${name}_postSerializeDoc != "undefined"){cmeditor_${name}_postSerializeDoc.apply(this, arguments)}}
 			},
-			idField: "${options.idField}",                           //String:  the field by which documents can be identified towards the server
 			mapping: {
-				name: "${mapping.name}",                             //String:  the variable name in ajax calls/responses mapped to the document name
+				content: "${mapping.content}",                       //String:  the variable name in ajax calls/responses mapped to the document content
+				idField: "${mapping.idField}",                       //String:  the field by which documents can be identified towards the server
 				mode: "${mapping.mode}",                             //String:  the variable name in ajax calls/responses mapped to the document mode
-				content: "${mapping.content}"                        //String:  the variable name in ajax calls/responses mapped to the document content
+				name: "${mapping.name}",                             //String:  the variable name in ajax calls/responses mapped to the document name
 			},
 			menu: ${options.menu},                                   //Boolean: whether to display a menu or not
 			overlayDefinitionsVar: typeof ${options.overlayDefinitionsVar} !== "undefined" ? ${options.overlayDefinitionsVar} : undefined,

@@ -21,9 +21,10 @@ class CMEditorTagLib {
 			]
 		def ajax = [:]
 		def mapping = [
-			name:'name',
-			content:'content',
-			mode:'mode',
+			content: 'content',
+			idField: 'id',
+			mode: 'mode',
+			name: 'name',
 			]
 		if (attrs.ajax) {
 			ajax.putAll(attrs.ajax)
@@ -61,7 +62,6 @@ class CMEditorTagLib {
 			defaultReadOnly: false,
 			overlayDefinitionsVar: 'overlay_definitions',
 			defaultDiffBeforeSave: true,
-			idField: 'id',
 			]
 		def ajax = [
             listURL:'ajaxList',
@@ -70,9 +70,11 @@ class CMEditorTagLib {
 			deleteURL:'ajaxDelete',
 			]
 		def mapping = [
-			name: 'name',
 			content: 'content',
-			mode: 'mode']
+			idField: 'id',
+			mode: 'mode',
+			name: 'name',
+			]
 		if (attrs.ajax) {
 			ajax.putAll(attrs.ajax)
 		}
