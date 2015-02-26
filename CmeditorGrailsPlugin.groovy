@@ -1,4 +1,4 @@
-class CmEditorGrailsPlugin {
+class CmeditorGrailsPlugin {
     // the plugin version
     def version = "2.3.1"
     // the version or versions of Grails the plugin is designed for
@@ -17,7 +17,7 @@ Brief summary/description of the plugin.
 '''
 
     // URL to the plugin's documentation
-    def documentation = "http://grails.org/plugin/cm-editor"
+    def documentation = "http://grails.org/plugin/cmeditor"
 
     // Extra (optional) plugin metadata
 	

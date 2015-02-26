@@ -6,7 +6,7 @@
 	<div class="cmeditor-tab-message" style="display:none;"></div>
 
 	<g:if test="${options.menu}">
-		<g:render template="/shared/menu" plugin="cm-editor" model="[name:name, options:options]"></g:render>
+		<g:render template="/shared/menu" plugin="cmeditor" model="[name:name, options:options]"></g:render>
 	</g:if>
 	<div class="cmeditor-settings"></div>
 	<div class="cmeditor-main">

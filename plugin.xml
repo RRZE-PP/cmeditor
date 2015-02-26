@@ -1,10 +1,10 @@
-<plugin name='cm-editor' version='2.3.1' grailsVersion='2.2 &gt; *'>
+<plugin name='cmeditor' version='2.3.1' grailsVersion='2.2 &gt; *'>
   <author>Frank Tröger</author>
   <authorEmail>frank.troeger@fau.de</authorEmail>
   <title>Cm Editor Plugin</title>
   <description>Brief summary/description of the plugin.
 </description>
-  <documentation>http://grails.org/plugin/cm-editor</documentation>
+  <documentation>http://grails.org/plugin/cmeditor</documentation>
   <type>CmEditorGrailsPlugin</type>
   <resources>
     <resource>CmEditorResources</resource>

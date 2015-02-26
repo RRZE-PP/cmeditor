@@ -3,7 +3,7 @@
 <r:require module="cmeditor-textarea" />
 
 <div id="${name}" class="cmeditor">
-	<g:if test="${options.menu}"><g:render template="/shared/menu" plugin="cm-editor" model="[name:name, options:options]"></g:render></g:if>
+	<g:if test="${options.menu}"><g:render template="/shared/menu" plugin="cmeditor" model="[name:name, options:options]"></g:render></g:if>
 	<div class="cmeditor-settings"></div>
 	<div class="cmeditor-main">
 		<g:textArea  name="${name}" value="${value}" />
