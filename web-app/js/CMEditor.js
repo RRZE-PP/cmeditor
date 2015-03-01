@@ -281,11 +281,11 @@ this.CMEditor = (function(){
 			return;
 		}
 
-		if (self.curDoc[self.options.mapping.idField]) {
+		if (self.curDoc.hasID()) {
 
 			$.ajax({
 				type:"GET",
-				data: {id: self.curDoc[self.options.mapping.idField]},
+				data: {id: self.curDoc.getID()},
 				url: self.options.ajax.deleteURL,
 				success:function(data, textStatus){
 					if (data.status == "success") {
@@ -370,6 +370,10 @@ this.CMEditor = (function(){
 
 			} else if (key == self.options.mapping.content) {
 				old = self.curDoc.getContent();
+				sef.curDoc.setContent(getCustomElementValue(self, elem));
+
+			} else if (key == self.options.mapping.idField) {
+				old = self.curDoc.getID();
 				sef.curDoc.setContent(getCustomElementValue(self, elem));
 
 			} else {
@@ -774,12 +778,18 @@ this.CMEditor = (function(){
 					                        data.result[self.options.mapping.mode] || self.options.defaultMode,
 					                        data.result[self.options.mapping.content],
 					                        readWrite ? "" : ((self.options.readOnly || self.options.defaultReadOnly) ? "nocursor" : ""));
-					newDoc[self.options.mapping.idField] = data.result[self.options.mapping.idField];
+					newDoc.setID(data.result[self.options.mapping.idField]);
 
 					//insert custom data
 					self.rootElem.find("form .cmeditor-field").not("[data-docField]").each(function(){
 						var elem = $(this);
 						var key = elem.attr("name");
+
+						//if a mapped value is also available in custom data, don't save it twice
+						for(var mappingKey in self.options.mapping){
+							if(key == self.options.mapping[mappingKey])
+								return true; //continue to next jquery-each
+						}
 
 						newDoc.setCustomData(key, data.result[key]);
 					});
@@ -994,6 +1004,12 @@ this.CMEditor = (function(){
 
 			self.docs[docId].setName(newName);
 			markDocumentAsChanged(self, docId);
+
+			if(self.docs[docId].isRenamed())
+				self.docs[docId].markUnsaved();
+			else
+				self.docs[docId].markChanged();
+
 			updateCurrentDocument(self);
 
 			log(self, "rename '"+oldName+"', '"+newName+"' was performed.");
@@ -1036,7 +1052,7 @@ this.CMEditor = (function(){
 		if (!name) name = "test";
 
 		rename(self, getUnambiguousName(self, name));
-		self.curDoc[self.options.mapping.idField] = "";
+		self.curDoc.setID("");
 
 		save(self);
 		log(self, "saveas was performed.");
@@ -1093,6 +1109,14 @@ this.CMEditor = (function(){
 			if (elem.attr("data-field-property") && self.curDoc.getCustomData(key)) {
 				setInputValue(self, elem, self.curDoc.getCustomData(key)[elem.attr("data-field-property")] || "");
 			} else {
+
+				//if a mapped value is also available in custom data, use the mapped value
+				for(var mappingKey in self.options.mapping){
+					if(key == self.options.mapping[mappingKey]){
+						setInputValue(self, elem, self.curDoc[mappingKey]);
+						return true; //continue to next jquery-each
+					}
+				}
 				setInputValue(self, elem, self.curDoc[key] || self.curDoc.getCustomData(key) || "");
 			}
 		});
@@ -1119,7 +1143,6 @@ this.CMEditor = (function(){
 	CMEditor.prototype.goto                      = function(){Array.prototype.unshift.call(arguments, this); return goto.apply(this, arguments)};
 	CMEditor.prototype.newDoc                    = function(){Array.prototype.unshift.call(arguments, this); return newDoc.apply(this, arguments)};
 	CMEditor.prototype.on                        = function(){Array.prototype.unshift.call(arguments, this); return on.apply(this, arguments)};
-	//todo save ,renameDoc &saveas deprecated
 	CMEditor.prototype.saveDoc                   = function(){Array.prototype.unshift.call(arguments, this); return save.apply(this, arguments)};
 	CMEditor.prototype.saveDocAs                 = function(){Array.prototype.unshift.call(arguments, this); return saveas.apply(this, arguments)};
 	CMEditor.prototype.setDoDiffBeforeSaving     = function(){Array.prototype.unshift.call(arguments, this); return setDoDiffBeforeSaving.apply(this, arguments)};
@@ -1157,6 +1180,7 @@ this.CMEditor = (function(){
 		this.mode = mode;
 		this.name = name;
 		this.origContent = content;
+		this.origName = name;
 		this.readOnly = readOnly;
 		this.status = "new";
 		this.customData = {};
@@ -1179,14 +1203,17 @@ this.CMEditor = (function(){
 	Doc.prototype.getCMDoc    = function(){return this.codeMirrorDoc};
 	Doc.prototype.getContent  = function(){return this.content};
 	Doc.prototype.getCustomData = function(key){return this.customData[key]};
+	Doc.prototype.getID       = function(){return this.idField};
 	Doc.prototype.getMode     = function(){return this.mode};
 	Doc.prototype.getName     = function(){return this.name};
 	Doc.prototype.getReadOnly = function(){return this.readOnly};
+	Doc.prototype.hasID       = function(){return this.idField !== undefined};
 	Doc.prototype.isNew       = function(){return this.status == Doc.status.NEW};
 	Doc.prototype.isChanged   = function(){return this.status == Doc.status.CHANGED};
 	Doc.prototype.isUnchanged = function(){return this.status == Doc.status.UNCHANGED};
 	Doc.prototype.isUnsaved   = function(){return this.status == Doc.status.UNSAVED};
 	Doc.prototype.needsSaving = function(){return this.status == Doc.status.UNSAVED || this.status == Doc.status.CHANGED};
+	Doc.prototype.isRenamed   = function(){return this.name != this.origName};
 
 	//Setter
 	Doc.prototype.setCustomData = function(key, value){this.customData[key] = value};
@@ -1195,8 +1222,9 @@ this.CMEditor = (function(){
 	Doc.prototype.markUnsaved   = function(){this.status = Doc.status.UNSAVED};
 	Doc.prototype.markUnchanged = function(){this.status = Doc.status.UNCHANGED};
 	Doc.prototype.setContent    = function(content){this.content = content};
+	Doc.prototype.setID         = function(id){this.idField = id};
 	Doc.prototype.setMode       = function(mode){this.mode = mode};
-	Doc.prototype.setName       = function(name){this.name = name};
+	Doc.prototype.setName       = function(name){this.name = name;};
 	Doc.prototype.setReadOnly   = function(readOnly){this.readOnly = readOnly};
 
 	return CMEditor;
