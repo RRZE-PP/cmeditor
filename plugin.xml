@@ -5,15 +5,14 @@
   <description>Brief summary/description of the plugin.
 </description>
   <documentation>http://grails.org/plugin/cmeditor</documentation>
-  <type>CmEditorGrailsPlugin</type>
+  <type>CmeditorGrailsPlugin</type>
   <resources>
-    <resource>CmEditorResources</resource>
-    <resource>de.rrze.cmeditor.CMEditorTagLib</resource>
+    <resource>CmeditorResources</resource>
+    <resource>de.rrze.cmeditor.CmeditorTagLib</resource>
   </resources>
   <repositories>
     <repository name='grailsCentral' url='http://grails.org/plugins' />
     <repository name='mavenCentral' url='http://repo1.maven.org/maven2/' />
-    <repository name='rrzeArchiva' url='http://reppo.rrze.uni-erlangen.de:8080/archiva/repository/internal/' />
   </repositories>
   <dependencies />
   <plugins />

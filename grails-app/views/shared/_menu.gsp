@@ -1,7 +1,3 @@
-<asset:javascript src="CMEditorMenu.js" />
-<asset:stylesheet href="CMEditorMenu.css" />
-<r:require module="cmeditor-menu" />
-
 <div id="cmEditorMenu_${name}" class="cmeditor-menu">
 	<div class="dialog donationDialog" title="Donation" style="display: none;">
 		<p>You want the incredible addon?</p>

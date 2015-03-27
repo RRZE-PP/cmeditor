@@ -20,7 +20,7 @@ grails.project.dependency.resolution = {
         //mavenRepo "http://repository.codehaus.org"
         //mavenRepo "http://download.java.net/maven/2/"
         //mavenRepo "http://repository.jboss.com/maven2/"
-		mavenRepo name:"rrzeArchiva", root:"http://reppo.rrze.uni-erlangen.de:8080/archiva/repository/internal"
+		//mavenRepo name:"rrzeArchiva", root:"http://reppo.rrze.uni-erlangen.de:8080/archiva/repository/internal"
     }
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.

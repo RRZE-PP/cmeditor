@@ -1,6 +1,6 @@
 package de.rrze.cmeditor
 
-class CMEditorTagLib {
+class CmeditorTagLib {
 
 	static namespace = "cmeditor"
 	

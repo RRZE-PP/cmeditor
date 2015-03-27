@@ -8,8 +8,8 @@ import org.junit.*
 /**
  * See the API for {@link grails.test.mixin.web.GroovyPageUnitTestMixin} for usage instructions
  */
-@TestFor(CMEditorTagLib)
-class CMEditorTagLibTests {
+@TestFor(CmeditorTagLib)
+class CmeditorTagLibTests {
 
     void testSomething() {
         fail "Implement me"

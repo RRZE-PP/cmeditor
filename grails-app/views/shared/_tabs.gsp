@@ -1,7 +1,3 @@
-<asset:javascript src="CMEditor.js" />
-<asset:stylesheet href="CMEditor.css" />
-<r:require module="cmeditor-tabs" />
-
 <div id="${name}" class="cmeditor">
 	<div class="cmeditor-tab-message" style="display:none;"></div>
 
