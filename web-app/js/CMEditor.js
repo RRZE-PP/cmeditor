@@ -1,6 +1,3 @@
-//= require jquery
-//= require jquery-ui
-
 //= require cmeditor-dependencies
 
 this.CMEditor = (function(){
@@ -134,7 +131,8 @@ this.CMEditor = (function(){
 				cmeditorall_add_overlay_definition(name, options.overlayDefinitionsVar[name]["baseMode"],
 				                                       options.overlayDefinitionsVar[name]["definition"]);
 			}
-			CodeMirror.commands.autocomplete = function(cm, getHints, options) {
+			CodeMirror.commands.autocomplete = function(cm, getHints, hintOptions) {
+				//var mergedOptions = $.extend({}, hintOptions, {cmeditorDefinitions: options.overlayDefinitionsVar}); 
 				CodeMirror.showHint(cm, null, {cmeditorDefinitions: options.overlayDefinitionsVar})
 			};
 		}
