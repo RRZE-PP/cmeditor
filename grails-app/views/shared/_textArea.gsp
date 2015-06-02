@@ -18,7 +18,9 @@
 			hooks:{                                                  //Object: with the keys being event names (see `CMEditor.on`) and the values being functions
 				"preMenuInit": function(){if(typeof cmeditor_${name}_preMenuInit != "undefined"){cmeditor_${name}_preMenuInit.apply(this, arguments)}},
 				"postMenuInit": function(){if(typeof cmeditor_${name}_postMenuInit != "undefined"){cmeditor_${name}_postMenuInit.apply(this, arguments)}},
-			}
+			},
+			mode: "${options.mode}",
+			readOnly: ${options.readOnly}                            //Boolean: whether the whole editor should be read-only
 		}
 
 		textAreaCMEditor($("#${name}"), textAreaCMEditorOptions);

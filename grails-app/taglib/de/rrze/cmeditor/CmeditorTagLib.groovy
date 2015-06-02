@@ -44,9 +44,11 @@ class CmeditorTagLib {
 		if (attrs.options) {
 			options.putAll(attrs.options)
 		}
+		if (attrs.readOnly && attrs.readOnly.equals("true"))
+			options.readOnly = true;
 		out << render(template:"/shared/textArea", plugin:'cmeditor', model:[name: attrs.name, value: attrs.value, mode:attrs.mode, options:options, mapping:mapping, ajax:ajax, body: body])
 	}
-	
+
 	def tabs = { attrs, body ->
 		def options = [
 			menu: true,
