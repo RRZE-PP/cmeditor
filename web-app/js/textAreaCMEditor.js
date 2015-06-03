@@ -28,6 +28,36 @@ this.textAreaCMEditor = function (){
             executeHooks(self, "postMenuInit", menuRootElem, [self.menu]);
         }
 
+        //disable some browser featues when the codeMirror has focus
+        $(document).bind("keydown", function(e){
+            if(e.ctrlKey && self.rootElem.find("CodeMirror-focused").size() !== 0){
+                e.preventDefault();
+            }
+        });
+
+        //replace code mirror's fullscreen mode addon
+        CodeMirror.defineOption("fullScreen", false, function() {
+            var focusElems = jQuery.grep(self.rootElem.find("*"),function(elem){return $(elem).is(":focus")});
+            if(focusElems.length != 0){
+                if(self.oldSizeMem == undefined){
+                    self.oldSizeMem = {"position": self.rootElem.css("position"),
+                                        "top":  self.rootElem.css("top"),
+                                        "left":  self.rootElem.css("left"),
+                                        "height":  self.rootElem.css("height"),
+                                        "width":  self.rootElem.css("width"),
+                                        "overflow": self.rootElem.css("overflow"),
+                                        "box-sizing": self.rootElem.css("box-sizing")};
+                    self.oldDocumentOverflow = document.documentElement.style.overflow;
+                    document.documentElement.style.overflow = "hidden";
+                    self.rootElem.css({"position": "fixed", "top": "0", "left": "0", "height": "100%", "width": "100%", "overflow-y": "scroll", "box-sizing": "border-box"});
+                }else{
+                    self.rootElem.css(self.oldSizeMem);
+                    document.documentElement.style.overflow = self.oldDocumentOverflow;
+                    self.oldSizeMem = undefined;
+                }
+            }
+        });
+
         registerInstance(self.instanceName, self.instanceNo, self);
     }
 

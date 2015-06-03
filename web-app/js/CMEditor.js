@@ -40,12 +40,35 @@ this.CMEditor = (function(){
 
 		insertNewUntitledDocument(self);
 
-		//disable some browser featues when the codeMirror has focus
 		$(document).bind("keydown", function(e){
+			//disable some browser featues when the codeMirror has focus
 			if(e.ctrlKey && self.rootElem.find("CodeMirror-focused").size() !== 0){
 				e.preventDefault();
 			}
 		});
+
+        //replace code mirror's fullscreen mode addon
+        CodeMirror.defineOption("fullScreen", false, function() {
+            var focusElems = jQuery.grep(self.rootElem.find("*"),function(elem){return $(elem).is(":focus")});
+            if(focusElems.length != 0){
+                if(self.oldSizeMem == undefined){
+                    self.oldSizeMem = {"position": self.rootElem.css("position"),
+                                        "top":  self.rootElem.css("top"),
+                                        "left":  self.rootElem.css("left"),
+                                        "height":  self.rootElem.css("height"),
+                                        "width":  self.rootElem.css("width"),
+                                        "overflow": self.rootElem.css("overflow"),
+                                     	"box-sizing": self.rootElem.css("box-sizing")};
+                    self.oldDocumentOverflow = document.documentElement.style.overflow;
+                    document.documentElement.style.overflow = "hidden";
+                    self.rootElem.css({"position": "fixed", "top": "0", "left": "0", "height": "100%", "width": "100%", "overflow-y": "scroll", "box-sizing": "border-box"});
+                }else{
+                    self.rootElem.css(self.oldSizeMem);
+                    document.documentElement.style.overflow = self.oldDocumentOverflow;
+                    self.oldSizeMem = undefined;
+                }
+            }
+        });
 
 		registerInstance(self.instanceName, self.instanceNo, self);
 
@@ -132,7 +155,7 @@ this.CMEditor = (function(){
 				                                       options.overlayDefinitionsVar[name]["definition"]);
 			}
 			CodeMirror.commands.autocomplete = function(cm, getHints, hintOptions) {
-				//var mergedOptions = $.extend({}, hintOptions, {cmeditorDefinitions: options.overlayDefinitionsVar}); 
+				//var mergedOptions = $.extend({}, hintOptions, {cmeditorDefinitions: options.overlayDefinitionsVar});
 				CodeMirror.showHint(cm, null, {cmeditorDefinitions: options.overlayDefinitionsVar})
 			};
 		}
