@@ -3,9 +3,9 @@ package de.rrze.cmeditor
 class CmeditorTagLib {
 
 	static namespace = "cmeditor"
-	
+
 	static encodeAsForTags = [tabs: 'raw', textArea: 'raw']
-	
+
 	def textArea = { attrs, body ->
 		def options = [
 			menu: true,
@@ -18,14 +18,14 @@ class CmeditorTagLib {
 			theme: 'default',
 			defaultReadOnly: false,
 			overlayDefinitionsVar: 'overlay_definitions',
-			]
+		]
 		def ajax = [:]
 		def mapping = [
 			content: 'content',
 			idField: 'id',
 			mode: 'mode',
 			name: 'name',
-			]
+		]
 		if (attrs.ajax) {
 			ajax.putAll(attrs.ajax)
 		}
@@ -41,11 +41,11 @@ class CmeditorTagLib {
 		if (attrs.theme) {
 			options.theme = attrs.theme
 		}
+		if (attrs.readOnly && attrs.readOnly.equals("true"))
+			options.readOnly = true;
 		if (attrs.options) {
 			options.putAll(attrs.options)
 		}
-		if (attrs.readOnly && attrs.readOnly.equals("true"))
-			options.readOnly = true;
 		out << render(template:"/shared/textArea", plugin:'cmeditor', model:[name: attrs.name, value: attrs.value, mode:attrs.mode, options:options, mapping:mapping, ajax:ajax, body: body])
 	}
 
@@ -64,19 +64,19 @@ class CmeditorTagLib {
 			defaultReadOnly: false,
 			overlayDefinitionsVar: 'overlay_definitions',
 			defaultDiffBeforeSave: true,
-			]
+		]
 		def ajax = [
-            listURL:'ajaxList',
-            getURL:'ajaxGet?label=',
+			listURL:'ajaxList',
+			getURL:'ajaxGet?label=',
 			updateURL:'ajaxUpdate',
 			deleteURL:'ajaxDelete',
-			]
+		]
 		def mapping = [
 			content: 'content',
 			idField: 'id',
 			mode: 'mode',
 			name: 'name',
-			]
+		]
 		if (attrs.ajax) {
 			ajax.putAll(attrs.ajax)
 		}
