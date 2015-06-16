@@ -248,7 +248,7 @@ this.textAreaCMEditor = function (){
         log(self, "update was performed.")
     }
 
-    textAreaCMEditor.prototype.constructor = CMEditor;
+    textAreaCMEditor.prototype.constructor = textAreaCMEditor;
 
     //Zugegriffen aus Menu
     textAreaCMEditor.prototype.focus         = function(){Array.prototype.unshift.call(arguments, this); return focus.apply(this, arguments)};
