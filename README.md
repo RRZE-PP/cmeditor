@@ -15,6 +15,16 @@ Add cmeditor as a plugin to your grails project's conf/BuildConfig.groovy:
     }
 ```
 
+Include the plugin's resources using either the resources or assets plugin:
+```
+
+	<r:require modules="cmeditor" />
+	<!-- or -->
+	<asset:javascript src="cmeditor.js"/>
+	<asset:stylesheet href="cmeditor.css"/>
+
+```
+
 When adding a textarea or tabbed editor you have to supply a `name`-attribute. After document initialization you can access the corresponding javascript CMEditor-object by calling `CMEditor.getInstance("<nameAttributeValue>)"`. For an API of the class see the CMEditor.js file in grails-app/js/web-app/js/.
 ### Textareas
 You can substitute a `<g:textArea name=""/>` with `<cmeditor:textArea name=""/>`.
@@ -27,16 +37,16 @@ Available options here are:
     * _idField_: String, the variable name of the mapped document to use as id; _default_: id
     * _mode_: the content's mode's variable name
     * _name_: the filename's variable name
-  * _mode_:    the default mode for the editor to use (e.g. htmlmixed) (not yet supported)
+  * _mode_:    the default mode for the editor to use (e.g. htmlmixed)
+  * _readOnly_: Boolean, whether to make the textArea readOnly; _default_: false
   * _options_: a collection defining additional options:
     * _binding_: String, overrides the _binding_-attribute
-    * _defaultReadOnly_: Boolean, whether to open files read only; _default_: false (not yet supported)
     * _menu_: Boolean, whether to display a menu bar or not; _default_: true
     * _menuFile_: Boolean, whether to display a file menu or not; _default_: false
     * _menuView_: Boolean, whether to display a view menu or not; _default_: true
     * _mode_: String, overrides the _mode_-attribute (not yet supported)
     * _overlayDefinitionsVar_: String, a js-variable name in which you can define additional CodeMirror overlays
-    * _readOnly_: Boolean, whether to make the textArea readOnly; _default_: false (not yet supported)
+    * _readOnly_: Boolean, overrides the _readOnly_-attribute
     * _theme_: String, overrides the _theme_-attribute
     * _useSession_: Boolean, whether to save editor state in the user's browser; _default_: true (not yet supported) _default_: true
   * _theme_:   the initial theme to use
