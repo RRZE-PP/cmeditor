@@ -1,9 +1,9 @@
 /*
-*= require codemirror-4.0/lib/codemirror
+*= require codemirror-5.3/lib/codemirror
 *
-*= require_full_tree codemirror-4.0/theme
-*= require_full_tree codemirror-4.0/addon/dialog
-*= require_full_tree codemirror-4.0/addon/hint
-*= require_full_tree codemirror-4.0/addon/fold
-*= require_full_tree codemirror-4.0/addon/display
+*= require_full_tree codemirror-5.3/theme
+*= require_full_tree codemirror-5.3/addon/dialog
+*= require_full_tree codemirror-5.3/addon/hint
+*= require_full_tree codemirror-5.3/addon/fold
+*= require_full_tree codemirror-5.3/addon/display
 */
