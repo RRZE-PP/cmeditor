@@ -315,7 +315,7 @@ this.CMEditor = (function(){
 					displayMessage(self, data.msg, textStatus);
 					//cmeditor_${name}_ajax_reload();
 				},
-				error:function(XMLHttpRequest,textStatus,errorThrown){}
+				error:function(XMLHttpRequest,textStatus,errorThrown){displayMessage(self, "An error occured: "+ textStatus +" " + errorThrown);}
 			});
 		}
 
@@ -363,7 +363,7 @@ this.CMEditor = (function(){
 					}
 					displayMessage(self, data.msg, textStatus);
 				},
-				error:function(XMLHttpRequest,textStatus,errorThrown){}
+				error:function(XMLHttpRequest,textStatus,errorThrown){displayMessage(self, "An error occured: "+ textStatus +" " + errorThrown);}
 			});
 			return false;
 		}
@@ -824,9 +824,8 @@ this.CMEditor = (function(){
 					displayMessage(self, data.msg);
 				}
 			},
-			error:function(XMLHttpRequest,textStatus,errorThrown){
-				displayMessage(self, textStatus + ": " + errorThrown);
-			},
+
+		error:function(XMLHttpRequest,textStatus,errorThrown){displayMessage(self, "An error occured: "+ textStatus +" " + errorThrown);},
 		});
 	}
 

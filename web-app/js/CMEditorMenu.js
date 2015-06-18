@@ -162,7 +162,7 @@ this.CMEditorMenu = (function(){
 						} else {
 							self.cmeditor.displayMessage(data.msg);
 						}
-					});
+					}).fail(function(XMLHttpRequest,textStatus,errorThrown){self.cmeditor.displayMessage("An error occured: "+ textStatus +" " + errorThrown);});
 				}
 			},
 			save: function(cm) { self.cmeditor.saveDoc(); },
