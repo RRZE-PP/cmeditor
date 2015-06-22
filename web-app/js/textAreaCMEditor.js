@@ -6,10 +6,12 @@ this.textAreaCMEditor = function (){
 
     function textAreaCMEditor(rootElem, options, instanceName){
         //allow the user to omit new
-        if (!(this instanceof textAreaCMEditor)) return new textAreaCMEditor(rootElem, options);
+        if (!(this instanceof textAreaCMEditor)) return new textAreaCMEditor(rootElem, options, instanceName);
         var self = this;
         self.instanceNo = textAreaCMEditor.instanciated++;
         self.instanceName = instanceName !== undefined ? instanceName : "";
+        if(self.instanceName == "")
+            log("Warning: No instance name supplied, fullscreen mode will be disabled!");
 
         var rootElem = self.rootElem = $(rootElem);
         self.options  = options  = options !== undefined ? options : {};
@@ -31,6 +33,11 @@ this.textAreaCMEditor = function (){
         //disable some browser featues when the codeMirror has focus
         $(document).bind("keydown", function(e){
             if(e.ctrlKey && self.rootElem.find("CodeMirror-focused").size() !== 0){
+                e.preventDefault();
+            }
+
+            if(e.which == 122 && !self.codeMirror.getOption("readOnly") && (self.rootElem.find("*:focus").size() > 0 || self.codeMirror.hasFocus())){
+                toggleFullscreen(self);
                 e.preventDefault();
             }
         });
@@ -134,11 +141,6 @@ this.textAreaCMEditor = function (){
         var keyMap = {
             "Ctrl-Space": "autocomplete",
             "Ctrl-Q": function(cm){ cm.foldCode(cm.getCursor()); },
-            "F11": function(cm) {
-                if (!cm.getOption("readOnly")) {
-                    cm.setOption("fullScreen", !cm.getOption("fullScreen"));
-                }
-            },
             "Alt-Up": function(cm) { cmeditorbase_moveUp(cm); },
             "Alt-Down": function(cm) { cmeditorbase_moveDown(cm); },
             "Ctrl-7": function(cm) { cmeditorbase_comment(cm); },
@@ -240,6 +242,51 @@ this.textAreaCMEditor = function (){
         log(self, "added a hook to event"+eventName);
     }
 
+
+    /* (Public)
+     * Enters or leaves fullscreen mode
+     */
+    function toggleFullscreen(self){
+        log(self, "Fullscreen toggled");
+        if(self.instanceName == ""){
+            log(self, "Could not enter fullscreen mode: no instance name supplied");
+            return;
+        }
+
+        if(self.cssBeforeFullscreen == undefined){
+            self.cssBeforeFullscreen = {"position": self.rootElem.css("position"),
+                                "top":  self.rootElem.css("top"),
+                                "left":  self.rootElem.css("left"),
+                                "height":  self.rootElem.css("height"),
+                                "width":  self.rootElem.css("width")};
+            self.oldDocumentOverflow = document.documentElement.style.overflow;
+            document.documentElement.style.overflow = "hidden";
+            self.rootElem.css({"position": "fixed", "top": "0", "left": "0", "height": "100%", "width": "100%"});
+            self.rootElem.addClass("cmeditor-fullscreen");
+
+            log(self ,"#cmeditor-"+self.instanceName+"-centerpane")
+            self.layout = self.rootElem.layout({
+                    center__paneSelector: "#cmeditor-"+self.instanceName+"-centerpane",
+                    north__paneSelector:  "#cmeditor-"+self.instanceName+"-northernpane",
+                    north__size: 75,
+                    north__resizable:false
+                    });
+
+            self.codeMirror.refresh();
+
+        }else{
+
+            self.layout.destroy();
+
+            self.rootElem.removeClass("cmeditor-fullscreen");
+            self.rootElem.css(self.cssBeforeFullscreen);
+            document.documentElement.style.overflow = self.oldDocumentOverflow;
+            self.cssBeforeFullscreen = undefined;
+
+            self.codeMirror.refresh();
+        }
+    }
+
     /* (Public)
      *
      * Logs its call to the console
@@ -254,6 +301,7 @@ this.textAreaCMEditor = function (){
     textAreaCMEditor.prototype.focus         = function(){Array.prototype.unshift.call(arguments, this); return focus.apply(this, arguments)};
     textAreaCMEditor.prototype.update        = function(){Array.prototype.unshift.call(arguments, this); return update.apply(this, arguments)};
     textAreaCMEditor.prototype.getCodeMirror = function(){Array.prototype.unshift.call(arguments, this); return getCodeMirror.apply(this, arguments)};
+    textAreaCMEditor.prototype.toggleFullscreen = function(){Array.prototype.unshift.call(arguments, this); return toggleFullscreen.apply(this, arguments)};
 
     return textAreaCMEditor;
 

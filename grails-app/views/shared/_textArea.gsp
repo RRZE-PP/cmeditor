@@ -1,7 +1,7 @@
 <div id="${name}" class="cmeditor">
-	<g:if test="${options.menu}"><g:render template="/shared/menu" plugin="cmeditor" model="[name:name, options:options]"></g:render></g:if>
+	<g:if test="${options.menu}"><div  id="cmeditor-${name}-northernpane"><g:render template="/shared/menu" plugin="cmeditor" model="[name:name, options:options]"></g:render></div></g:if>
 	<div class="cmeditor-settings"></div>
-	<div class="cmeditor-main">
+	<div  id="cmeditor-${name}-centerpane" class="cmeditor-main">
 		<g:textArea  name="${name}" value="${value}" />
 	</div>
 </div>
@@ -23,6 +23,6 @@
 			readOnly: ${options.readOnly}                            //Boolean: whether the whole editor should be read-only
 		}
 
-		textAreaCMEditor($("#${name}"), textAreaCMEditorOptions);
+		textAreaCMEditor($("#${name}"), textAreaCMEditorOptions, "${name}");
 	});
 </script>

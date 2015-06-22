@@ -23,4 +23,6 @@
 
 //= require_full_tree jsdifflib
 
+//= require_full_tree jquery-layout-1.4.0
+
 //= require cmeditor-common

@@ -63,7 +63,7 @@ this.CMEditorMenu = (function(){
 		clazz.instancesString[instanceName] = instance;
 		clazz.instancesNumber[instanceNo]   = instance;
 		clazz.instances.push(instance);
-		log("registered new textAreaCMEditor instance #" + instanceNo + " '" + instanceName + "'");
+		log("registered new CMEditorMenu instance #" + instanceNo + " '" + instanceName + "'");
 	}
 
 	/*
@@ -201,7 +201,7 @@ this.CMEditorMenu = (function(){
 			goto: function(cm) { self.cmeditor.goto() },
 			addonfullscreen: function(cm) {
 				if (!cm.getOption("readOnly")) {
-					cm.setOption("fullScreen", !cm.getOption("fullScreen"));
+					self.cmeditor.toggleFullscreen();
 		        }
 		    },
 			modehtmlmixed: function(cm) { cm.setOption("mode", "htmlmixed"); },

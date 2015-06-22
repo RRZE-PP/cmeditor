@@ -6,4 +6,6 @@
 *= require_full_tree codemirror-5.3/addon/hint
 *= require_full_tree codemirror-5.3/addon/fold
 *= require_full_tree codemirror-5.3/addon/display
+
+*= require_full_tree jquery-layout-1.4.0
 */

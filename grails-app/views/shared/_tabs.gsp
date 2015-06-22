@@ -1,20 +1,28 @@
 <div id="${name}" class="cmeditor">
-	<div class="cmeditor-tab-message" style="display:none;"></div>
+	<div id="cmeditor-${name}-northernpane">
+		<div class="cmeditor-tab-message" style="display:none;"></div>
 
-	<g:if test="${options.menu}">
-		<g:render template="/shared/menu" plugin="cmeditor" model="[name:name, options:options]"></g:render>
-	</g:if>
-	<div class="cmeditor-settings"></div>
+		<g:if test="${options.menu}">
+				<g:render template="/shared/menu" plugin="cmeditor" model="[name:name, options:options]"></g:render>
+		</g:if>
+		<div class="cmeditor-settings"></div>
+		</div>
 	<div class="cmeditor-main">
 		<form method="post">
-			<g:hiddenField name="_cmeditorContent" data-docField="content" class="cmeditor-field" value="" />
-			<g:hiddenField name="_cmeditorMode" data-docField="mode" class="cmeditor-field" value="" />
-			<g:hiddenField name="_cmeditorName" data-docField="name" class="cmeditor-field" value="" />
-			<g:hiddenField name="_cmeditorOrigContent" data-docField="origContent" class="cmeditor-field" value="" />
-			<g:hiddenField name="_cmeditorReadOnly" data-docField="readOnly" class="cmeditor-field" value="" />
-			<g:hiddenField name="_cmeditorStatus" data-docField="status" class="cmeditor-field" value="" />
-			${raw(body())}
-			<ul class="docs tabs"></ul>
+			<div id="cmeditor-${name}-easternpane">
+				<g:hiddenField name="_cmeditorContent" data-docField="content" class="cmeditor-field" value="" />
+				<g:hiddenField name="_cmeditorMode" data-docField="mode" class="cmeditor-field" value="" />
+				<g:hiddenField name="_cmeditorName" data-docField="name" class="cmeditor-field" value="" />
+				<g:hiddenField name="_cmeditorOrigContent" data-docField="origContent" class="cmeditor-field" value="" />
+				<g:hiddenField name="_cmeditorReadOnly" data-docField="readOnly" class="cmeditor-field" value="" />
+				<g:hiddenField name="_cmeditorStatus" data-docField="status" class="cmeditor-field" value="" />
+				${raw(body())}
+			</div>
+			<div id="cmeditor-${name}-centerpane">
+				<ul class="docs tabs"></ul>
+
+				<textarea class="cmTarget"></textarea>
+			</div>
 		</form>
 	</div>
 </div>

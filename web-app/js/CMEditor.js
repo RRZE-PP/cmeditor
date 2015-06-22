@@ -14,6 +14,8 @@ this.CMEditor = (function(){
 		var self = this;
 		self.instanceNo = CMEditor.instanciated++;
 		self.instanceName = instanceName !== undefined ? instanceName : "";
+        if(self.instanceName == "")
+            log("Warning: No instance name supplied, fullscreen mode will be disabled!");
 
 		self.rootElem = $(rootElem);
 		self.options  = options = options !== undefined ? options : {};
@@ -45,30 +47,12 @@ this.CMEditor = (function(){
 			if(e.ctrlKey && self.rootElem.find("CodeMirror-focused").size() !== 0){
 				e.preventDefault();
 			}
-		});
 
-        //replace code mirror's fullscreen mode addon
-        CodeMirror.defineOption("fullScreen", false, function() {
-            var focusElems = jQuery.grep(self.rootElem.find("*"),function(elem){return $(elem).is(":focus")});
-            if(focusElems.length != 0){
-                if(self.oldSizeMem == undefined){
-                    self.oldSizeMem = {"position": self.rootElem.css("position"),
-                                        "top":  self.rootElem.css("top"),
-                                        "left":  self.rootElem.css("left"),
-                                        "height":  self.rootElem.css("height"),
-                                        "width":  self.rootElem.css("width"),
-                                        "overflow": self.rootElem.css("overflow"),
-                                     	"box-sizing": self.rootElem.css("box-sizing")};
-                    self.oldDocumentOverflow = document.documentElement.style.overflow;
-                    document.documentElement.style.overflow = "hidden";
-                    self.rootElem.css({"position": "fixed", "top": "0", "left": "0", "height": "100%", "width": "100%", "overflow-y": "scroll", "box-sizing": "border-box"});
-                }else{
-                    self.rootElem.css(self.oldSizeMem);
-                    document.documentElement.style.overflow = self.oldDocumentOverflow;
-                    self.oldSizeMem = undefined;
-                }
-            }
-        });
+			if(e.which == 122 && !self.codeMirror.getOption("readOnly") && (self.rootElem.find("*:focus").size() > 0 || self.codeMirror.hasFocus())){
+				toggleFullscreen(self);
+				e.preventDefault();
+			}
+		});
 
 		registerInstance(self.instanceName, self.instanceNo, self);
 
@@ -138,11 +122,6 @@ this.CMEditor = (function(){
 			"Ctrl-Space": "autocomplete",
 			"Ctrl-S":     function(cm) { save(self);},
 			"Ctrl-Q":     function(cm){ cm.foldCode(cm.getCursor()); },
-			"F11":        function(cm) {
-			                 if (!cm.getOption("readOnly")) {
-			                 	cm.setOption("fullScreen", !cm.getOption("fullScreen"));
-			                 }
-			               },
 			"Alt-Up":     function(cm) { cmeditorbase_moveUp(cm); },
 			"Alt-Down":   function(cm) { cmeditorbase_moveDown(cm); },
 			"Ctrl-7":     function(cm) { cmeditorbase_comment(cm); },
@@ -179,7 +158,7 @@ this.CMEditor = (function(){
 		if(options.defaultReadOnly || options.readOnly)
 			codeMirrorOptions.readOnly = "nocursor";
 
-		var codeMirror = self.codeMirror = CodeMirror(self.rootElem.find(".cmeditor-main form").get(0), codeMirrorOptions);
+		var codeMirror = self.codeMirror = CodeMirror.fromTextArea(self.rootElem.find(".cmeditor-main .cmTarget").get(0), codeMirrorOptions);
 
 		if(options.useSession){
 			if(localStorage["cmeditor-menu-binding"])
@@ -1087,6 +1066,50 @@ this.CMEditor = (function(){
 	}
 
 	/* (Public)
+	 * Enters or leaves fullscreen mode
+	 */
+	function toggleFullscreen(self){
+		log(self, "Fullscreen toggled");
+		if(self.instanceName == ""){
+			log(self, "Could not enter fullscreen mode: no instance name supplied");
+            return;
+		}
+
+        if(self.cssBeforeFullscreen == undefined){
+            self.cssBeforeFullscreen = {"position": self.rootElem.css("position"),
+                                "top":  self.rootElem.css("top"),
+                                "left":  self.rootElem.css("left"),
+                                "height":  self.rootElem.css("height"),
+                                "width":  self.rootElem.css("width")};
+            self.oldDocumentOverflow = document.documentElement.style.overflow;
+            document.documentElement.style.overflow = "hidden";
+            self.rootElem.css({"position": "fixed", "top": "0", "left": "0", "height": "100%", "width": "100%"});
+            self.rootElem.addClass("cmeditor-fullscreen");
+
+            self.layout = self.rootElem.layout({
+					east__paneSelector:   "#cmeditor-"+self.instanceName+"-easternpane",
+					center__paneSelector: "#cmeditor-"+self.instanceName+"-centerpane",
+					north__paneSelector:  "#cmeditor-"+self.instanceName+"-northernpane",
+					north__size: 75,
+					north__resizable:false
+					});
+
+            self.codeMirror.refresh();
+
+        }else{
+
+        	self.layout.destroy();
+
+            self.rootElem.removeClass("cmeditor-fullscreen");
+            self.rootElem.css(self.cssBeforeFullscreen);
+            document.documentElement.style.overflow = self.oldDocumentOverflow;
+            self.cssBeforeFullscreen = undefined;
+
+            self.codeMirror.refresh();
+        }
+	}
+
+	/* (Public)
 	 * Updates mode and read-onlyness of the current document to the corresponding properties
 	 * of the underlying codeMirror
 	 */
@@ -1166,6 +1189,7 @@ this.CMEditor = (function(){
 	CMEditor.prototype.saveDoc                   = function(){Array.prototype.unshift.call(arguments, this); return save.apply(this, arguments)};
 	CMEditor.prototype.saveDocAs                 = function(){Array.prototype.unshift.call(arguments, this); return saveas.apply(this, arguments)};
 	CMEditor.prototype.setDoDiffBeforeSaving     = function(){Array.prototype.unshift.call(arguments, this); return setDoDiffBeforeSaving.apply(this, arguments)};
+	CMEditor.prototype.toggleFullscreen          = function(){Array.prototype.unshift.call(arguments, this); return toggleFullscreen.apply(this, arguments)};
 	CMEditor.prototype.renameDoc                 = function(){Array.prototype.unshift.call(arguments, this); return rename.apply(this, arguments)};
 	CMEditor.prototype.update                    = function(){Array.prototype.unshift.call(arguments, this); return update.apply(this, arguments)};
 	CMEditor.prototype.displayMessage            = function(){Array.prototype.unshift.call(arguments, this); return displayMessage.apply(this, arguments)};

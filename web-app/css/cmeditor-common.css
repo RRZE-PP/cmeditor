@@ -88,7 +88,7 @@ div.cmeditor {
 
 
 div.cmeditor-menu {
-    position: absolute;
+    position: relative;
     left: 0px;
     top: 34px;
     width:100%;
@@ -119,7 +119,11 @@ div.cmeditor-menu {
     z-index:5;
 }
 
-.cmeditor-menubar { margin: 0 0 4em; }
+.cmeditor-menubar {
+    margin: 0 0 4em 0;
+    overflow:visible;
+    height: 32px; /*set fixed height, jquery's clearfix is broken*/
+}
 
 .cmeditor .ui-button-text {
     font-size: 11pt;
@@ -127,6 +131,7 @@ div.cmeditor-menu {
 .cmeditor .ui-menu .ui-menu-item a {
 	font-size: 11pt;
 }
+
 
 .cmeditor ul.tabs {
     font-family: "Ubuntu Mono";
@@ -225,3 +230,55 @@ div.cmeditor-menu {
         background-position: bottom;
         background-repeat: repeat-x;
       }
+
+/*
+ * Stuff for fullscreen mode
+ */
+div.cmeditor.cmeditor-fullscreen {
+    border:none;
+    padding:0;
+    border-radius:initial;
+    overflow-y: scroll;
+    box-sizing: border-box;
+    z-index: 95;
+}
+
+div.cmeditor.cmeditor-fullscreen .cmeditor-main {
+    position:static;
+}
+
+div.cmeditor.cmeditor-fullscreen .cmeditor-menu {
+    z-index:97;
+    top: 20px;
+}
+
+div.cmeditor.cmeditor-fullscreen .CodeMirror {
+    height: calc(100% - 30px);
+    height: -moz-calc(100% - 30px);
+    height: -webkit-calc(100% - 30px);
+    height: -o-calc(100% - 30px);
+}
+
+ div.cmeditor.cmeditor-fullscreen .ui-layout-container, .ui-layout-container * {
+    box-sizing: border-box;
+ }
+
+ div.cmeditor.cmeditor-fullscreen .ui-layout-pane {
+    background:none;
+    padding:20px;
+    border:none;
+ }
+
+ div.cmeditor.cmeditor-fullscreen .ui-layout-pane-center {
+    background: none;
+    padding: 0px;
+ }
+
+div.cmeditor.cmeditor-fullscreen .ui-layout-pane-north {
+    overflow:visible;
+    z-index: 95 !important; /*overwrite style-attribute set by jquery-layout; todo: in der doku nachgucken, da gibts scheinbar mechanismen*/
+}
+
+div.cmeditor.cmeditor-fullscreen .ui-layout-pane-north .ui-menu {
+    z-index: 96;
+}
