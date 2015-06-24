@@ -76,7 +76,7 @@ modules = {
 	}
 
 	'cmeditor-menu' {
-		dependsOn 'jquery, jquery-ui'
+		dependsOn 'jquery, jquery-ui, jquery-ui-scopedTheme'
 
 		resource url:'/css/jquery/jquery.ui.menubar.css', disposition:'head'
 		resource url:'/js/jquery/jquery.ui.menubar.js', disposition:'head'
@@ -87,13 +87,13 @@ modules = {
 	}
 
 	'cmeditor-tabs' {
-		dependsOn 'jquery, jquery-ui, cmeditor-dependencies, cmeditor-menu'
+		dependsOn 'jquery, jquery-ui, jquery-ui-scopedTheme, cmeditor-dependencies, cmeditor-menu'
 
 		resource url:'/js/CMEditor.js', disposition:'head'
 	}
 
 	'cmeditor-textarea' {
-		dependsOn 'jquery, jquery-ui, cmeditor-dependencies, cmeditor-menu'
+		dependsOn 'jquery, jquery-ui, jquery-ui-scopedTheme, cmeditor-dependencies, cmeditor-menu'
 
 		resource url:'/js/textAreaCMEditor.js', disposition:'head'
 	}
@@ -104,5 +104,9 @@ modules = {
 		resource url:'/lib/jsdifflib/difflib.js', disposition:'head'
 		resource url:'/lib/jsdifflib/diffview.css', disposition:'head'
 		resource url:'/lib/jsdifflib/diffview.js', disposition:'head'
+	}
+
+	'jquery-ui-scopedTheme' {
+		resource url:'/lib/jquery-ui-1.10.4.custom/css/cmeditor/jquery-ui-1.10.4.custom.css', disposition:'head'
 	}
 }
