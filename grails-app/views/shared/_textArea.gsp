@@ -1,4 +1,5 @@
 <div id="${name}" class="cmeditor">
+	<style></style>
 	<g:if test="${options.menu}"><div  id="cmeditor-${name}-northernpane"><g:render template="/shared/menu" plugin="cmeditor" model="[name:name, options:options]"></g:render></div></g:if>
 	<div class="cmeditor-settings"></div>
 	<div  id="cmeditor-${name}-centerpane" class="cmeditor-main">

@@ -65,6 +65,8 @@ this.textAreaCMEditor = function (){
             }
         });
 
+        copyCMTheme(self);
+
         registerInstance(self.instanceName, self.instanceNo, self);
     }
 
@@ -201,6 +203,34 @@ this.textAreaCMEditor = function (){
      *************************************************************************/
 
     /* (Public)
+     * Sets the code mirror theme and copies some styles to the CMEditor to match the theme as closely as possible
+     */
+    function copyCMTheme(self){
+        var id = self.rootElem.attr("id");
+        var style = self.rootElem.children("style").eq(0);
+        style.text("");
+
+        function copyCSS(fromSelector, targetSelector, propertyName, targetPropertyName){
+            var target =  "#" + id + (targetSelector!=null ? " " + targetSelector : "");
+            if(targetPropertyName == undefined)
+                targetPropertyName = propertyName;
+
+            style.text(style.text()+"\n"+target+"{"+targetPropertyName+":"+self.rootElem.find(fromSelector).css(propertyName)+"}");
+        }
+
+        copyCSS(".CodeMirror-gutters", null, "background-color");
+        copyCSS(".CodeMirror-linenumber", null, "color");
+        copyCSS(".CodeMirror", "input", "color");
+        copyCSS(".CodeMirror", "input", "background-color");
+
+        copyCSS(".CodeMirror-gutters", "ul.tabs li", "border-right-color", "border-color");
+        copyCSS(".CodeMirror-gutters", "ul.tabs li", "border-right-width", "border-width");
+        style.text(style.text()+"\n #"+id+" ul.tabs li {border-bottom-width: 0px}");
+        copyCSS(".CodeMirror", "ul.tabs li", "background-color");
+        copyCSS(".CodeMirror", "ul.tabs li", "color");
+    }
+
+    /* (Public)
      *
      * Sets focus to the text editor
      */
@@ -298,6 +328,7 @@ this.textAreaCMEditor = function (){
     textAreaCMEditor.prototype.constructor = textAreaCMEditor;
 
     //Zugegriffen aus Menu
+    textAreaCMEditor.prototype.copyCMTheme   = function(){Array.prototype.unshift.call(arguments, this); return copyCMTheme.apply(this, arguments)};
     textAreaCMEditor.prototype.focus         = function(){Array.prototype.unshift.call(arguments, this); return focus.apply(this, arguments)};
     textAreaCMEditor.prototype.update        = function(){Array.prototype.unshift.call(arguments, this); return update.apply(this, arguments)};
     textAreaCMEditor.prototype.getCodeMirror = function(){Array.prototype.unshift.call(arguments, this); return getCodeMirror.apply(this, arguments)};

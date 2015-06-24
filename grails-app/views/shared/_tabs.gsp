@@ -1,4 +1,5 @@
 <div id="${name}" class="cmeditor">
+	<style></style>
 	<div id="cmeditor-${name}-northernpane">
 		<div class="cmeditor-tab-message" style="display:none;"></div>
 

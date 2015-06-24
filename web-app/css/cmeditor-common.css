@@ -10,7 +10,9 @@
 /*     z-index: 9; */
 /* } */
 
-/*.CodeMirror-scroll { width: 400px }*/
+.CodeMirror-scroll {
+    overflow-x: hidden !important
+}
 
 .CodeMirror-fullscreen {
 	font-size: 11pt;
@@ -122,7 +124,7 @@ div.cmeditor-menu {
 .cmeditor-menubar {
     margin: 0 0 4em 0;
     overflow:visible;
-    height: 32px; /*set fixed height, jquery's clearfix is broken*/
+    height: 30px; /*set fixed height, jquery's clearfix seems to be broken*/
 }
 
 .cmeditor .ui-button-text {
@@ -160,41 +162,18 @@ div.cmeditor-menu {
     padding: 2px 20px 5px 5px;
     position: relative;
     z-index: 1;
+    opacity:0.6;
 }
 .cmeditor ul.tabs li:hover {
     color: #444444;
+    opacity:1;
 }
 .cmeditor ul.tabs li.selected {
     background: none repeat scroll 0 0 #FFFFFF;
     color: #222222;
     cursor: default;
     z-index: 3;
-}
-.cmeditor ul.tabs li:before, ul.tabs li:after {
-    border: 1px solid #C0C0C0;
-    bottom: 0;
-    content: " ";
-    height: 6px;
-    position: absolute;
-    width: 6px;
-}
-.cmeditor ul.tabs li:before {
-    border-bottom-right-radius: 6px;
-    border-width: 0 1px 1px 0;
-    box-shadow: 2px 2px 0 #F3F3F3;
-    left: -7px;
-}
-.cmeditor ul.tabs li:after {
-    border-bottom-left-radius: 6px;
-    border-width: 0 0 1px 1px;
-    box-shadow: -2px 2px 0 #F3F3F3;
-    right: -7px;
-}
-.cmeditor ul.tabs li.selected:before {
-    box-shadow: 2px 2px 0 #FFFFFF;
-}
-.cmeditor ul.tabs li.selected:after {
-    box-shadow: -2px 2px 0 #FFFFFF;
+    opacity:1;
 }
 
 .cmeditor ul.tabs .closeButton {
@@ -206,20 +185,6 @@ div.cmeditor-menu {
 	font-size:0.8em;
 }
 
-.cmeditor-completion:before {
-    -moz-box-sizing: border-box;
-    border-radius: 50%;
-    bottom: 4px;
-    color: #FFFFFF;
-    font-size: 12px;
-    font-weight: bold;
-    height: 15px;
-    left: 2px;
-    line-height: 16px;
-    position: absolute;
-    text-align: center;
-    width: 15px;
-}
 .cmeditor-completion {
     padding-left: 22px;
     position: relative;

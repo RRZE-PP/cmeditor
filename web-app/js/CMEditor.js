@@ -54,6 +54,8 @@ this.CMEditor = (function(){
 			}
 		});
 
+		copyCMTheme(self);
+
 		registerInstance(self.instanceName, self.instanceNo, self);
 
 		log(self, "cmeditor loaded.");
@@ -394,6 +396,34 @@ this.CMEditor = (function(){
 				updateCurrentDocument(self, {cmeditor_custom_field: true, old:old, new:getCustomElementValue(self, elem)});
 			}
 		}
+	}
+
+	/* (Public)
+	 * Sets the code mirror theme and copies some styles to the CMEditor to match the theme as closely as possible
+	 */
+	function copyCMTheme(self){
+		var id = self.rootElem.attr("id");
+		var style = self.rootElem.children("style").eq(0);
+		style.text("");
+
+		function copyCSS(fromSelector, targetSelector, propertyName, targetPropertyName){
+			var target =  "#" + id + (targetSelector!=null ? " " + targetSelector : "");
+			if(targetPropertyName == undefined)
+				targetPropertyName = propertyName;
+
+			style.text(style.text()+"\n"+target+"{"+targetPropertyName+":"+self.rootElem.find(fromSelector).css(propertyName)+"}");
+		}
+
+		copyCSS(".CodeMirror-gutters", null, "background-color");
+		copyCSS(".CodeMirror-linenumber", null, "color");
+		copyCSS(".CodeMirror", "input", "color");
+		copyCSS(".CodeMirror", "input", "background-color");
+
+		copyCSS(".CodeMirror-gutters", "ul.tabs li", "border-right-color", "border-color");
+		copyCSS(".CodeMirror-gutters", "ul.tabs li", "border-right-width", "border-width");
+		style.text(style.text()+"\n #"+id+" ul.tabs li {border-bottom-width: 0px}");
+		copyCSS(".CodeMirror", "ul.tabs li", "background-color");
+		copyCSS(".CodeMirror", "ul.tabs li", "color");
 	}
 
 	/*
@@ -1176,6 +1206,7 @@ this.CMEditor = (function(){
 	//public methods
 	CMEditor.prototype.ajax_load                 = function(){Array.prototype.unshift.call(arguments, this); return ajax_load.apply(this, arguments)};
 	CMEditor.prototype.closeDoc                  = function(){Array.prototype.unshift.call(arguments, this); return close.apply(this, arguments)};
+	CMEditor.prototype.copyCMTheme               = function(){Array.prototype.unshift.call(arguments, this); return copyCMTheme.apply(this, arguments)};
 	CMEditor.prototype.diff                      = function(){Array.prototype.unshift.call(arguments, this); return diff.apply(this, arguments)};
 	CMEditor.prototype.deleteDoc                 = function(){Array.prototype.unshift.call(arguments, this); return deleteDoc.apply(this, arguments)};
 	CMEditor.prototype.getDocumentPositionByName = function(){Array.prototype.unshift.call(arguments, this); return getDocumentPositionByName.apply(this, arguments)};
