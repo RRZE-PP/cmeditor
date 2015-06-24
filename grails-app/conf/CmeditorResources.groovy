@@ -69,7 +69,7 @@ modules = {
 		resource url: 'lib/codemirror-5.3/addon/display/fullscreen.js', disposition:'head'
 
 		resource url: 'lib/jquery-layout-1.4.0/layout-default-latest.css'
-		resource url: 'lib/jquery-layout-1.4.0/layout-default-latest.js'
+		resource url: 'lib/jquery-layout-1.4.0/jquery.layout-latest.js'
 
 		resource url:'/css/cmeditor-common.css', disposition:'head'
 		resource url:'/js/cmeditor-common.js', disposition:'head'
