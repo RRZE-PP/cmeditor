@@ -95,6 +95,7 @@ class CmeditorTagLib {
 		if (attrs.options) {
 			options.putAll(attrs.options)
 		}
-		out << render(template:"/shared/tabs", plugin:'cmeditor', model:[name: attrs.name, value: attrs.value, mode:attrs.mode, options:options, mapping:mapping, ajax:ajax, body: body])
+		def bodyContent = raw(body())
+		out << render(template:"/shared/tabs", plugin:'cmeditor', model:[name: attrs.name, value: attrs.value, mode:attrs.mode, options:options, mapping:mapping, ajax:ajax, bodyContent: bodyContent])
 	}
 }

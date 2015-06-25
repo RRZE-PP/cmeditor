@@ -17,7 +17,7 @@
 				<g:hiddenField name="_cmeditorOrigContent" data-docField="origContent" class="cmeditor-field" value="" />
 				<g:hiddenField name="_cmeditorReadOnly" data-docField="readOnly" class="cmeditor-field" value="" />
 				<g:hiddenField name="_cmeditorStatus" data-docField="status" class="cmeditor-field" value="" />
-				${raw(body())}
+				${bodyContent}
 			</div>
 			<div id="cmeditor-${name}-centerpane">
 				<ul class="docs tabs"></ul>
