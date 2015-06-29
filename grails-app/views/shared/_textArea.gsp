@@ -8,6 +8,15 @@
 </div>
 <script type="text/javascript">
 
+	<plugin:isAvailable name="resources">
+	CMEditor.themeBaseURL = "${resource(dir: '/static/lib/codemirror-5.3/theme/')}";
+	CMEditor.modeBaseURL = "${resource(dir: '/static/lib/codemirror-5.3/mode/')}";
+	</plugin:isAvailable>
+
+	<plugin:isAvailable name="asset-pipeline">
+	CMEditor.themeBaseURL = "${assetPath(src: 'codemirror-5.3/theme/')}";
+	CMEditor.modeBaseURL = "${assetPath(src: 'codemirror-5.3/mode/')}";
+	</plugin:isAvailable>
 
 	$(document).ready(function() {
 		var textAreaCMEditorOptions = {
@@ -21,7 +30,13 @@
 				"postMenuInit": function(){if(typeof cmeditor_${name}_postMenuInit != "undefined"){cmeditor_${name}_postMenuInit.apply(this, arguments)}},
 			},
 			mode: "${options.mode}",
-			readOnly: ${options.readOnly}                            //Boolean: whether the whole editor should be read-only
+			readOnly: ${options.readOnly},                           //Boolean: whether the whole editor should be read-only
+			useSession: ${options.useSession},                       //Boolean: whether to save some settings like theme in the browser's localstorage
+			availableThemes: 										 //List of Strings: names of all themes that should be available to the user
+				["default", "cobalt", "eclipse", "mbo", "night", "rubyblue", "solarized", "the-matrix", "twilight", "zenburn"],
+			availableModes: 										 //List of Strings: names of all modes (file extensions) that should be available to the user
+				["htmlmixed", "htmlembedded", "javascript", "xml", "css", "groovy", "java", "properties"],
+			preloadModules: false									 //Boolean: whether to load themes and modules at document load or on demand
 		}
 
 		textAreaCMEditor($("#${name}"), textAreaCMEditorOptions, "${name}");

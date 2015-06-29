@@ -28,16 +28,9 @@
 				<li><a href="#" value="goto"><span></span>goto</a></li>
 				<li><a href="#" value="addonfullscreen"><span></span>full-screen (f11)</a></li>
 				<li><a href="#"><span></span>Mode</a>
-					<ul class="modesMenu">
-						<li><a href="#" value="modehtmlmixed"><span class="ui-icon ui-icon-blank"></span>htmlmixed</a></li>
-						<li><a href="#" value="modehtmlembedded"><span></span>htmlembedded</a></li>
-						<li><a href="#" value="modejavascript"><span></span>javascript</a></li>
-						<li><a href="#" value="modexml"><span></span>xml</a></li>
-						<li><a href="#" value="modecss"><span></span>css</a></li>
-						<li><a href="#" value="modegroovy"><span></span>groovy</a></li>
-						<li><a href="#" value="modejava"><span></span>java</a></li>
-						<li><a href="#" value="modeproperties"><span></span>properties</a></li>
-					</ul></li>
+					<ul class="modesMenu  ui-menu-icons">
+					</ul>
+				</li>
 			</ul>
 		</li>
 		</g:if>
@@ -52,15 +45,9 @@
 						<li><a href="#" value="bindingsublime"><span></span>sublime</a></li>
 					</ul></li>
 				<li><a href="#"><span></span>Theme</a>
-					<ul id="cmeditor-menu-${name}-themes">
-						<li><a href="#" value="themedefault"><span class="ui-icon ui-icon-blank"></span>default</a></li>
-						<li><a href="#" value="themeeclipse"><span></span>eclipse</a></li>
-						<li><a href="#" value="themelesser-dark"><span></span>lesser-dark</a></li>
-						<li><a href="#" value="thememonokai"><span></span>monokai</a></li>
-						<li><a href="#" value="themenight"><span></span>night</a></li>
-						<li><a href="#" value="themethe-matrix"><span></span>the-matrix</a></li>
-						<li><a href="#" value="themetwilight"><span></span>twilight</a></li>
-					</ul></li>
+					<ul class="themesMenu" id="cmeditor-menu-${name}-themes">
+					</ul>
+				</li>
 			</ul>
 		</li>
 		<li><a href="#"><span></span>Addons</a>

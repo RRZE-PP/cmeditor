@@ -93,32 +93,6 @@ this.CMEditorMenu = (function(){
 	 * Initialises menu objects where the keys are the menu items' anchor's names and the values are callbacks
 	 */
 	function initMenus(self){
-		self.viewMenu = {
-			readOnly: function(cm) {
-				if (!cm.getOption("readOnly")) {
-					cm.setOption("readOnly", "nocursor");
-					self.find("a[value='addonfullscreen']").parent().addClass("ui-state-disabled");
-				} else {
-					cm.setOption("readOnly", false);
-					self.find("a[value='addonfullscreen']").parent().removeClass("ui-state-disabled");
-				}
-			},
-			diff: function(cm) { if(typeof self.cmeditor.diff == "function") self.cmeditor.diff(); },
-			addonfullscreen: function(cm) {
-				if (!cm.getOption("readOnly")) {
-					cm.setOption("fullScreen", !cm.getOption("fullScreen"));
-		        }
-		    },
-			modehtmlmixed: function(cm) { cm.setOption("mode", "htmlmixed"); },
-			modehtmlembedded: function(cm) { cm.setOption("mode", "htmlembedded"); },
-			modexml: function(cm) { cm.setOption("mode", "xml"); },
-			modecss: function(cm) { cm.setOption("mode", "css"); },
-			modejavascript: function(cm) { cm.setOption("mode", "javascript"); },
-			modegroovy: function(cm) { cm.setOption("mode", "groovy"); },
-			modejava: function(cm) { cm.setOption("mode", "text/x-java"); },
-			modeproperties: function(cm) { cm.setOption("mode", "properties"); },
-		}
-
 		self.fileMenu = {
 			new: function(cm) { self.cmeditor.newDoc(); },
 			open: function(cm) {
@@ -203,16 +177,39 @@ this.CMEditorMenu = (function(){
 				if (!cm.getOption("readOnly")) {
 					self.cmeditor.toggleFullscreen();
 		        }
-		    },
-			modehtmlmixed: function(cm) { cm.setOption("mode", "htmlmixed"); },
-			modehtmlembedded: function(cm) { cm.setOption("mode", "htmlembedded"); },
-			modexml: function(cm) { cm.setOption("mode", "xml"); },
-			modecss: function(cm) { cm.setOption("mode", "css"); },
-			modejavascript: function(cm) { cm.setOption("mode", "javascript"); },
-			modegroovy: function(cm) { cm.setOption("mode", "groovy"); },
-			modejava: function(cm) { cm.setOption("mode", "text/x-java"); },
-			modeproperties: function(cm) { cm.setOption("mode", "properties"); },
+		    }
 		}
+
+		//add available modes dynamically
+		var modesMenuElem = self.rootElem.find(".modesMenu");
+		if(self.options.availableModes === undefined){
+			self.options.availableThemes = [];
+		}
+		function getModeCallback(self, mode, mimetype){
+			return function(cm){CMEditor.loadMode(mode, function(){self.cmeditor.codeMirror.setOption("mode", mimetype); self.cmeditor.update();})};
+		}
+		for(var i=0; i < self.options.availableModes.length; i++){
+			var mode = self.options.availableModes[i];
+			var modename = mode;
+			var mimetype = mode;
+			var clike = {
+			"c":"text/x-csrc",
+			"c++":"text/x-c++src",
+			"java":"text/x-java",
+			"c#":"text/x-csharp",
+			"objective-c":"text/x-objectivec",
+			"scala":"text/x-scala",
+			"vertex":"text/x-vertex",
+			"fragment":"x-shader/x-fragment"};
+			if(mode in clike){
+				mimetype = clike[mode];
+				mode = "clike";
+			}
+			self.viewMenu["mode"+modename] = getModeCallback(self, mode, mimetype);
+			modesMenuElem.append('<li><a href="#" value="mode'+modename+'"><span></span>'+modename+'</a></li>');
+		}
+
+
 		self.optionsMenu = {
 			diffBeforeSave: function(cm) {
 				if(typeof self.cmeditor.setDoDiffBeforeSaving == "function")
@@ -221,15 +218,23 @@ this.CMEditorMenu = (function(){
 			bindingvim: function(cm) { cm.setOption("keymap", "vim"); cm.setOption("vimMode", true); },
 			bindingemacs: function(cm) { cm.setOption("keymap", "emacs"); cm.setOption("vimMode", false); },
 			bindingsublime: function(cm) { cm.setOption("keymap", "sublime"); cm.setOption("vimMode", false); },
-			themedefault: function(cm) { cm.setOption("theme", "default"); self.cmeditor.copyCMTheme(); },
-			themeeclipse: function(cm) { cm.setOption("theme", "eclipse");  self.cmeditor.copyCMTheme();},
-			"themelesser-dark": function(cm) { cm.setOption("theme", "lesser-dark");  self.cmeditor.copyCMTheme();},
-			thememonokai: function(cm) { cm.setOption("theme", "monokai");  self.cmeditor.copyCMTheme();},
-			themenight: function(cm) { cm.setOption("theme", "night");  self.cmeditor.copyCMTheme();},
-			"themethe-matrix": function(cm) { cm.setOption("theme", "the-matrix");  self.cmeditor.copyCMTheme();},
-			themetwilight: function(cm) { cm.setOption("theme", "twilight");  self.cmeditor.copyCMTheme();},
-			//theme: function(cm) { cm.setOption("theme", ""); },
 		};
+
+		//add available themes dynamically
+		var themesMenuElem = self.rootElem.find(".themesMenu");
+		if(self.options.availableThemes === undefined){
+			self.options.availableThemes = ["default"];
+		}
+		function getThemeCallback(self, theme){
+			return function(cm){CMEditor.loadTheme(theme, function(){self.cmeditor.codeMirror.setOption("theme", theme); self.cmeditor.copyCMTheme();})};
+		}
+		for(var i=0; i < self.options.availableThemes.length; i++){
+			var theme = self.options.availableThemes[i];
+			self.optionsMenu["theme"+theme] = getThemeCallback(self, theme);
+			themesMenuElem.append('<li><a href="#" value="theme'+theme+'"><span></span>'+theme+'</a></li>');
+		}
+
+
 		self.addonsMenu = {
 			addondonation: function(cm) {
 				self.donationDialog.dialog("open");
@@ -357,7 +362,6 @@ this.CMEditorMenu = (function(){
 		    else log(self, "CALLED MISSING VIEW: "+$(this).attr("value"));
 
 		    if ($(this).attr("value").indexOf("mode") == 0) {
-		    	self.cmeditor.update();
 				$(this).parent().parent().find("span").removeClass("ui-icon ui-icon-check");
 				$(this).children("span").addClass("ui-icon ui-icon-check");
 		    }

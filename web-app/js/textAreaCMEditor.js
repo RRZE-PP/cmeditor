@@ -65,7 +65,9 @@ this.textAreaCMEditor = function (){
             }
         });
 
-        copyCMTheme(self);
+        if(self.options.preloadModules){
+            preloadModules(self);
+        }
 
         registerInstance(self.instanceName, self.instanceNo, self);
     }
@@ -79,6 +81,7 @@ this.textAreaCMEditor = function (){
     clazz.instancesNumber = {};
     clazz.instancesString = {};
     clazz.instances = [];
+    clazz.loadedResources = [];
 
     /*
      * Logs to the console. If only one argument is provided prints the second argument prefixed by class name.
@@ -119,6 +122,68 @@ this.textAreaCMEditor = function (){
      */
      var getInstances = clazz.getInstances = function(){
         return clazz.instances;
+    }
+
+    /*
+     * Loads a (css or js) resource if it is not yet loaded, then calls a callback
+     *
+     * Parameters: location String: the resource location
+     *             callback Function: called when resource was loaded successfully or is already available
+     */
+    var loadResource = clazz.loadResource = function(location, callback){
+        if($.inArray(location, clazz.loadedResources) != -1){
+            if(callback !== undefined) callback();
+            return;
+        }
+
+        $.ajax(location)
+         .done(function(data){
+            //js is being evaluated automatically
+            if(location.indexOf("css", location.length - 3) !== -1){
+                $("head").append("<style>" + data + "</style>");
+            }
+
+            clazz.loadedResources.push(location);
+            if(callback !== undefined)
+                callback();
+         })
+         .fail(function(){
+            log("Could not load the resource at "+location);
+         });
+    }
+
+    /*
+     * Loads a theme if it is not yet loaded, then calls a callback. Requires the static
+     * property "themeBaseURL" to be set correctly
+     *
+     * Parameters: themeName String: the theme's name
+     *             callback Function: called when resource was loaded successfully or is already available
+     */
+    var loadTheme = clazz.loadTheme = function(themeName, callback){
+        if(clazz.themeBaseURL === undefined){
+            log("Please set the a themeBaseURL");
+            return;
+        }
+        if(themeName == "default"){
+            if(callback !== undefined) callback();
+            return;
+        }
+        loadResource(clazz.themeBaseURL+themeName+".css", callback);
+    }
+
+    /*
+     * Loads a mode if it is not yet loaded, then calls a callback. Requires the static
+     * property "modeBaseURL" to be set correctly
+     *
+     * Parameters: modeName String: the mode's name
+     *             callback Function: called when resource was loaded successfully or is already available
+     */
+    var loadMode = clazz.loadMode = function(modeName, callback){
+        if(clazz.modeBaseURL === undefined){
+            log("Please set the a modeBaseURL");
+            return;
+        }
+        loadResource(clazz.modeBaseURL+modeName+"/"+modeName+".js", callback);
     }
 
     /*************************************************************************
@@ -182,9 +247,9 @@ this.textAreaCMEditor = function (){
             else
                 codeMirror.setOption("keymap", "default");
 
-            if (localStorage['cmeditor-menu-theme'])
-                codeMirror.setOption("theme", localStorage['cmeditor-menu-theme']);
-            else
+            if (localStorage['cmeditor-menu-theme']){
+                loadTheme(localStorage["cmeditor-menu-theme"], function(){codeMirror.setOption("theme", localStorage["cmeditor-menu-theme"]); copyCMTheme(self);});
+            }else
                 codeMirror.setOption("theme", "default");
         }else{
             codeMirror.setOption("keymap", self.options.binding);
@@ -195,6 +260,18 @@ this.textAreaCMEditor = function (){
             codeMirror.setOption("vimMode", true);
         } else {
             codeMirror.setOption("vimMode", false);
+        }
+    }
+
+    /*
+     * Loads all modules in options.availableThemes and options.availableModes
+     */
+    function preloadModules(self){
+        for(var i=0; i<self.options.availableThemes.length; i++){
+            loadTheme(self.options.availableThemes[i]);
+        }
+        for(var i=0; i<self.options.availableModes.length; i++){
+            loadMode(self.options.availableModes[i]);
         }
     }
 

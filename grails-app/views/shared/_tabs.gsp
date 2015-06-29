@@ -28,10 +28,21 @@
 	</div>
 </div>
 <script type="text/javascript">
+
+	<plugin:isAvailable name="resources">
+	CMEditor.themeBaseURL = "${resource(dir: '/static/lib/codemirror-5.3/theme/')}";
+	CMEditor.modeBaseURL = "${resource(dir: '/static/lib/codemirror-5.3/mode/')}";
+	</plugin:isAvailable>
+
+	<plugin:isAvailable name="asset-pipeline">
+	CMEditor.themeBaseURL = "${assetPath(src: 'codemirror-5.3/theme/')}";
+	CMEditor.modeBaseURL = "${assetPath(src: 'codemirror-5.3/mode/')}";
+	</plugin:isAvailable>
+
 	$(document).ready(function() {
 		var codeMirrorEditorOptions = {
 			addModes: <g:if test="${options.addModes}">${options.addModes}</g:if><g:else>[]</g:else>,
-			                                                         //String[]: additional modes to add to the menu
+			                                                         //String[]: additional modes to add to the menu //TODO: Do we still need this for some obscure reason, see availableModes?
 			ajax:{
 				deleteURL: "${ajax.deleteURL}",                      //String:  a document deletion ca be triggered via this url
 				updateURL: "${ajax.updateURL}",                      //String:  a document update can be sent to this url
@@ -59,7 +70,12 @@
                                                                      //Object or undefined: descriptions for additional highlights and completions
 			readOnly: ${options.readOnly},                           //Boolean: whether the whole editor should be read-only
 			theme: "${options.theme}",                               //String:  the default theme to use
-			useSession: ${options.useSession}                        //Boolean: wether to save some data in the browser's localstorage
+			useSession: ${options.useSession},                       //Boolean: whether to save some data in the browser's localstorage
+			availableThemes: 										 //List of Strings: names of all themes that should be available to the user
+				["default", "cobalt", "eclipse", "mbo", "night", "rubyblue", "solarized", "the-matrix", "twilight", "zenburn"],
+			availableModes: 										 //List of Strings: names of all modes (file extensions) that should be available to the user
+				["htmlmixed", "htmlembedded", "javascript", "xml", "css", "groovy", "java", "properties"],
+			preloadModules: false									 //Boolean: whether to load themes and modules at document load or on demand
 		};
 
 		CMEditor($("#${name}"), codeMirrorEditorOptions, "${name}");

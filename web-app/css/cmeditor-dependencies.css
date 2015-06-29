@@ -1,7 +1,7 @@
 /*
 *= require codemirror-5.3/lib/codemirror
 *
-*= require_full_tree codemirror-5.3/theme
+
 *= require_full_tree codemirror-5.3/addon/dialog
 *= require_full_tree codemirror-5.3/addon/hint
 *= require_full_tree codemirror-5.3/addon/fold

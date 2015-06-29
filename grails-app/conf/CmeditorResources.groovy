@@ -9,24 +9,6 @@ modules = {
 		resource url: 'lib/codemirror-5.3/lib/codemirror.css', disposition:'head'
 		resource url: 'lib/codemirror-5.3/lib/codemirror.js', disposition:'head'
 
-		// modes
-		resource url: 'lib/codemirror-5.3/mode/htmlmixed/htmlmixed.js', disposition:'head'
-		resource url: 'lib/codemirror-5.3/mode/htmlembedded/htmlembedded.js', disposition:'head'
-		resource url: 'lib/codemirror-5.3/mode/css/css.js', disposition:'head'
-		resource url: 'lib/codemirror-5.3/mode/xml/xml.js', disposition:'head'
-		resource url: 'lib/codemirror-5.3/mode/javascript/javascript.js', disposition:'head'
-		resource url: 'lib/codemirror-5.3/mode/groovy/groovy.js', disposition:'head'
-		resource url: 'lib/codemirror-5.3/mode/clike/clike.js', disposition:'head'
-		resource url: 'lib/codemirror-5.3/mode/properties/properties.js', disposition:'head'
-
-		// themes
-		resource url: 'lib/codemirror-5.3/theme/eclipse.css', disposition:'head'
-		resource url: 'lib/codemirror-5.3/theme/lesser-dark.css', disposition:'head'
-		resource url: 'lib/codemirror-5.3/theme/monokai.css', disposition:'head'
-		resource url: 'lib/codemirror-5.3/theme/night.css', disposition:'head'
-		resource url: 'lib/codemirror-5.3/theme/the-matrix.css', disposition:'head'
-		resource url: 'lib/codemirror-5.3/theme/twilight.css', disposition:'head'
-
 		// keymaps
 		resource url: 'lib/codemirror-5.3/keymap/vim.js', disposition:'head'
 		resource url: 'lib/codemirror-5.3/keymap/sublime.js', disposition:'head'
