@@ -18,6 +18,7 @@ class CmeditorTagLib {
 			theme: 'default',
 			defaultReadOnly: false,
 			overlayDefinitionsVar: 'overlay_definitions',
+			preloadModules: false
 		]
 		def ajax = [:]
 		def mapping = [
@@ -46,7 +47,32 @@ class CmeditorTagLib {
 		if (attrs.options) {
 			options.putAll(attrs.options)
 		}
-		out << render(template:"/shared/textArea", plugin:'cmeditor', model:[name: attrs.name, value: attrs.value, mode:attrs.mode, options:options, mapping:mapping, ajax:ajax, body: body])
+
+		def availableThemes = [
+			"default",
+			"eclipse",
+			"lesser-dark",
+			"monokai",
+			"night",
+			"the-matrix",
+			"twilight"
+		]
+		def availableModes = [
+			"htmlmixed",
+			"htmlembedded",
+			"css",
+			"xml",
+			"javascript",
+			"groovy",
+			"java",
+			"properties"
+		]
+		if(attrs.availableThemes)
+			availableThemes = attrs.availableThemes
+		if(attrs.availableModes)
+			availableModes = attrs.availableModes
+
+		out << render(template:"/shared/textArea", plugin:'cmeditor', model:[name: attrs.name, value: attrs.value, mode:attrs.mode, options:options, mapping:mapping, ajax:ajax, body: body, availableModes: availableModes, availableThemes: availableThemes])
 	}
 
 	def tabs = { attrs, body ->
@@ -64,6 +90,7 @@ class CmeditorTagLib {
 			defaultReadOnly: false,
 			overlayDefinitionsVar: 'overlay_definitions',
 			defaultDiffBeforeSave: true,
+			preloadModules: false
 		]
 		def ajax = [
 			listURL:'ajaxList',
@@ -95,7 +122,32 @@ class CmeditorTagLib {
 		if (attrs.options) {
 			options.putAll(attrs.options)
 		}
+
+		def availableThemes = [
+			"default",
+			"eclipse",
+			"lesser-dark",
+			"monokai",
+			"night",
+			"the-matrix",
+			"twilight"
+		]
+		def availableModes = [
+			"htmlmixed",
+			"htmlembedded",
+			"css",
+			"xml",
+			"javascript",
+			"groovy",
+			"java",
+			"properties"
+		]
+		if(attrs.availableThemes)
+			availableThemes = attrs.availableThemes
+		if(attrs.availableModes)
+			availableModes = attrs.availableModes
+
 		def bodyContent = raw(body())
-		out << render(template:"/shared/tabs", plugin:'cmeditor', model:[name: attrs.name, value: attrs.value, mode:attrs.mode, options:options, mapping:mapping, ajax:ajax, bodyContent: bodyContent])
+		out << render(template:"/shared/tabs", plugin:'cmeditor', model:[name: attrs.name, value: attrs.value, mode:attrs.mode, options:options, mapping:mapping, ajax:ajax, bodyContent: bodyContent, availableModes: availableModes, availableThemes: availableThemes])
 	}
 }

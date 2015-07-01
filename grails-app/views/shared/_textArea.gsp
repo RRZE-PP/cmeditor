@@ -32,11 +32,9 @@
 			mode: "${options.mode}",
 			readOnly: ${options.readOnly},                           //Boolean: whether the whole editor should be read-only
 			useSession: ${options.useSession},                       //Boolean: whether to save some settings like theme in the browser's localstorage
-			availableThemes: 										 //List of Strings: names of all themes that should be available to the user
-				["default", "cobalt", "eclipse", "mbo", "night", "rubyblue", "solarized", "the-matrix", "twilight", "zenburn"],
-			availableModes: 										 //List of Strings: names of all modes (file extensions) that should be available to the user
-				["htmlmixed", "htmlembedded", "javascript", "xml", "css", "groovy", "java", "properties"],
-			preloadModules: false									 //Boolean: whether to load themes and modules at document load or on demand
+			availableThemes: ${availableThemes.encodeAsJSON()},		 //List of Strings: names of all themes that should be available to the user
+			availableModes:  ${availableModes.encodeAsJSON()},		 //List of Strings: names of all modes (file extensions) that should be available to the user
+			preloadModules: ${options.preloadModules}				 //Boolean: whether to load themes and modules at document load or on demand
 		}
 
 		textAreaCMEditor($("#${name}"), textAreaCMEditorOptions, "${name}");

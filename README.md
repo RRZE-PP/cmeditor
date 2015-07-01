@@ -30,13 +30,9 @@ When adding a textarea or tabbed editor you have to supply a `name`-attribute. A
 You can substitute a `<g:textArea name=""/>` with `<cmeditor:textArea name=""/>`.
 
 Available options here are:
-  * _ajax_: ajax locations (not yet supported)
+  * _availableModes_: List of Strings, all the modes (CodeMirror lingo for filetypes) the editor should make available. For a list see https://codemirror.net/mode/
+  * _availableThemes_: List of Strings, all the themes the editor should make available. For a list see https://codemirror.net/demo/theme.html
   * _binding_: the initial key-binding of the editor (e.g. vim)
-  * _mapping_: a collection defining the mapping for your document model (respectively the generated json):
-    * _content_: the file content's variable name
-    * _idField_: String, the variable name of the mapped document to use as id; _default_: id
-    * _mode_: the content's mode's variable name
-    * _name_: the filename's variable name
   * _mode_:    the default mode for the editor to use (e.g. htmlmixed)
   * _readOnly_: Boolean, whether to make the textArea readOnly; _default_: false
   * _options_: a collection defining additional options:
@@ -44,11 +40,12 @@ Available options here are:
     * _menu_: Boolean, whether to display a menu bar or not; _default_: true
     * _menuFile_: Boolean, whether to display a file menu or not; _default_: false
     * _menuView_: Boolean, whether to display a view menu or not; _default_: true
-    * _mode_: String, overrides the _mode_-attribute (not yet supported)
+    * _mode_: String, overrides the _mode_-attribute
     * _overlayDefinitionsVar_: String, a js-variable name in which you can define additional CodeMirror overlays
+    * _preloadModules_: Boolean, whether the editor should load all themes and modes on document load; _default_: false
     * _readOnly_: Boolean, overrides the _readOnly_-attribute
     * _theme_: String, overrides the _theme_-attribute
-    * _useSession_: Boolean, whether to save editor state in the user's browser; _default_: true (not yet supported) _default_: true
+    * _useSession_: Boolean, whether to save editor state in the user's browser; _default_: true
   * _theme_:   the initial theme to use
   * _value_: The initial value to put in the text area
 
@@ -63,6 +60,8 @@ Available options are:
     * getURL: GET, object representing the mapped document: _default_: 'ajaxGet?label=',
     * updateURL: POST, location to call to save a document; it's passed the document's id; _default_: 'ajaxUpdate',
     * deleteURL: POST, location to call to delete a document; it's passed the document's id; _default_: 'ajaxDelete',
+  * _availableModes_: List of Strings, all the modes (CodeMirror lingo for filetypes) the editor should make available. For a list see https://codemirror.net/mode/
+  * _availableThemes_: List of Strings, all the themes the editor should make available. For a list see https://codemirror.net/demo/theme.html
   * _binding_: the initial key-binding of the editor (e.g. vim)
   * _mapping_: a collection defining the mapping for your document model (respectively the generated json):
     * _content_: the file content's variable name
@@ -81,9 +80,10 @@ Available options are:
     * _menuView_: Boolean, whether to display a view menu or not; _default_: true
     * _mode_: String, overrides the _mode_-attribute (not yet supported)
     * _overlayDefinitionsVar_: String, a js-variable name in which you can define additional CodeMirror overlays
+    * _preloadModules_: Boolean, whether the editor should load all themes and modes on document load; _default_: false
     * _readOnly_: Boolean, whether to make the whole editor readOnly; _default_: false
     * _theme_: String, overrides the _theme_-attribute
-    * _useSession_: Boolean, whether to save editor state in the user's browser; _default_: true (not yet supported) _default_: true
+    * _useSession_: Boolean, whether to save editor state in the user's browser; _default_: true
   * _theme_:   the initial theme to use
 
 If you need additional input fields, you can provide them in the body of the tag. All elements with the class `cmeditor-field` there will be serialized using their name as key and sent along with the document's content.
