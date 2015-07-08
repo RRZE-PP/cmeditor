@@ -131,7 +131,8 @@ this.textAreaCMEditor = function (){
      *             callback Function: called when resource was loaded successfully or is already available
      */
     var loadResource = clazz.loadResource = function(location, callback){
-        if($.inArray(location, clazz.loadedResources) != -1){
+        //use CMEditor here instead of clazz to share resources between the two classes
+        if($.inArray(location, CMEditor.loadedResources) != -1){
             if(callback !== undefined) callback();
             return;
         }
@@ -143,7 +144,8 @@ this.textAreaCMEditor = function (){
                 $("head").append("<style>" + data + "</style>");
             }
 
-            clazz.loadedResources.push(location);
+            //use CMEditor here instead of clazz to share resources between the two classes
+            CMEditor.loadedResources.push(location);
             if(callback !== undefined)
                 callback();
          })
