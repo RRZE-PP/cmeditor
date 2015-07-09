@@ -1,4 +1,4 @@
-//= require CMEditor
+//= require CMEditor-src
 //= require textAreaCMEditor
 //= require CMEditorMenu
 //= require_self

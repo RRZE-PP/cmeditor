@@ -71,7 +71,7 @@ modules = {
 	'cmeditor-tabs' {
 		dependsOn 'jquery, jquery-ui, jquery-ui-scopedTheme, cmeditor-dependencies, cmeditor-menu'
 
-		resource url:'/js/CMEditor.js', disposition:'head'
+		resource url:'/js/CMEditor-src.js', disposition:'head'
 	}
 
 	'cmeditor-textarea' {
