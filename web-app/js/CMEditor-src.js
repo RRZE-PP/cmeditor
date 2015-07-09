@@ -41,6 +41,7 @@ this.CMEditor = (function(){
 		}
 
 		insertNewUntitledDocument(self);
+		syncTabIndent(self);
 
 		$(document).bind("keydown", function(e){
 			//disable some browser featues when the codeMirror has focus
@@ -256,6 +257,7 @@ this.CMEditor = (function(){
 
 		codeMirror.on("changes", function(cm, cmChangeObjects) {
 			updateCurrentDocument(self, cmChangeObjects);
+			syncTabIndent(self);
 		});
 	}
 
@@ -791,6 +793,13 @@ this.CMEditor = (function(){
 	}
 
 	/*
+	 * Syncs the indentation of the tabs to fit the indenation of the CodeMirror's gutter
+	 */
+	function syncTabIndent(self){
+		self.rootElem.find(".docs").css("padding-left", self.rootElem.find(".CodeMirror-gutters").width());
+	}
+
+	/*
 	 * Checks whether the list `data` has an entry with the value `name`. Type conversion is performed.
 	 *
 	 * Parameters: data List: the list of which to check the values
@@ -1202,6 +1211,7 @@ this.CMEditor = (function(){
 					});
 
             self.codeMirror.refresh();
+			syncTabIndent(self);
 
         }else{
 
@@ -1213,6 +1223,7 @@ this.CMEditor = (function(){
             self.cssBeforeFullscreen = undefined;
 
             self.codeMirror.refresh();
+			syncTabIndent(self);
         }
 	}
 
