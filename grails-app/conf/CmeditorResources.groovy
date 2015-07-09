@@ -62,8 +62,8 @@ modules = {
 
 		resource url:'/css/jquery/jquery.ui.menubar.css', disposition:'head'
 		resource url:'/js/jquery/jquery.ui.menubar.js', disposition:'head'
-		resource url:'/css/jquery/chosen.css', disposition:'head'
-		resource url:'/js/jquery/chosen.jquery.js', disposition:'head'
+		resource url:'lib/select2-4.0.0/dist/js/select2.min.js', disposition:'head'
+		resource url:'lib/select2-4.0.0/dist/css/select2.min.css', disposition:'head'
 
 		resource url:'/js/CMEditorMenu.js', disposition:'head'
 	}

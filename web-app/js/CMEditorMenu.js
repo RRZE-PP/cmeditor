@@ -2,7 +2,7 @@
 //= require jquery-ui
 
 //= require jquery/jquery.ui.menubar
-//= require jquery/chosen.jquery
+//= require select2-4.0.0/dist/js/select2.min.js
 
 this.CMEditorMenu = (function(){
 
@@ -97,10 +97,8 @@ this.CMEditorMenu = (function(){
 			new: function(cm) { self.cmeditor.newDoc(); },
 			open: function(cm) {
 
-				var s = $("<select class=\"fileSelect\" name=\"cmeditor-menu-open-select\" multiple=\"true\" />");
-				self.openDialog.find(".noFiles").remove();
-				self.openDialog.find(".fileSelect").remove();
-				self.openDialog.find(".chosen-container").remove();
+				self.openDialog.children().remove();
+				var s = $("<select class=\"fileSelect\" name=\"cmeditor-menu-open-select\" multiple=\"multiple\" style=\"width:100%\"/>");
 
 				if(self.options.ajax.listURL){
 					$.get(self.options.ajax.listURL, function(data){
@@ -111,13 +109,18 @@ this.CMEditorMenu = (function(){
 							};
 							for(var i=0; i < data.result.length; ++i) {
 								if (self.cmeditor.getDocumentPositionByName(data.result[i]) == undefined) {
-									$("<option />", {value: data.result[i], text: data.result[i]}).appendTo(s);
+									s.append($("<option />", {value: data.result[i], text: data.result[i]}));
 									available = true;
 								}
 							}
 							if (available == true) {
 								s.appendTo(self.openDialog);
-								self.openDialog.find(".fileSelect").chosen({width:"95%"});
+								self.openDialog.find(".fileSelect").select2({placeholder: "Select a file",
+  																			 allowClear: true})
+
+								//workaround a width calculation bug in select2
+								self.openDialog.find(".select2-search__field").css("width", "auto");
+
 								myButtons.Open = function() {
 									var vals = self.openDialog.find(".fileSelect").val();
 									for (var i in vals) {
