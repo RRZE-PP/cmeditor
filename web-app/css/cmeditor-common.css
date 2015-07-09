@@ -27,8 +27,9 @@
 .CodeMirror div.CodeMirror-cursor {
     border-left: 2px solid #444444;
 }
-.CodeMirror-hint {
+.CodeMirror-hints {
     font-size: 11pt;
+    z-index: 96;
 }
 
 
