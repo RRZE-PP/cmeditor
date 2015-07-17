@@ -348,7 +348,6 @@ this.textAreaCMEditor = function (){
 
         self.eventHooks[eventName].push(hook);
 
-        log(self, "added a hook to event"+eventName);
     }
 
 
@@ -356,9 +355,7 @@ this.textAreaCMEditor = function (){
      * Enters or leaves fullscreen mode
      */
     function toggleFullscreen(self){
-        log(self, "Fullscreen toggled");
         if(self.instanceName == ""){
-            log(self, "Could not enter fullscreen mode: no instance name supplied");
             return;
         }
 
@@ -373,7 +370,6 @@ this.textAreaCMEditor = function (){
             self.rootElem.css({"position": "fixed", "top": "0", "left": "0", "height": "100%", "width": "100%"});
             self.rootElem.addClass("cmeditor-fullscreen");
 
-            log(self ,"#cmeditor-"+self.instanceName+"-centerpane")
             self.layout = self.rootElem.layout({
                     center__paneSelector: "#cmeditor-"+self.instanceName+"-centerpane",
                     north__paneSelector:  "#cmeditor-"+self.instanceName+"-northernpane",
@@ -401,7 +397,6 @@ this.textAreaCMEditor = function (){
      * Logs its call to the console
      */
     function update(self) {
-        log(self, "update was performed.")
     }
 
     textAreaCMEditor.prototype.constructor = textAreaCMEditor;

@@ -61,7 +61,6 @@ this.CMEditor = (function(){
 
 		registerInstance(self.instanceName, self.instanceNo, self);
 
-		log(self, "cmeditor loaded.");
 	}
 
 	/*************************************************************************
@@ -629,7 +628,6 @@ this.CMEditor = (function(){
 		selectDocumentByIndex(self, self.docs.length - 1);
 		removeUntitledDocument(self);
 
-		log(self, "insertNewDocument '"+newDoc.getName()+"' was performed. Current doc: "+self.curDoc)
 	}
 
 	/*
@@ -644,7 +642,6 @@ this.CMEditor = (function(){
 
 			insertNewDocument(self, newDoc);
 		}
-		log(self, "insertNewUntitledDocument "+self.curDoc.getName()+" was performed.");
 	}
 
 	/*
@@ -656,8 +653,6 @@ this.CMEditor = (function(){
 		var docTab = self.rootElem.find(".tabs li:nth-child("+(pos+1)+") .tabName");
 		docTab.text("*"+ self.docs[pos].getName());
 
-		log(self, "changed " + self.docs[pos].getName());
-		log(self, "markDocumentAsChanged '"+pos+"' was performed.");
 	}
 
 	/*
@@ -670,7 +665,6 @@ this.CMEditor = (function(){
 		docTabs.removeClass("selected");
 		docTabs.eq(pos).addClass("selected");
 
-		log(self, "markDocumentAsSelected "+ pos +" was performed.")
 	}
 
 	/*
@@ -682,8 +676,6 @@ this.CMEditor = (function(){
 		var docTab = self.rootElem.find(".tabs li:nth-child("+(pos+1)+") .tabName");
 		docTab.text(self.docs[pos].getName());
 
-		log(self, "unchanged " + self.docs[pos].getName());
-		log(self, "markDocumentAsUnchanged '"+pos+"' was performed.");
 	}
 
 	/*
@@ -713,7 +705,6 @@ this.CMEditor = (function(){
 		insertNewUntitledDocument(self);
 		selectDocumentByIndex(self, Math.max(0, i - 1));
 
-		log(self, "removeDocument "+doc.getName()+" was performed.");
 	}
 
 	/*
@@ -726,7 +717,6 @@ this.CMEditor = (function(){
 				removeDocument(self, doc);
 			}
 		}
-		log(self, "removeUntitledDocument was performed.");
 	}
 
 	/*
@@ -746,7 +736,6 @@ this.CMEditor = (function(){
 		}
 
 		focus(self);
-		log(self, "selectDocumentByIndex "+ self.curDoc.getName() +" "+ pos +" was performed.")
 	}
 
 	/*
@@ -832,13 +821,11 @@ this.CMEditor = (function(){
 			if (self.curDoc.getMode() != self.codeMirror.getOption("mode")) {
 				self.codeMirror.setOption("mode", self.curDoc.getMode());
 				changed = true;
-				log(self, "mode changed");
 			}
 
 			if (cmChangeObjects && !cmChangeObjects.propertyIsEnumerable("cmeditor_custom_field")) {
 				self.curDoc.setContent(self.curDoc.getCMDoc().getValue());
 				changed = true;
-				log(self, "content changed" + cmChangeObjects);
 			}
 
 			if (self.curDoc.getReadOnly() != self.codeMirror.getOption("readOnly")) {
@@ -851,7 +838,6 @@ this.CMEditor = (function(){
 
 			if (cmChangeObjects && cmChangeObjects.propertyIsEnumerable("cmeditor_custom_field")) {
 				changed = true;
-				log(self, "custom field changed")
 			}
 
 			if (changed || cmChangeObjects) {
@@ -866,7 +852,6 @@ this.CMEditor = (function(){
 			writeCurrentDocToForm(self);
 		}
 
-		log(self, "updateCurrentDocument "+ docName +" was performed.")
 		return changed;
 	}
 
@@ -913,8 +898,6 @@ this.CMEditor = (function(){
 					newDoc.markUnchanged();
 					insertNewDocument(self, newDoc);
 
-					log(self, "ajax_load '"+name+"' was performed.");
-					log(self, data.result.version)
 				} else {
 					displayMessage(self, data.msg);
 				}
@@ -1023,7 +1006,6 @@ this.CMEditor = (function(){
 	 * Parameters: name String: The name of the document
 	 */
 	function getUnambiguousName(self, name) {
-		log(self, name);
 		var data = [];
 		if(self.options.ajax.listURL){
 			$.ajax({
@@ -1054,7 +1036,6 @@ this.CMEditor = (function(){
 	 * Creates a new document with a name supplied by the user
 	 */
 	function newDoc(self) {
-		log(self, "creating new doc");
 		if(self.options.readOnly){
 			displayMessage("This editor read only!");
 		}else{
@@ -1102,7 +1083,6 @@ this.CMEditor = (function(){
 
 		self.eventHooks[eventName].push(hook);
 
-		log(self, "added a hook to event"+eventName);
 	}
 
 	/* (Public)
@@ -1127,7 +1107,6 @@ this.CMEditor = (function(){
 
 			updateCurrentDocument(self);
 
-			log(self, "rename '"+oldName+"', '"+newName+"' was performed.");
 		}
 	}
 
@@ -1152,7 +1131,6 @@ this.CMEditor = (function(){
 			self.rootElem.find(".cmeditor-main form").submit();
 		}
 
-		log(self, "save "+ self.curDoc.getName() +" ("+ pos +") was performed.");
 	}
 
 	/* (Public)
@@ -1170,7 +1148,6 @@ this.CMEditor = (function(){
 		self.curDoc.setID("");
 
 		save(self);
-		log(self, "saveas was performed.");
 	}
 
 	/* (Public)
@@ -1178,16 +1155,13 @@ this.CMEditor = (function(){
 	 */
 	function setDoDiffBeforeSaving(self, value) {
 		self.doDiffBeforeSaving = value;
-		log(self, "setDoDiffBeforeSaving " + value + " was performed.")
 	}
 
 	/* (Public)
 	 * Enters or leaves fullscreen mode
 	 */
 	function toggleFullscreen(self){
-		log(self, "Fullscreen toggled");
 		if(self.instanceName == ""){
-			log(self, "Could not enter fullscreen mode: no instance name supplied");
             return;
 		}
 
@@ -1254,7 +1228,6 @@ this.CMEditor = (function(){
 
 			updateCurrentDocument(self);
 		}
-		log(self, "update "+ docName +" was performed.")
 	}
 
 	/* (Public)
@@ -1284,7 +1257,6 @@ this.CMEditor = (function(){
 
 		executeHooks(self, "postSerializeDoc", self.rootElem, [self.curDoc]);
 
-		log(self, "writeCurrentDocToForm "+ self.curDoc.getName() +" was performed.")
 	}
 
 

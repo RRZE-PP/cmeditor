@@ -29,7 +29,6 @@ this.CMEditorMenu = (function(){
 		});
 
 		self.cmeditor.focus();
-		log(self, "cmeditor_menu loaded.");
 
 		registerInstance(self.instanceName, self.instanceNo, self);
 	}
@@ -135,7 +134,6 @@ this.CMEditorMenu = (function(){
 
 							self.openDialog.dialog("option", "buttons", myButtons);
 							self.openDialog.dialog("open");
-							log(self, "opened");
 						} else {
 							self.cmeditor.displayMessage(data.msg);
 						}
@@ -146,10 +144,8 @@ this.CMEditorMenu = (function(){
 			saveas: function(cm) { self.cmeditor.saveDocAs(); },
 			rename: function(cm) {
 				var name = prompt("Name of the new buffer", "");
-				log(self, name);
 				if (name == null) return;
 				if (!name) name = "test";
-				log(self, self.cmeditor.getUnambiguousName(name));
 				self.cmeditor.renameDoc(self.cmeditor.getUnambiguousName(name));
 			},
 			delete: function(cm) { self.cmeditor.deleteDoc(); },
@@ -347,12 +343,10 @@ this.CMEditorMenu = (function(){
 	 */
 	function registerMenuCallbacks(self){
 		self.rootElem.find(".fileMenu a").click(function(event) {
-			log(self, "file menu entry clicked");
 			var found = self.fileMenu[$(this).attr("value")];
 		    self.cmeditor.focus();
 
 		    if (found) found(self.cmeditor.getCodeMirror());
-		    else log(self, "CALLED MISSING FILE: "+$(this).attr("value"));
 
 			event.preventDefault();
 		});
@@ -362,7 +356,6 @@ this.CMEditorMenu = (function(){
 		    self.cmeditor.focus();
 
 		    if (found) found(self.cmeditor.getCodeMirror());
-		    else log(self, "CALLED MISSING VIEW: "+$(this).attr("value"));
 
 		    if ($(this).attr("value").indexOf("mode") == 0) {
 				$(this).parent().parent().find("span").removeClass("ui-icon ui-icon-check");
@@ -395,7 +388,6 @@ this.CMEditorMenu = (function(){
 		    self.cmeditor.focus();
 
 		    if (found) found(self.cmeditor.getCodeMirror())
-		    else log(self, "CALLED MISSING OPTIONS: "+$(this).attr("value"));
 
 			if(self.options.useSession){
 			    if ($(this).attr("value").indexOf("binding") == 0) {localStorage["cmeditor-menu-binding"] = $(this).attr("value").substring(7);}
@@ -410,8 +402,8 @@ this.CMEditorMenu = (function(){
 			var found = self.addonsMenu[$(this).attr("value")];
 		    self.cmeditor.focus();
 		    if (found) found(self.cmeditor.getCodeMirror());
-		    else log(self, "CALLED MISSING FILE: "+$(this).attr("value"));
-			event.preventDefault();
+
+		    event.preventDefault();
 		});
 	}
 
@@ -420,16 +412,13 @@ this.CMEditorMenu = (function(){
 		self.rootElem.find(".modesMenu a[value='mode"+self.cmeditor.getCurrentCMEditorMode()+"']").children("span").addClass("ui-icon ui-icon-check");
 
 		if (self.cmeditor.getCodeMirror().getOption("readOnly")) {
-			log(self, "RO");
 			self.rootElem.find(".view a[value='readOnly'] span").addClass("ui-icon ui-icon-check");
 			self.rootElem.find(".view a[value='addonfullscreen']").parent().addClass("ui-state-disabled");
 		} else {
-			log(self, "RW");
 			self.rootElem.find(".view a[value='readOnly'] span").removeClass("ui-icon ui-icon-check");
 			self.rootElem.find(".view a[value='addonfullscreen']").parent().removeClass("ui-state-disabled");
 		}
 
-		log(self, "cmeditor_menu_update was performed.")
 	}
 
 	CMEditorMenu.prototype.constructor = CMEditorMenu;
