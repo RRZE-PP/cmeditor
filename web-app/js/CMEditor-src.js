@@ -507,7 +507,7 @@ this.CMEditor = (function(){
 		diffoutputdiv.text("");
 		contextSize = contextSize || null;
 
-		if (opcodes && opcodes.length == 1) {
+		if (opcodes && opcodes.length == 1 && opcodes[0][0] == "equal") {
 			diffoutputdiv.html("<p>No changes!</p>");
 		} else {
 			diffoutputdiv.append(diffview.buildView({
