@@ -75,15 +75,46 @@ this.CMEditor = (function(){
 	clazz.loadedResources = [];
 
 	/*
-	 * Logs to the console. If only one argument is provided prints the second argument prefixed by class name.
-	 * If two arguments are provided the first must be an instance of this class. Then prints the second argument
-	 * prefixed by class name and instance number
+	 * Logs to the console. If possible prefixed by class name, instance number. The default logLevel is INFO.
+	 * Possible values are: ERROR, WARNING, INFO, DEBUG. If Data is supplied, its entries will be printed
+	 * one per line
+	 *
+	 * Possible Parameter combinations:
+	 * Message (String), [Loglevel (String, "INFO"), [Data (List of Objects)]]
+	 * Instance (Object), Message (String), [Loglevel (String, "INFO"), [Data (Object|List of Objects)]]]
 	 */
-	var log = clazz.log = function(arg0, arg1){
-		if(arguments.length == 2)
-			console.log(clazz.name + " #" + arg0.instanceNo + " '" + arg0.instanceName + "': " + arg1);
-		else
-			console.log(clazz.name + ": " + arg0);
+	var LOGLEVELS = {ERROR: 0, WARNING: 5, INFO: 10, DEBUG: 15}
+	var log = clazz.log = function(arg0, arg1, arg2, arg3){
+		var className = ((typeof clazz.name != "undefined") ? clazz.name : "IE,really?");
+		var instance = "";
+		var message = "";
+		var logLevel = LOGLEVELS.INFO;
+		var data = [];
+
+		if(arg0 instanceof clazz){
+			instance = " #" + arg0.instanceNo + " '" + arg0.instanceName +"'";
+			message = arg1;
+			logLevel = (typeof arg2 != "undefined") ? LOGLEVELS[arg2] : LOGLEVELS.INFO;
+			data = ((typeof arg3 != "undefined")? ((arg3 instanceof Array)? arg3 : [arg3]) : []);
+		}else{
+			message = arg0;
+			logLevel = (typeof arg1 != "undefined") ? LOGLEVELS[arg1] : LOGLEVELS.INFO;
+			data = ((typeof arg2 != "undefined")? ((arg2 instanceof Array)? arg2 : [arg2]) : []);
+		}
+
+		if(logLevel == LOGLEVELS.DEBUG)    var logF = function(data){console.log(data);}
+		if(logLevel == LOGLEVELS.INFO)     var logF = function(data){console.info(data);}
+		if(logLevel == LOGLEVELS.WARNING)  var logF = function(data){console.warn(data);}
+		if(logLevel == LOGLEVELS.ERROR)    var logF = function(data){console.error(data);}
+
+		logF(className + instance + ": " + message);
+		if(data.length != 0){
+			console.groupCollapsed != undefined && data.length > 1 && console.groupCollapsed();
+			for(var i=0; i<data.length; i++){
+				logF(data[i]);
+			}
+			console.groupEnd != undefined && data.length > 1 &&  console.groupEnd();
+		}
 	}
 
 	/*
@@ -93,7 +124,7 @@ this.CMEditor = (function(){
 		clazz.instancesString[instanceName] = instance;
 		clazz.instancesNumber[instanceNo]   = instance;
 		clazz.instances.push(instance);
-		log("registered new textAreaCMEditor instance #" + instanceNo + " '" + instanceName + "'");
+		log("registered new textAreaCMEditor instance #" + instanceNo + " '" + instanceName + "'", "INFO");
 	}
 
 	/*
@@ -139,7 +170,7 @@ this.CMEditor = (function(){
 				callback();
 		 })
 		 .fail(function(){
-		 	log("Could not load the resource at "+location);
+		 	log("Could not load the resource at "+location, "WARNING");
 		 });
 	}
 
@@ -152,7 +183,7 @@ this.CMEditor = (function(){
 	 */
 	var loadTheme = clazz.loadTheme = function(themeName, callback){
 		if(clazz.themeBaseURL === undefined){
-			log("Please set the a themeBaseURL");
+			log("Could not load theme. Please set the themeBaseURL", "WARNING");
 			return;
 		}
 		if(themeName == "default"){
@@ -171,7 +202,7 @@ this.CMEditor = (function(){
 	 */
 	var loadMode = clazz.loadMode = function(modeName, callback){
 		if(clazz.modeBaseURL === undefined){
-			log("Please set the a modeBaseURL");
+            log("Could not load mode. Please set the modeBaseURL", "WARNING");
 			return;
 		}
 		loadResource(clazz.modeBaseURL+modeName+"/"+modeName+".js", callback);
@@ -355,11 +386,19 @@ this.CMEditor = (function(){
 				success:function(data, textStatus){
 					if (data.status == "success") {
 						removeDocument(self, self.curDoc);
+						log(self, "Deleted a document from the server", "INFO");
+					}else{
+						log(self, "Could not delete this file from the server", "WARNING", data);
+						log(self, "Message was:" + data.msg, "DEBUG");
 					}
 					if(data.msg)
 						displayMessage(self, data.msg, textStatus);
+					log(self, "Currently serving these documents locally:", "DEBUG", self.docs)
 				},
-				error:function(XMLHttpRequest,textStatus,errorThrown){displayMessage(self, "An error occured: "+ textStatus +" " + errorThrown);}
+				error:function(XMLHttpRequest,textStatus,errorThrown){
+					displayMessage(self, "An error occured: "+ textStatus +" " + errorThrown);
+					log(self, "Could not delete this file from the server", "WARNING", data);
+				}
 			});
 		}
 
@@ -405,11 +444,17 @@ this.CMEditor = (function(){
 						}else{
 							ajax_reload(self);
 						}
+						log(self, "Saved a document to the server", "INFO");
+					}else{
+						log(self, "Could not save this document to the server.", "WARNING", data);
 					}
 					if(data.msg)
 						displayMessage(self, data.msg, textStatus);
 				},
-				error:function(XMLHttpRequest,textStatus,errorThrown){displayMessage(self, "An error occured: "+ textStatus +" " + errorThrown);}
+				error:function(XMLHttpRequest,textStatus,errorThrown){
+					displayMessage(self, "An error occured: "+ textStatus +" " + errorThrown);
+					log(self, "Could not save this document to the server.", "WARNING", data);
+				}
 			});
 			return false;
 		}
@@ -461,6 +506,8 @@ this.CMEditor = (function(){
 				updateCurrentDocument(self, {cmeditor_custom_field: true, old:old, new:getCustomElementValue(self, elem)});
 			}
 		}
+
+		log(self, "The user changed a custom element", "INFO");
 	}
 
 	/* (Public)
@@ -532,6 +579,8 @@ this.CMEditor = (function(){
 		for(var i=0; self.eventHooks[eventName] && i<self.eventHooks[eventName].length; i++){
 			if(typeof self.eventHooks[eventName][i] == "function")
 				self.eventHooks[eventName][i].apply(context, args);
+			else
+				log(self, "A hook was not executed because it is not a function", "WARNING");
 		}
 	}
 
@@ -628,6 +677,8 @@ this.CMEditor = (function(){
 		selectDocumentByIndex(self, self.docs.length - 1);
 		removeUntitledDocument(self);
 
+		log(self, "Inserted a new document", "INFO");
+		log(self, "This document was inserted", "DEBUG", newDoc);
 	}
 
 	/*
@@ -1292,27 +1343,27 @@ this.CMEditor = (function(){
 	CMEditor.prototype.writeCurrentDocToForm     = function(){Array.prototype.unshift.call(arguments, this); return writeCurrentDocToForm.apply(this, arguments)};
 
 	//public methods, deprecated; use the corresponding from above
-	CMEditor.prototype.close                     = function(){console.log("WARN: using close is deprecated. use closeDoc instead");
+	CMEditor.prototype.close                     = function(){log("using close is deprecated. use closeDoc instead", "WARNING");
                                                               Array.prototype.unshift.call(arguments, this); return close.apply(this, arguments)};
-	CMEditor.prototype.delete                    = function(){console.log("WARN: using delete is deprecated. use deleteDoc instead");
+	CMEditor.prototype.delete                    = function(){log("using delete is deprecated. use deleteDoc instead", "WARNING");
                                                               Array.prototype.unshift.call(arguments, this); return deleteDoc.apply(this, arguments)};
-	CMEditor.prototype.doc_id                    = function(){console.log("WARN: using doc_id is deprecated. use getDocumentPositionByName instead");
+	CMEditor.prototype.doc_id                    = function(){log("using doc_id is deprecated. use getDocumentPositionByName instead", "WARNING");
                                                               Array.prototype.unshift.call(arguments, this); return getDocumentPositionByName.apply(this, arguments)};
-	CMEditor.prototype.get_name                  = function(){console.log("WARN: using get_name is deprecated. use getUnambiguousName instead");
+	CMEditor.prototype.get_name                  = function(){log("using get_name is deprecated. use getUnambiguousName instead", "WARNING");
                                                               Array.prototype.unshift.call(arguments, this); return getUnambiguousName.apply(this, arguments)};
-	CMEditor.prototype.get_mode                  = function(){console.log("WARN: using get_mode is deprecated. use getCurrentCMEditorMode instead");
+	CMEditor.prototype.get_mode                  = function(){log("using get_mode is deprecated. use getCurrentCMEditorMode instead", "WARNING");
                                                               Array.prototype.unshift.call(arguments, this); return getCurrentCMEditorMode.apply(this, arguments)};
-	CMEditor.prototype.new                       = function(){console.log("WARN: using new is deprecated. use newDoc instead");
+	CMEditor.prototype.new                       = function(){log("using new is deprecated. use newDoc instead", "WARNING");
                                                               Array.prototype.unshift.call(arguments, this); return newDoc.apply(this, arguments)};
-	CMEditor.prototype.set_diff_before_save      = function(){console.log("WARN: using set_diff_before_save is deprecated. use setDoDiffBeforeSaving instead");
+	CMEditor.prototype.set_diff_before_save      = function(){log("using set_diff_before_save is deprecated. use setDoDiffBeforeSaving instead", "WARNING");
                                                               Array.prototype.unshift.call(arguments, this); return setDoDiffBeforeSaving.apply(this, arguments)};
-	CMEditor.prototype.save                      = function(){console.log("WARN: using save is deprecated. use saveDoc instead");
+	CMEditor.prototype.save                      = function(){log("using save is deprecated. use saveDoc instead", "WARNING");
                                                               Array.prototype.unshift.call(arguments, this); return save.apply(this, arguments)};
-	CMEditor.prototype.saveas                    = function(){console.log("WARN: using saveas is deprecated. use saveDocAs instead");
+	CMEditor.prototype.saveas                    = function(){log("using saveas is deprecated. use saveDocAs instead", "WARNING");
                                                               Array.prototype.unshift.call(arguments, this); return saveas.apply(this, arguments)};
-	CMEditor.prototype.rename_doc                = function(){console.log("WARN: using rename_doc is deprecated. use renameDoc instead");
+	CMEditor.prototype.rename_doc                = function(){log("using rename_doc is deprecated. use renameDoc instead", "WARNING");
                                                               Array.prototype.unshift.call(arguments, this); return rename.apply(this, arguments)};
-	CMEditor.prototype.update_message            = function(){console.log("WARN: using update_message is deprecated. use displayMessage instead");
+	CMEditor.prototype.update_message            = function(){log("using update_message is deprecated. use displayMessage instead", "WARNING");
                                                               Array.prototype.unshift.call(arguments, this); return displayMessage.apply(this, arguments)};
 
 	var Doc = CMEditor.Doc = function Doc(name, mode, content, readOnly, cmDoc){

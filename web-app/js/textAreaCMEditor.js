@@ -11,7 +11,7 @@ this.textAreaCMEditor = function (){
         self.instanceNo = textAreaCMEditor.instanciated++;
         self.instanceName = instanceName !== undefined ? instanceName : "";
         if(self.instanceName == "")
-            log("Warning: No instance name supplied, fullscreen mode will be disabled!");
+            log("No instance name supplied, fullscreen mode will be disabled!", "WARNING");
 
         var rootElem = self.rootElem = $(rootElem);
         self.options  = options  = options !== undefined ? options : {};
@@ -84,15 +84,46 @@ this.textAreaCMEditor = function (){
     clazz.loadedResources = [];
 
     /*
-     * Logs to the console. If only one argument is provided prints the second argument prefixed by class name.
-     * If two arguments are provided the first must be an instance of this class. Then prints the second argument
-     * prefixed by class name and instance number
+     * Logs to the console. If possible prefixed by class name, instance number. The default logLevel is INFO.
+     * Possible values are: ERROR, WARNING, INFO, DEBUG. If Data is supplied, its entries will be printed
+     * one per line
+     *
+     * Possible Parameter combinations:
+     * Message (String), [Loglevel (String, "INFO"), [Data (List of Objects)]]
+     * Instance (Object), Message (String), [Loglevel (String, "INFO"), [Data (Object|List of Objects)]]]
      */
-    var log = clazz.log = function(arg0, arg1){
-        if(arguments.length == 2)
-            console.log(clazz.name + " #" + arg0.instanceNo + " '" + arg0.instanceName + "': " + arg1);
-        else
-            console.log(clazz.name + ": " + arg0);
+    var LOGLEVELS = {ERROR: 0, WARNING: 5, INFO: 10, DEBUG: 15}
+    var log = clazz.log = function(arg0, arg1, arg2, arg3){
+        var className = ((typeof clazz.name != "undefined") ? clazz.name : "IE,really?");
+        var instance = "";
+        var message = "";
+        var logLevel = LOGLEVELS.INFO;
+        var data = [];
+
+        if(arg0 instanceof clazz){
+            instance = " #" + arg0.instanceNo + " '" + arg0.instanceName +"'";
+            message = arg1;
+            logLevel = (typeof arg2 != "undefined") ? LOGLEVELS[arg2] : LOGLEVELS.INFO;
+            data = ((typeof arg3 != "undefined")? ((arg3 instanceof Array)? arg3 : [arg3]) : []);
+        }else{
+            message = arg0;
+            logLevel = (typeof arg1 != "undefined") ? LOGLEVELS[arg1] : LOGLEVELS.INFO;
+            data = ((typeof arg2 != "undefined")? ((arg2 instanceof Array)? arg2 : [arg2]) : []);
+        }
+
+        if(logLevel == LOGLEVELS.DEBUG)    var logF = function(data){console.log(data);}
+        if(logLevel == LOGLEVELS.INFO)     var logF = function(data){console.info(data);}
+        if(logLevel == LOGLEVELS.WARNING)  var logF = function(data){console.warn(data);}
+        if(logLevel == LOGLEVELS.ERROR)    var logF = function(data){console.error(data);}
+
+        logF(className + instance + ": " + message);
+        if(data.length != 0){
+            console.groupCollapsed != undefined && data.length > 1 && console.groupCollapsed();
+            for(var i=0; i<data.length; i++){
+                logF(data[i]);
+            }
+            console.groupEnd != undefined && data.length > 1 &&  console.groupEnd();
+        }
     }
 
     /*
@@ -102,7 +133,7 @@ this.textAreaCMEditor = function (){
         clazz.instancesString[instanceName] = instance;
         clazz.instancesNumber[instanceNo]   = instance;
         clazz.instances.push(instance);
-        log("registered new textAreaCMEditor instance #" + instanceNo + " '" + instanceName + "'");
+        log("registered new textAreaCMEditor instance #" + instanceNo + " '" + instanceName + "'", "INFO");
     }
 
     /*
@@ -150,7 +181,7 @@ this.textAreaCMEditor = function (){
                 callback();
          })
          .fail(function(){
-            log("Could not load the resource at "+location);
+            log("Could not load the resource at "+location, "ERROR");
          });
     }
 
@@ -163,7 +194,7 @@ this.textAreaCMEditor = function (){
      */
     var loadTheme = clazz.loadTheme = function(themeName, callback){
         if(clazz.themeBaseURL === undefined){
-            log("Please set the a themeBaseURL");
+            log("Could not load theme. Please set the themeBaseURL", "WARNING");
             return;
         }
         if(themeName == "default"){
@@ -182,7 +213,7 @@ this.textAreaCMEditor = function (){
      */
     var loadMode = clazz.loadMode = function(modeName, callback){
         if(clazz.modeBaseURL === undefined){
-            log("Please set the a modeBaseURL");
+            log("Could not load mode. Please set the modeBaseURL", "WARNING");
             return;
         }
         loadResource(clazz.modeBaseURL+modeName+"/"+modeName+".js", callback);
