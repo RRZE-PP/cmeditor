@@ -1102,8 +1102,15 @@ this.CMEditor = (function(){
 			displayMessage("This editor read only!");
 		}else{
 			var name = prompt("Name of the new buffer", "");
-			if (name == null || name == "") return;
-			name = getUnambiguousName(self, name);
+			if (name == null)
+				return;
+
+			if(name.trim() == ""){
+				displayMessage(self, "Please supply a filename");
+				return;
+			}
+
+			name = getUnambiguousName(self, name.trim());
 
 			var newDoc = new Doc(name, self.options.defaultMode, self.options.defaultContent,
 									(self.options.readOnly || self.options.defaultReadOnly) ? "nocursor":"");
