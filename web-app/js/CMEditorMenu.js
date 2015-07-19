@@ -108,7 +108,7 @@ this.CMEditorMenu = (function(){
 							};
 							for(var i=0; i < data.result.length; ++i) {
 								if (self.cmeditor.getDocumentPositionByName(data.result[i]) == undefined) {
-									s.append($("<option />", {value: data.result[i], text: data.result[i]}));
+									s.append($("<option />", {value: data.result[i][self.options.mapping["idField"]], text: data.result[i][self.options.mapping["name"]]}));
 									available = true;
 								}
 							}

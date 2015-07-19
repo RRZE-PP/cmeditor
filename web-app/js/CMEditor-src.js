@@ -328,12 +328,6 @@ this.CMEditor = (function(){
 			}
 		});
 
-		//save document
-		mainForm.on("submit", function(e){
-			ajax_update(self, $(this).serialize());
-			e.preventDefault();
-		});
-
 		//changes in custom inputs
 		mainForm.find(".cmeditor-field").keyup(function() { customElementChanged(self, $(this));});
 		mainForm.find("select.cmeditor-field").change(function() {customElementChanged(self, $(this));});
@@ -351,22 +345,23 @@ this.CMEditor = (function(){
 
 		if (self.curDoc.hasID()) {
 
+			var data = {};
+			data[self.options.mapping.idField] = self.curDoc.getID();
+
 			$.ajax({
 				type:"GET",
-				data: {id: self.curDoc.getID()},
+				data: data,
 				url: self.options.ajax.deleteURL,
 				success:function(data, textStatus){
 					if (data.status == "success") {
-						// do sth
+						removeDocument(self, self.curDoc);
 					}
-					displayMessage(self, data.msg, textStatus);
-					//cmeditor_${name}_ajax_reload();
+					if(data.msg)
+						displayMessage(self, data.msg, textStatus);
 				},
 				error:function(XMLHttpRequest,textStatus,errorThrown){displayMessage(self, "An error occured: "+ textStatus +" " + errorThrown);}
 			});
 		}
-
-		removeDocument(self, self.curDoc);
 
 		return false;
 	}
@@ -374,41 +369,45 @@ this.CMEditor = (function(){
 	/*
 	 * Reinitiates the current document from the server
 	 *
-	 * Parameters: newname String: If supplied the document will be replaced by this one
+	 * Parameters: newId (Integer|String): If supplied the document will be replaced by this one
 	 */
-	function ajax_reload(self, newname) {
+	function ajax_reload(self, newId) {
 		if (self.curDoc) {
-			var name = self.curDoc.getName();
-			removeDocument(self, self.curDoc);
+			if(typeof newId == "undefined")
+				newId = self.curDoc.getID();
 
-			if(typeof newname !== "undefined") {
-				ajax_load(self, newname, true);
-			} else {
-				ajax_load(self, name, true);
-			}
+			removeDocument(self, self.curDoc);
+			ajax_load(self, newId, true);
 		}
 	}
 
 	/*
 	 *	Triggers updating the document on server side and then reloads it from the server
-	 *
-	 *  Parameters: data Object: the data as the server expects it
 	 */
-	function ajax_update(self, data) {
+	function ajax_update(self) {
 		if (self.curDoc) {
+
+			var data = {};
+			jQuery.extend(data, self.curDoc.getCustomData()); //'clone' into the data object
+			data[self.options.mapping.idField] = self.curDoc.getID();
+			data[self.options.mapping.mode] = self.curDoc.getMode();
+			data[self.options.mapping.name] = self.curDoc.getName();
+			data[self.options.mapping.content] = self.curDoc.getContent();
+
 			$.ajax({
 				type: "POST",
 				data: data,
 				url: self.options.ajax.updateURL,
 				success: function(data,textStatus){
 					if (data.status == "success") {
-						if (data.newname) {
-							ajax_reload(self, data.newname);
+						if (data.newId) {
+							ajax_reload(self, data.newId);
 						}else{
 							ajax_reload(self);
 						}
 					}
-					displayMessage(self, data.msg, textStatus);
+					if(data.msg)
+						displayMessage(self, data.msg, textStatus);
 				},
 				error:function(XMLHttpRequest,textStatus,errorThrown){displayMessage(self, "An error occured: "+ textStatus +" " + errorThrown);}
 			});
@@ -442,19 +441,19 @@ this.CMEditor = (function(){
 
 			} else if (key == self.options.mapping.idField) {
 				old = self.curDoc.getID();
-				sef.curDoc.setContent(getCustomElementValue(self, elem));
+				sef.curDoc.setID(getCustomElementValue(self, elem));
 
 			} else {
 				if (elem.attr("data-field-property")) {
-					if (self.curDoc.getCustomData(key)) {
-						old = self.curDoc.getCustomData(key)[elem.attr("data-field-property")];
+					if (self.curDoc.getCustomDataField(key)) {
+						old = self.curDoc.getCustomDataField(key)[elem.attr("data-field-property")];
 					} else {
-						self.curDoc.setCustomData(key, {});
+						self.curDoc.setCustomDataField(key, {});
 					}
-					self.curDoc.getCustomData(key)[elem.attr("data-field-property")] = getCustomElementValue(self, elem);
+					self.curDoc.getCustomDataField(key)[elem.attr("data-field-property")] = getCustomElementValue(self, elem);
 				} else {
-					old = self.curDoc.getCustomData(key);
-					self.curDoc.setCustomData(key, getCustomElementValue(self, elem));
+					old = self.curDoc.getCustomDataField(key);
+					self.curDoc.setCustomDataField(key, getCustomElementValue(self, elem));
 				}
 			}
 
@@ -497,11 +496,12 @@ this.CMEditor = (function(){
 	 */
 	function decorateDiffDialog(self) {
 
-		var base    = difflib.stringAsLines(self.rootElem.find("input[name=_cmeditorOrigContent]").eq(0).val()),
-			newtxt  = difflib.stringAsLines(self.rootElem.find("input[name=_cmeditorContent]").eq(0).val()),
-			opcodes = new difflib.SequenceMatcher(base, newtxt).get_opcodes(),
+		var base    = difflib.stringAsLines(self.curDoc.getOrigContent()),
+			newtxt  = difflib.stringAsLines(self.curDoc.getContent()),
 			diffoutputdiv = self.diffDialog.find(".diffoutput"),
 			contextSize   = self.diffDialog.find("input[name=contextSize]").val();
+
+		var opcodes = new difflib.SequenceMatcher(base, newtxt).get_opcodes();
 
 		diffoutputdiv.text("");
 		contextSize = contextSize || null;
@@ -639,6 +639,14 @@ this.CMEditor = (function(){
 
 			var newDoc = new Doc(name, self.options.defaultMode, self.options.defaultContent,
 									(self.options.readOnly||self.options.defaultReadOnly)?"nocursor":"");
+
+
+			//insert custom data, if it is present in the form
+			self.rootElem.find("form .cmeditor-field").each(function(){
+				var elem = $(this);
+				var key = elem.attr("name");
+				newDoc.setCustomDataField(key, elem.attr('value')!=undefined?elem.attr('value'):"");
+			});
 
 			insertNewDocument(self, newDoc);
 		}
@@ -865,14 +873,18 @@ this.CMEditor = (function(){
 	/* (Public)
 	 * Loads a document from the server
 	 *
-	 * Parameters: name String: The document name to load
+	 * Parameters: fileId (Integer|String): The document's id
 	 *             readWrite Boolean: If true document will always be writable, else it will be readOnly
 	 *                                if options.readOnly or options.defaultReadOnly is set to true
 	 */
-	function ajax_load(self, name, readWrite) {
+	function ajax_load(self, fileId, readWrite) {
+		var data = {};
+		data[self.options.mapping.idField] = fileId;
+
 		$.ajax({
 			type:"GET",
-			url: self.options.ajax.getURL+name,
+			data: data,
+			url: self.options.ajax.getURL,
 			success: function(data){
 				if (data.status == "success" && data.result) {
 					var newDoc = new Doc(data.result[self.options.mapping.name],
@@ -881,23 +893,19 @@ this.CMEditor = (function(){
 					                        readWrite ? "" : ((self.options.readOnly || self.options.defaultReadOnly) ? "nocursor" : ""));
 					newDoc.setID(data.result[self.options.mapping.idField]);
 
-					//insert custom data
-					self.rootElem.find("form .cmeditor-field").not("[data-docField]").each(function(){
+					//insert custom data, if it is present in the form
+					self.rootElem.find("form .cmeditor-field").each(function(){
 						var elem = $(this);
 						var key = elem.attr("name");
-
-						//if a mapped value is also available in custom data, don't save it twice
-						for(var mappingKey in self.options.mapping){
-							if(key == self.options.mapping[mappingKey])
-								return true; //continue to next jquery-each
-						}
-
-						newDoc.setCustomData(key, data.result[key]);
+						elem.val(data.result[key]);
+						newDoc.setCustomDataField(key, data.result[key]!=undefined?data.result[key]:"");
 					});
 
 					newDoc.markUnchanged();
 					insertNewDocument(self, newDoc);
 
+					if(data.msg)
+						displayMessage(self, data.msg);
 				} else {
 					displayMessage(self, data.msg);
 				}
@@ -1006,21 +1014,24 @@ this.CMEditor = (function(){
 	 * Parameters: name String: The name of the document
 	 */
 	function getUnambiguousName(self, name) {
-		var data = [];
+		var namesOnServer = [];
 		if(self.options.ajax.listURL){
 			$.ajax({
 				url: self.options.ajax.listURL,
 				success: function(json) {
 					if (json.status == "success" && json.result) {
-						data = json.result;
+						for(var i=0; i<json.result.length; i++){
+							namesOnServer.push(json.result[i][self.options.mapping["name"]]);
+						}
 					}
 				},
 				async:false
 			});
 		}
-
 		var i = 0;
-		while (getDocumentByName(self, name + (i || "")) || listContainsElem(self, data, name + (i || ""))) ++i;
+		while (getDocumentByName(self, name + (i || "")) || listContainsElem(self, namesOnServer, name + (i || "")))
+			i++;
+
 		return name + (i || "");
 	}
 
@@ -1045,6 +1056,7 @@ this.CMEditor = (function(){
 
 			var newDoc = new Doc(name, self.options.defaultMode, self.options.defaultContent,
 									(self.options.readOnly || self.options.defaultReadOnly) ? "nocursor":"");
+
 
 			insertNewDocument(self, newDoc);
 			selectDocumentByIndex(self, self.docs.length - 1);
@@ -1124,7 +1136,7 @@ this.CMEditor = (function(){
 
 		if (self.doDiffBeforeSaving) {
 			var additionalButtons = {
-					Save: function() { self.rootElem.find(".cmeditor-main form").submit(); $(this).dialog("close"); },
+					Save: function() { ajax_update(self); $(this).dialog("close"); },
 				};
 			diff(self, additionalButtons);
 		} else {
@@ -1238,20 +1250,13 @@ this.CMEditor = (function(){
 
 		self.rootElem.find("form .cmeditor-field").each(function(){
 			var elem = $(this);
-			var key = elem.attr("data-docField") || elem.attr("name");
+			var key = elem.attr("name");
 
-			if (elem.attr("data-field-property") && self.curDoc.getCustomData(key)) {
-				setInputValue(self, elem, self.curDoc.getCustomData(key)[elem.attr("data-field-property")] || "");
+			if (elem.attr("data-field-property") && self.curDoc.getCustomDataField(key)) {
+				//if the element indicates to use the property of an object, use it
+				setInputValue(self, elem, self.curDoc.getCustomDataField(key)[elem.attr("data-field-property")] || "");
 			} else {
-
-				//if a mapped value is also available in custom data, use the mapped value
-				for(var mappingKey in self.options.mapping){
-					if(key == self.options.mapping[mappingKey]){
-						setInputValue(self, elem, self.curDoc[mappingKey]);
-						return true; //continue to next jquery-each
-					}
-				}
-				setInputValue(self, elem, self.curDoc[key] || self.curDoc.getCustomData(key) || "");
+				setInputValue(self, elem, self.curDoc[key] || self.curDoc.getCustomDataField(key) || "");
 			}
 		});
 
@@ -1312,6 +1317,7 @@ this.CMEditor = (function(){
 
 	var Doc = CMEditor.Doc = function Doc(name, mode, content, readOnly, cmDoc){
 		this.content = content;
+		this.idField = null;
 		this.mode = mode;
 		this.name = name;
 		this.origContent = content;
@@ -1337,10 +1343,12 @@ this.CMEditor = (function(){
 	//Getter
 	Doc.prototype.getCMDoc    = function(){return this.codeMirrorDoc};
 	Doc.prototype.getContent  = function(){return this.content};
-	Doc.prototype.getCustomData = function(key){return this.customData[key]};
+	Doc.prototype.getCustomData = function(){ return this.customData};
+	Doc.prototype.getCustomDataField = function(key){return this.customData[key]};
 	Doc.prototype.getID       = function(){return this.idField};
 	Doc.prototype.getMode     = function(){return this.mode};
 	Doc.prototype.getName     = function(){return this.name};
+	Doc.prototype.getOrigContent = function(){return this.origContent};
 	Doc.prototype.getReadOnly = function(){return this.readOnly};
 	Doc.prototype.hasID       = function(){return this.idField !== undefined};
 	Doc.prototype.isNew       = function(){return this.status == Doc.status.NEW};
@@ -1351,7 +1359,7 @@ this.CMEditor = (function(){
 	Doc.prototype.isRenamed   = function(){return this.name != this.origName};
 
 	//Setter
-	Doc.prototype.setCustomData = function(key, value){this.customData[key] = value};
+	Doc.prototype.setCustomDataField = function(key, value){this.customData[key] = value};
 	Doc.prototype.markNew       = function(){this.status = Doc.status.NEW};
 	Doc.prototype.markChanged   = function(){this.status = Doc.status.CHANGED};
 	Doc.prototype.markUnsaved   = function(){this.status = Doc.status.UNSAVED};

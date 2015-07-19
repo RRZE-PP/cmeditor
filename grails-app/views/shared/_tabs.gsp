@@ -11,12 +11,6 @@
 	<div class="cmeditor-main">
 		<form method="post">
 			<div id="cmeditor-${name}-easternpane">
-				<g:hiddenField name="_cmeditorContent" data-docField="content" class="cmeditor-field" value="" />
-				<g:hiddenField name="_cmeditorMode" data-docField="mode" class="cmeditor-field" value="" />
-				<g:hiddenField name="_cmeditorName" data-docField="name" class="cmeditor-field" value="" />
-				<g:hiddenField name="_cmeditorOrigContent" data-docField="origContent" class="cmeditor-field" value="" />
-				<g:hiddenField name="_cmeditorReadOnly" data-docField="readOnly" class="cmeditor-field" value="" />
-				<g:hiddenField name="_cmeditorStatus" data-docField="status" class="cmeditor-field" value="" />
 				${bodyContent}
 			</div>
 			<div id="cmeditor-${name}-centerpane">
