@@ -470,6 +470,7 @@ this.CMEditor = (function(){
 			var old = null;
 			var doUpdate = true;
 
+			// First handle the cases where a custom element corresponds to a mapped value
 			if (key == self.options.mapping.name) {
 				rename(self, getCustomElementValue(self, elem));
 				doUpdate = false;
@@ -488,7 +489,9 @@ this.CMEditor = (function(){
 				old = self.curDoc.getID();
 				sef.curDoc.setID(getCustomElementValue(self, elem));
 
-			} else {
+			}
+			//else handle all other cases
+			else {
 				if (elem.attr("data-field-property")) {
 					if (self.curDoc.getCustomDataField(key)) {
 						old = self.curDoc.getCustomDataField(key)[elem.attr("data-field-property")];
@@ -949,6 +952,10 @@ this.CMEditor = (function(){
 					self.rootElem.find("form .cmeditor-field").each(function(){
 						var elem = $(this);
 						var key = elem.attr("name");
+
+						if(listContainsElem(self, Object.keys(self.options.mapping), key))
+							return true; //jquery-Each continue
+
 						elem.val(data.result[key]);
 						newDoc.setCustomDataField(key, data.result[key]!=undefined?data.result[key]:"");
 					});
