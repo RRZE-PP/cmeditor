@@ -656,15 +656,16 @@ this.CMEditor = (function(){
 		li.appendChild($('<span class="tabName"></span>').text(newDoc.getName()).get(0));
 
 		var closeButton = $('<span class="closeButton">&#10005;</span>');
-		closeButton.on("click", function(){
+		closeButton.on("click", function(e){
 									var doc = getDocumentByName(self, newDoc.getName());
 
 									if(doc.needsSaving()){
 										showWarning(self, "Do you really want to close this buffer? Unsaved changes will be lost.",
 											{Close: function(){removeDocument(self, doc); $(this).dialog("close");}})
 									}else{
-										removeDocument(self, doc)
+										removeDocument(self, doc);
 									}
+									e.stopPropagation();
 
 								});
 		li.appendChild(closeButton.get(0));
