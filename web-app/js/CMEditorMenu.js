@@ -279,18 +279,6 @@ this.CMEditorMenu = (function(){
 	 * Adds items to the menu which the user defined via options
 	 */
 	function addUserDefinedItems(self) {
-		if(self.options.addModes){
-			for (var i = self.options.addModes.length - 1; i >= 0; i--) {
-				var mode = self.options.addModes[i];
-
-				var s = $("<li><a href=\"#\" value=\"mode"+mode+"\"><span></span>"+mode+"</a></li>");
-				s.appendTo(self.rootElem.find(".modesMenu"));
-				self.viewMenu["mode"+mode] = function(name) {
-					return function(cm) { cm.setOption("mode", name); };
-				}(mode);
-			}
-		}
-
 		if (typeof self.options.overlayDefinitionsVar !== "undefined") {
 			for(var name in self.options.overlayDefinitionsVar) {
 				var s = $("<li><a href=\"#\" value=\"mode"+name+"\"><span></span>"+name+"</a></li>");
