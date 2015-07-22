@@ -158,11 +158,60 @@ this.CMEditor = (function(){
 			return;
 		}
 
+		var modulesToInit = [];
+		var toLoadModules = 0;
+
+		if(window.define === undefined){
+			//hack to load dependant modules, because we're not using a module loader
+			window.define = function(list, mod){
+				window.define.isInUse = true;
+
+				modulesToInit.push(mod);
+
+				if(list.length == 1){
+					//this module has no dependencies; we've potentially reached the final dependency
+
+					if(toLoadModules == 0){
+						log("No more dependencies to load; Initializing modules", "DEBUG", modulesToInit);
+
+						//init modules of higher layer after all their submodules are initiated
+						for(var j=modulesToInit.length-1; j>=0; j--){
+							modulesToInit[j](CodeMirror);
+						}
+						modulesToInit = [];
+						toLoadModules = 0;
+						window.define = undefined;
+
+						//call callback again, because we've potentially not loaded all dependencies when it was called first
+						callback();
+					}else{
+						toLoadModules--;
+					}
+				}else{
+					log("This module has some dependencies, loading them.", "DEBUG", list);
+
+					toLoadModules += list.length - 2; //-2: 1 for codemirror dependency, 1 for the current
+
+					for(var i=1; i<list.length; i++){//i=1 ==> skip codemirror dependency
+						var dependency = list[i];
+						var pos = location.lastIndexOf("/")+1;
+						loadResource(location.substr(0, pos)+dependency+".js")
+					}
+				}
+			}
+			window.define.amd = true;
+			window.define.amd_fake = true;
+		}
+
 		$.ajax(location)
 		 .done(function(data){
 			//js is being evaluated automatically
 			if(location.indexOf("css", location.length - 3) !== -1){
 		 		$("head").append("<style>" + data + "</style>");
+			}
+
+			if(window.define !== undefined && window.define.amd_fake && !window.define.isInUse){
+				window.define = undefined;
 			}
 
 			clazz.loadedResources.push(location);
@@ -205,6 +254,7 @@ this.CMEditor = (function(){
             log("Could not load mode. Please set the modeBaseURL", "WARNING");
 			return;
 		}
+
 		loadResource(clazz.modeBaseURL+modeName+"/"+modeName+".js", callback);
 	}
 
@@ -792,6 +842,7 @@ this.CMEditor = (function(){
 		self.curDoc = self.docs[pos];
 
 		self.codeMirror.swapDoc(self.curDoc.getCMDoc());
+		setMode(self, self.curDoc.getMode());
 		updateCurrentDocument(self);
 
 		if(self.options.menu){
@@ -882,7 +933,7 @@ this.CMEditor = (function(){
 			docName = self.curDoc.getName();
 
 			if (self.curDoc.getMode() != self.codeMirror.getOption("mode")) {
-				self.codeMirror.setOption("mode", self.curDoc.getMode());
+				self.setMode(self.curDoc.getMode());
 				changed = true;
 			}
 
@@ -1236,6 +1287,27 @@ this.CMEditor = (function(){
 	}
 
 	/* (Public)
+	 * Sets the mode (CM lingo for filetype) of the current document; triggers loading the mode
+	 * first if necessary
+	 *
+	 * Parameters: mode (String): The name of the mode to set
+	 */
+	function setMode(self, mode){
+		var cmMode = CodeMirror.findModeByName(mode) || CodeMirror.findModeByMIME(mode);
+
+		if(cmMode === null || cmMode === undefined){
+			log(self, "Could not load this unknown mode: "+mode, "WARNING");
+			displayMessage(self, "Unknown mode");
+			return;
+		}
+
+		CMEditor.loadMode(cmMode.mode, function(){
+			log(self, "Setting a mode:", "DEBUG", mode)
+			self.codeMirror.setOption("mode", cmMode.mime); update(self);
+		});
+	}
+
+	/* (Public)
 	 * Enters or leaves fullscreen mode
 	 */
 	function toggleFullscreen(self){
@@ -1293,7 +1365,9 @@ this.CMEditor = (function(){
 			}
 
 			if(self.curDoc.getMode() != self.codeMirror.getOption("mode")){
-				self.curDoc.setMode(self.codeMirror.getOption("mode"));
+				var mode = self.codeMirror.getOption("mode");
+				self.curDoc.setMode(mode);
+				self.setMode(mode)
 
 				markDocumentAsChanged(self, getDocumentPositionByName(self, self.curDoc.getName()));
 
@@ -1351,6 +1425,7 @@ this.CMEditor = (function(){
 	CMEditor.prototype.saveDoc                   = function(){Array.prototype.unshift.call(arguments, this); return save.apply(this, arguments)};
 	CMEditor.prototype.saveDocAs                 = function(){Array.prototype.unshift.call(arguments, this); return saveas.apply(this, arguments)};
 	CMEditor.prototype.setDoDiffBeforeSaving     = function(){Array.prototype.unshift.call(arguments, this); return setDoDiffBeforeSaving.apply(this, arguments)};
+	CMEditor.prototype.setMode                   = function(){Array.prototype.unshift.call(arguments, this); return setMode.apply(this, arguments)};
 	CMEditor.prototype.toggleFullscreen          = function(){Array.prototype.unshift.call(arguments, this); return toggleFullscreen.apply(this, arguments)};
 	CMEditor.prototype.renameDoc                 = function(){Array.prototype.unshift.call(arguments, this); return rename.apply(this, arguments)};
 	CMEditor.prototype.update                    = function(){Array.prototype.unshift.call(arguments, this); return update.apply(this, arguments)};

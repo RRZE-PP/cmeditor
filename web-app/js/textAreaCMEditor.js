@@ -162,10 +162,54 @@ this.textAreaCMEditor = function (){
      *             callback Function: called when resource was loaded successfully or is already available
      */
     var loadResource = clazz.loadResource = function(location, callback){
-        //use CMEditor here instead of clazz to share resources between the two classes
-        if($.inArray(location, CMEditor.loadedResources) != -1){
+        if($.inArray(location, clazz.loadedResources) != -1){
             if(callback !== undefined) callback();
             return;
+        }
+
+        var modulesToInit = [];
+        var toLoadModules = 0;
+
+        if(window.define === undefined){
+            //hack to load dependant modules, because we're not using a module loader
+            window.define = function(list, mod){
+                window.define.isInUse = true;
+
+                modulesToInit.push(mod);
+
+                if(list.length == 1){
+                    //this module has no dependencies; we've potentially reached the final dependency
+
+                    if(toLoadModules == 0){
+                        log("No more dependencies to load; Initializing modules", "DEBUG", modulesToInit);
+
+                        //init modules of higher layer after all their submodules are initiated
+                        for(var j=modulesToInit.length-1; j>=0; j--){
+                            modulesToInit[j](CodeMirror);
+                        }
+                        modulesToInit = [];
+                        toLoadModules = 0;
+                        window.define = undefined;
+
+                        //call callback again, because we've potentially not loaded all dependencies when it was called first
+                        callback();
+                    }else{
+                        toLoadModules--;
+                    }
+                }else{
+                    log("This module has some dependencies, loading them.", "DEBUG", list);
+
+                    toLoadModules += list.length - 2; //-2: 1 for codemirror dependency, 1 for the current
+
+                    for(var i=1; i<list.length; i++){//i=1 ==> skip codemirror dependency
+                        var dependency = list[i];
+                        var pos = location.lastIndexOf("/")+1;
+                        loadResource(location.substr(0, pos)+dependency+".js")
+                    }
+                }
+            }
+            window.define.amd = true;
+            window.define.amd_fake = true;
         }
 
         $.ajax(location)
@@ -175,13 +219,16 @@ this.textAreaCMEditor = function (){
                 $("head").append("<style>" + data + "</style>");
             }
 
-            //use CMEditor here instead of clazz to share resources between the two classes
-            CMEditor.loadedResources.push(location);
+            if(window.define !== undefined && window.define.amd_fake && !window.define.isInUse){
+                window.define = undefined;
+            }
+
+            clazz.loadedResources.push(location);
             if(callback !== undefined)
                 callback();
          })
          .fail(function(){
-            log("Could not load the resource at "+location, "ERROR");
+            log("Could not load the resource at "+location, "WARNING");
          });
     }
 
@@ -378,7 +425,25 @@ this.textAreaCMEditor = function (){
             self.eventHooks[eventName] = [];
 
         self.eventHooks[eventName].push(hook);
+    }
 
+
+    /* (Public)
+     * Sets the mode (CM lingo for filetype) of the current document; triggers loading the mode
+     * first if necessary
+     *
+     * Parameters: mode (String): The name of the mode to set
+     */
+    function setMode(self, mode){
+        var cmMode = CodeMirror.findModeByName(mode) || CodeMirror.findModeByMIME(mode);
+
+        if(cmMode === null || cmMode === undefined){
+            log(self, "Could not load this unknown mode: "+mode, "WARNING");
+            displayMessage(self, "Unknown mode");
+            return;
+        }
+
+        CMEditor.loadMode(cmMode.mode, function(){self.codeMirror.setOption("mode", cmMode.mime); update(self);});
     }
 
 
@@ -437,6 +502,7 @@ this.textAreaCMEditor = function (){
     textAreaCMEditor.prototype.focus         = function(){Array.prototype.unshift.call(arguments, this); return focus.apply(this, arguments)};
     textAreaCMEditor.prototype.update        = function(){Array.prototype.unshift.call(arguments, this); return update.apply(this, arguments)};
     textAreaCMEditor.prototype.getCodeMirror = function(){Array.prototype.unshift.call(arguments, this); return getCodeMirror.apply(this, arguments)};
+    textAreaCMEditor.prototype.setMode                   = function(){Array.prototype.unshift.call(arguments, this); return setMode.apply(this, arguments)};
     textAreaCMEditor.prototype.toggleFullscreen = function(){Array.prototype.unshift.call(arguments, this); return toggleFullscreen.apply(this, arguments)};
 
     return textAreaCMEditor;

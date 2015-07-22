@@ -14,6 +14,8 @@ modules = {
 		resource url: 'lib/codemirror-5.3/keymap/sublime.js', disposition:'head'
 		resource url: 'lib/codemirror-5.3/keymap/emacs.js', disposition:'head'
 
+		resource url: 'lib/codemirror-5.3/mode/meta.js', disposition:'head'
+
 		// addon
 		resource url: 'lib/codemirror-5.3/addon/dialog/dialog.js', disposition:'head'
 		resource url: 'lib/codemirror-5.3/addon/dialog/dialog.css', disposition:'head'

@@ -58,14 +58,14 @@ class CmeditorTagLib {
 			"twilight"
 		]
 		def availableModes = [
-			"htmlmixed",
-			"htmlembedded",
-			"css",
-			"xml",
-			"javascript",
-			"groovy",
-			"java",
-			"properties"
+			"HTML",
+			"Embedded Javascript",
+			"CSS",
+			"XML",
+			"Javascript",
+			"Groovy",
+			"Java",
+			"Properties"
 		]
 		if(attrs.availableThemes)
 			availableThemes = attrs.availableThemes
@@ -86,7 +86,7 @@ class CmeditorTagLib {
 			binding: 'default',
 			theme: 'default',
 			defaultContent: '',
-			defaultMode: 'htmlmixed',
+			defaultMode: 'html',
 			defaultReadOnly: false,
 			overlayDefinitionsVar: 'overlay_definitions',
 			defaultDiffBeforeSave: true,
@@ -133,14 +133,14 @@ class CmeditorTagLib {
 			"twilight"
 		]
 		def availableModes = [
-			"htmlmixed",
-			"htmlembedded",
-			"css",
-			"xml",
-			"javascript",
-			"groovy",
-			"java",
-			"properties"
+			"HTML",
+			"Embedded Javascript",
+			"CSS",
+			"XML",
+			"Javascript",
+			"Groovy",
+			"Java",
+			"Properties"
 		]
 		if(attrs.availableThemes)
 			availableThemes = attrs.availableThemes

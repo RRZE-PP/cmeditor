@@ -213,30 +213,13 @@ this.CMEditorMenu = (function(){
 		//add available modes dynamically
 		var modesMenuElem = self.rootElem.find(".modesMenu");
 		if(self.options.availableModes === undefined){
-			self.options.availableThemes = [];
+			self.options.availableModes = [];
 		}
-		function getModeCallback(self, mode, mimetype){
-			return function(cm){CMEditor.loadMode(mode, function(){self.cmeditor.codeMirror.setOption("mode", mimetype); self.cmeditor.update();})};
-		}
+
 		for(var i=0; i < self.options.availableModes.length; i++){
 			var mode = self.options.availableModes[i];
-			var modename = mode;
-			var mimetype = mode;
-			var clike = {
-			"c":"text/x-csrc",
-			"c++":"text/x-c++src",
-			"java":"text/x-java",
-			"c#":"text/x-csharp",
-			"objective-c":"text/x-objectivec",
-			"scala":"text/x-scala",
-			"vertex":"text/x-vertex",
-			"fragment":"x-shader/x-fragment"};
-			if(mode in clike){
-				mimetype = clike[mode];
-				mode = "clike";
-			}
-			self.viewMenu["mode"+modename] = getModeCallback(self, mode, mimetype);
-			modesMenuElem.append('<li><a href="#" value="mode'+modename+'"><span></span>'+modename+'</a></li>');
+			self.viewMenu["mode"+mode] = (function(mode){return function(){self.cmeditor.setMode(mode)}})(mode);
+			modesMenuElem.append('<li><a href="#" value="mode'+mode+'"><span></span>'+mode+'</a></li>');
 		}
 
 

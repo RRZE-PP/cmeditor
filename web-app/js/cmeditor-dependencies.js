@@ -2,14 +2,7 @@
 //= require jquery-ui
 //= require codemirror-5.3/lib/codemirror
 
-//= require codemirror-5.3/mode/htmlmixed/htmlmixed
-//= require codemirror-5.3/mode/htmlembedded/htmlembedded
-//= require codemirror-5.3/mode/css/css
-//= require codemirror-5.3/mode/xml/xml
-//= require codemirror-5.3/mode/javascript/javascript
-//= require codemirror-5.3/mode/groovy/groovy
-//= require codemirror-5.3/mode/clike/clike
-//= require codemirror-5.3/mode/properties/properties
+//= require codemirror-5.3/mode/meta.js
 //= require_full_tree codemirror-5.3/keymap
 //= require_full_tree codemirror-5.3/addon/dialog
 //= require_full_tree codemirror-5.3/addon/edit
