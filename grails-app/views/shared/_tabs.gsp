@@ -55,6 +55,7 @@
 			},
 			mapping: {
 				content: "${mapping.content}",                       //String:  the variable name in ajax calls/responses mapped to the document content
+				folder: "${mapping.folder}",                         //String:  the variable name in ajax calls/responses mapped to the document's folder
 				idField: "${mapping.idField}",                       //String:  the field by which documents can be identified towards the server
 				mode: "${mapping.mode}",                             //String:  the variable name in ajax calls/responses mapped to the document mode
 				name: "${mapping.name}",                             //String:  the variable name in ajax calls/responses mapped to the document name

@@ -23,6 +23,7 @@ class CmeditorTagLib {
 		def ajax = [:]
 		def mapping = [
 			content: 'content',
+			folder: 'folder',
 			idField: 'id',
 			mode: 'mode',
 			name: 'name',
@@ -100,6 +101,7 @@ class CmeditorTagLib {
 		]
 		def mapping = [
 			content: 'content',
+			folder: 'folder',
 			idField: 'id',
 			mode: 'mode',
 			name: 'name',

@@ -198,6 +198,23 @@ div.cmeditor-menu {
       }
 
 /*
+ * Stuff for plugins
+ */
+
+.fileSelectTree {
+    margin-top: 1em;
+    border: 1px solid #aaa;
+    border-radius: 4px;
+    padding: 5px;
+    background-color: white;
+}
+
+.fileSelectTree ul.jqueryFileTree a:hover {
+    background-color: #5897fb;
+    color:white;
+}
+
+/*
  * Stuff for fullscreen mode
  */
 div.cmeditor.cmeditor-fullscreen {

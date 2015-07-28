@@ -128,7 +128,7 @@ this.CMEditorMenu = (function(){
 			open: function(cm) {
 
 				self.openDialog.children().remove();
-				var s = $("<select class=\"fileSelect\" name=\"cmeditor-menu-open-select\" multiple=\"multiple\" style=\"width:100%\"/>");
+				var s = $("<select class=\"fileSelect\" name=\"cmeditor-menu-open-select\" multiple=\"multiple\" style=\"width:100%\"/><div class=\"fileSelectTree\" />");
 
 				if(self.options.ajax.listURL){
 					$.get(self.options.ajax.listURL, function(data){
@@ -138,15 +138,53 @@ this.CMEditorMenu = (function(){
 								Cancel: function() { $(this).dialog( "close" ); },
 							};
 							for(var i=0; i < data.result.length; ++i) {
-								if (self.cmeditor.getDocumentPositionByName(data.result[i]) == undefined) {
-									s.append($("<option />", {value: data.result[i][self.options.mapping["idField"]], text: data.result[i][self.options.mapping["name"]]}));
-									available = true;
-								}
+								s.append($("<option />", {value: data.result[i][self.options.mapping["idField"]], text: data.result[i][self.options.mapping["name"]]}));
+								available = true;
 							}
 							if (available == true) {
 								s.appendTo(self.openDialog);
 								self.openDialog.find(".fileSelect").select2({placeholder: "Select a file",
-  																			 allowClear: true})
+  																			 allowClear: true});
+
+								self.openDialog.find(".fileSelectTree").fileTree({script:function(fileTreeData){
+									//this is called each time the user opens a directory (including root)
+									var val = $('<ul class="jqueryFileTree" style="display: none;"></ul>');
+
+									var curPathElems = fileTreeData.dir.split("/");
+									folders = {};
+
+									for(var i=0; i < data.result.length; ++i) {
+										if(typeof data.result[i][self.options.mapping["folder"]] !== "undefined" &&
+											data.result[i][self.options.mapping["folder"]] !== null) {
+
+											var absPath = data.result[i][self.options.mapping["folder"]];
+											absPath = absPath.endsWith("/") ? absPath : absPath+"/";
+
+											if (absPath === fileTreeData.dir) {
+												var fileName = data.result[i][self.options.mapping["name"]];
+												var fileId = data.result[i][self.options.mapping["idField"]];
+												val.append($('<li class="file ext_'+fileName+'"><a href="#" rel='+fileId+'>'+fileName+'</a></li>'));
+											}else{
+												//save each folder once for later adding
+												var pathElems = absPath.split("/");
+
+												if (absPath.startsWith(fileTreeData.dir) && pathElems.length - 1 == curPathElems.length){
+													folders[absPath] = pathElems[pathElems.length-2];
+												}
+											}
+										}
+									}
+
+									for(absPath in folders){
+										val.append($('<li class="directory collapsed"><a href="#" rel="'+absPath+'"">'+folders[absPath]+'</a></li>'));
+									}
+
+									return val;
+								}}, function(fileId){
+									//this is called each time a user selects a file
+									var option = self.openDialog.find(".fileSelect option[value="+fileId+"]");
+									option.attr("selected", !option.attr("selected")).trigger("change");
+								});
 
 								//workaround a width calculation bug in select2
 								self.openDialog.find(".select2-search__field").css("width", "auto");
@@ -270,7 +308,8 @@ this.CMEditorMenu = (function(){
 
 		self.openDialog = self.rootElem.find(".openMenu").dialog({
 					autoOpen: false,
-					height: 300
+					height: 500,
+					width: 300
 				});
 
 	}

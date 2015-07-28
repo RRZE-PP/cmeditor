@@ -8,4 +8,6 @@
 *= require_full_tree codemirror-5.3/addon/display
 
 *= require_full_tree jquery-layout-1.4.0
+
+*= require jqueryfiletree-2.0.1/src/jQueryFileTree
 */
