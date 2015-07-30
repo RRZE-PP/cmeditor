@@ -25,6 +25,7 @@ modules = {
 		resource url: 'lib/codemirror-5.3/addon/search/search.js', disposition:'head'
 		resource url: 'lib/codemirror-5.3/addon/search/searchcursor.js', disposition:'head'
 		resource url: 'lib/codemirror-5.3/addon/mode/overlay.js', disposition:'head'
+		resource url: 'lib/codemirror-5.3/addon/mode/loadmode.js', disposition:'head'
 		// hint
 		resource url: 'lib/codemirror-5.3/addon/hint/show-hint.css', disposition:'head'
 		resource url: 'lib/codemirror-5.3/addon/hint/show-hint.js', disposition:'head'

@@ -147,83 +147,6 @@ this.CMEditor = (function(){
 	}
 
 	/*
-	 * Loads a (css or js) resource if it is not yet loaded, then calls a callback
-	 *
-	 * Parameters: location String: the resource location
-	 *             callback Function: called when resource was loaded successfully or is already available
-	 */
-	var loadResource = clazz.loadResource = function(location, callback){
-        if($.inArray(location, clazz.loadedResources) != -1){
-			if(callback !== undefined) callback();
-			return;
-		}
-
-		var modulesToInit = [];
-		var toLoadModules = 0;
-
-		if(window.define === undefined){
-			//hack to load dependant modules, because we're not using a module loader
-			window.define = function(list, mod){
-				window.define.isInUse = true;
-
-				modulesToInit.push(mod);
-
-				if(list.length == 1){
-					//this module has no dependencies; we've potentially reached the final dependency
-
-					if(toLoadModules == 0){
-						log("No more dependencies to load; Initializing modules", "DEBUG", modulesToInit);
-
-						//init modules of higher layer after all their submodules are initiated
-						for(var j=modulesToInit.length-1; j>=0; j--){
-							modulesToInit[j](CodeMirror);
-						}
-						modulesToInit = [];
-						toLoadModules = 0;
-						window.define = undefined;
-
-						//call callback again, because we've potentially not loaded all dependencies when it was called first
-						callback();
-					}else{
-						toLoadModules--;
-					}
-				}else{
-					log("This module has some dependencies, loading them.", "DEBUG", list);
-
-					toLoadModules += list.length - 2; //-2: 1 for codemirror dependency, 1 for the current
-
-					for(var i=1; i<list.length; i++){//i=1 ==> skip codemirror dependency
-						var dependency = list[i];
-						var pos = location.lastIndexOf("/")+1;
-						loadResource(location.substr(0, pos)+dependency+".js")
-					}
-				}
-			}
-			window.define.amd = true;
-			window.define.amd_fake = true;
-		}
-
-		$.ajax(location)
-		 .done(function(data){
-			//js is being evaluated automatically
-			if(location.indexOf("css", location.length - 3) !== -1){
-		 		$("head").append("<style>" + data + "</style>");
-			}
-
-			if(window.define !== undefined && window.define.amd_fake && !window.define.isInUse){
-				window.define = undefined;
-			}
-
-			clazz.loadedResources.push(location);
-			if(callback !== undefined)
-				callback();
-		 })
-		 .fail(function(){
-		 	log("Could not load the resource at "+location, "WARNING");
-		 });
-	}
-
-	/*
 	 * Loads a theme if it is not yet loaded, then calls a callback. Requires the static
 	 * property "themeBaseURL" to be set correctly
 	 *
@@ -239,7 +162,18 @@ this.CMEditor = (function(){
 			if(callback !== undefined) callback();
 			return;
 		}
-		loadResource(clazz.themeBaseURL+themeName+".css", callback);
+		$.ajax(clazz.themeBaseURL+themeName+".css")
+			.done(function(data){
+				$("head").append("<style>" + data + "</style>");
+
+				clazz.loadedResources.push(location);
+
+				if(callback !== undefined)
+					callback();
+			})
+			.fail(function(){
+				log("Could not load the resource at "+location, "WARNING");
+			});
 	}
 
 	/*
@@ -255,7 +189,8 @@ this.CMEditor = (function(){
 			return;
 		}
 
-		loadResource(clazz.modeBaseURL+modeName+"/"+modeName+".js", callback);
+		CodeMirror.modeURL = clazz.modeBaseURL+"%N/%N.js"
+		CodeMirror.requireMode(modeName, callback);
 	}
 
 	/*************************************************************************

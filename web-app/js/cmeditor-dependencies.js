@@ -13,6 +13,7 @@
 //= require_full_tree codemirror-5.3/addon/fold
 //= require_full_tree codemirror-5.3/addon/selection
 //= require_full_tree codemirror-5.3/addon/display
+//= require codemirror-5.3/addon/mode/loadmode
 
 //= require_full_tree jsdifflib
 
