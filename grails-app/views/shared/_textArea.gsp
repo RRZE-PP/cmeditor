@@ -32,8 +32,10 @@
 			mode: "${options.mode}",
 			readOnly: ${options.readOnly},                           //Boolean: whether the whole editor should be read-only
 			useSession: ${options.useSession},                       //Boolean: whether to save some settings like theme in the browser's localstorage
-			availableThemes: ${availableThemes.encodeAsJSON()},		 //List of Strings: names of all themes that should be available to the user
-			availableModes:  ${availableModes.encodeAsJSON()},		 //List of Strings: names of all modes (file extensions) that should be available to the user
+			<g:applyCodec encodeAs="raw"> <%-- do not encode the already encoded json --%>
+			availableThemes: ${availableThemes.encodeAsJSON()},      //List of Strings: names of all themes that should be available to the user
+			availableModes:  ${availableModes.encodeAsJSON()},       //List of Strings: names of all modes (file extensions) that should be available to the user
+			</g:applyCodec>
 			preloadModules: ${options.preloadModules}				 //Boolean: whether to load themes and modules at document load or on demand
 		}
 
