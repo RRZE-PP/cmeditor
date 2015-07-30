@@ -214,6 +214,10 @@ div.cmeditor-menu {
     color:white;
 }
 
+.fileSelectTree ul.jqueryFileTree li.selected > a{
+    font-weight: normal;
+}
+
 /*
  * Stuff for fullscreen mode
  */

@@ -68,7 +68,7 @@ modules = {
 		resource url:'lib/select2-4.0.0/dist/css/select2.min.css', disposition:'head'
 
 		resource url:'lib/jqueryfiletree-2.0.1/src/jQueryFileTree.js', disposition:'head'
-		resource url:'lib/jqueryfiletree-2.0.1/src/jQueryFileTree.css', disposition:'head'
+		resource url:'lib/jqueryfiletree-2.0.1/dist/jQueryFileTree.min.css', disposition:'head'
 
 		resource url:'/js/CMEditorMenu.js', disposition:'head'
 	}
