@@ -1072,8 +1072,9 @@ this.CMEditor = (function(){
 	 * Appends a number to a filename so that it is unambigous
 	 *
 	 * Parameters: name String: The name of the document
+	 *             folder String (optional): if supplied, will only search for collisions within this directory; null matches all folders
 	 */
-	function getUnambiguousName(self, name) {
+	function getUnambiguousName(self, name, folder) {
 		var namesOnServer = [];
 		if(self.options.ajax.listURL){
 			$.ajax({
@@ -1081,7 +1082,10 @@ this.CMEditor = (function(){
 				success: function(json) {
 					if (json.status == "success" && json.result) {
 						for(var i=0; i<json.result.length; i++){
-							namesOnServer.push(json.result[i][self.options.mapping["name"]]);
+							if((typeof folder === "undefined" || folder === null
+									|| json.result[i][self.options.mapping["folder"]] === folder)){
+								namesOnServer.push(json.result[i][self.options.mapping["name"]]);
+							}
 						}
 					}
 				},
@@ -1089,8 +1093,19 @@ this.CMEditor = (function(){
 			});
 		}
 		var i = 0;
-		while (getDocumentByName(self, name + (i || "")) || listContainsElem(self, namesOnServer, name + (i || "")))
+		while (true){
+			var isCurrentlyOpened = false;
+			$.each(self.docs, function(idx, doc){
+				if(doc.getName() === name + (i || "") && (folder === null || typeof folder === "undefined" || folder === doc.getFolder()))
+					isCurrentlyOpened = true;
+			});
+
+			if(!listContainsElem(self, namesOnServer, name + (i || "")) && !isCurrentlyOpened){
+				break;
+			}
+
 			i++;
+		}
 
 		return name + (i || "");
 	}
