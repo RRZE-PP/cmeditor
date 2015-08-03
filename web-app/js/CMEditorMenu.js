@@ -124,7 +124,43 @@ this.CMEditorMenu = (function(){
 	 */
 	function initMenus(self){
 		self.fileMenu = {
-			new: function(cm) { self.cmeditor.newDoc(); },
+			new: function(cm) {
+				var nameElem = self.newFileDialog.find("input[name=name]");
+				var folderElem = self.newFileDialog.find("input[name=folder]");
+
+				nameElem.val("");
+				folderElem.val("/");
+
+				var buttons = {
+					Create : function(){
+						var name = nameElem.val().trim();
+						var folder = folderElem.val().trim();
+
+						if(name === ""){
+							alert("Please supply a name");
+							return;
+						}
+						if(folder === ""){
+							folder = null;
+							self.cmeditor.displayMessage("Your file will be hidden in the folder view. Use the searchbar to find it.");
+						}
+
+						var unambigousName = self.cmeditor.getUnambiguousName(name, folder);
+						if(name !== unambigousName){
+							self.cmeditor.displayMessage("A number was appended to the filename, because it is already in use");
+						}
+
+						self.cmeditor.newDoc(unambigousName, folder);
+						self.newFileDialog.dialog("close");
+					},
+					Cancel: function(){
+						self.newFileDialog.dialog("close");
+					}
+				}
+
+				self.newFileDialog.dialog("option", "buttons", buttons);
+				self.newFileDialog.dialog("open");
+			},
 			open: function(cm) {
 
 				self.openDialog.children().remove();
@@ -352,6 +388,12 @@ this.CMEditorMenu = (function(){
 				});
 
 		self.renameDialog = self.rootElem.find(".renameDialog").dialog({
+					autoOpen: false,
+					height: 300,
+					width: 500
+				});
+
+		self.newFileDialog = self.rootElem.find(".newFileDialog").dialog({
 					autoOpen: false,
 					height: 300,
 					width: 500

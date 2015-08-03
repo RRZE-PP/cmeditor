@@ -9,6 +9,10 @@
 		New filename: <input type="text" name="newName" /> <br />
 		New folder: <input type="text" name="newFolder" /> (Leave empty to hide in folder view)
 	</div>
+	<div class="dialog newFileDialog" title="Create new file" style="display: none;">
+		Filename: <input type="text" name="name" /> <br />
+		Folder: <input type="text" name="folder" /> (Leave empty to hide in folder view)
+	</div>
 	<ul class="cmeditor-menubar menu">
 		<li><a href="#">File</a>
 			<ul class="fileMenu">
