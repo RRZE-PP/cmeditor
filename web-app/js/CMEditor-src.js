@@ -677,7 +677,7 @@ this.CMEditor = (function(){
 		if (self.docs.length < 1) {
 			var name = self.unregDocName = getUnambiguousName(self, "Untitled Document");
 
-			var newDoc = new Doc(name, self.options.defaultMode, self.options.defaultContent,
+			var newDoc = new Doc(name, "/", self.options.defaultMode, self.options.defaultContent,
 									(self.options.readOnly||self.options.defaultReadOnly)?"nocursor":"");
 
 
@@ -929,6 +929,7 @@ this.CMEditor = (function(){
 			success: function(data){
 				if (data.status == "success" && data.result) {
 					var newDoc = new Doc(data.result[self.options.mapping.name],
+					                        data.result[self.options.mapping.folder] || null,
 					                        data.result[self.options.mapping.mode] || self.options.defaultMode,
 					                        data.result[self.options.mapping.content],
 					                        readWrite ? "" : ((self.options.readOnly || self.options.defaultReadOnly) ? "nocursor" : ""));
@@ -1120,23 +1121,15 @@ this.CMEditor = (function(){
 
 	/* (Public)
 	 * Creates a new document with a name supplied by the user
+	 *
+	 * Parameters: fileName String: the new filename
+	 *             folder String: the folder (or null)
 	 */
-	function newDoc(self) {
+	function newDoc(self, fileName, folder) {
 		if(self.options.readOnly){
 			displayMessage("This editor read only!");
 		}else{
-			var name = prompt("Name of the new buffer", "");
-			if (name == null)
-				return;
-
-			if(name.trim() == ""){
-				displayMessage(self, "Please supply a filename");
-				return;
-			}
-
-			name = getUnambiguousName(self, name.trim());
-
-			var newDoc = new Doc(name, self.options.defaultMode, self.options.defaultContent,
+			var newDoc = new Doc(fileName, folder, self.options.defaultMode, self.options.defaultContent,
 									(self.options.readOnly || self.options.defaultReadOnly) ? "nocursor":"");
 
 
@@ -1421,8 +1414,9 @@ this.CMEditor = (function(){
 	CMEditor.prototype.update_message            = function(){log("using update_message is deprecated. use displayMessage instead", "WARNING");
                                                               Array.prototype.unshift.call(arguments, this); return displayMessage.apply(this, arguments)};
 
-	var Doc = CMEditor.Doc = function Doc(name, mode, content, readOnly, cmDoc){
+	var Doc = CMEditor.Doc = function Doc(name, folder, mode, content, readOnly, cmDoc){
 		this.content = content;
+		this.folder = folder;
 		this.idField = null;
 		this.mode = mode;
 		this.name = name;
@@ -1451,6 +1445,7 @@ this.CMEditor = (function(){
 	Doc.prototype.getContent  = function(){return this.content};
 	Doc.prototype.getCustomData = function(){ return this.customData};
 	Doc.prototype.getCustomDataField = function(key){return this.customData[key]};
+	Doc.prototype.getFolder   = function(){return this.folder};
 	Doc.prototype.getID       = function(){return this.idField};
 	Doc.prototype.getMode     = function(){return this.mode};
 	Doc.prototype.getName     = function(){return this.name};
@@ -1471,6 +1466,7 @@ this.CMEditor = (function(){
 	Doc.prototype.markUnsaved   = function(){this.status = Doc.status.UNSAVED};
 	Doc.prototype.markUnchanged = function(){this.status = Doc.status.UNCHANGED};
 	Doc.prototype.setContent    = function(content){this.content = content};
+	Doc.prototype.setFolder     = function(folder){this.folder = folder};
 	Doc.prototype.setID         = function(id){this.idField = id};
 	Doc.prototype.setMode       = function(mode){this.mode = mode};
 	Doc.prototype.setName       = function(name){this.name = name;};
