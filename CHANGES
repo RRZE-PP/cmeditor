@@ -1,0 +1,12 @@
+Version 2.4.0 (Aug 2015)
+ * Load theme and mode files on demand
+ * Available themes and modes can be defined per instance
+ * Support pseudo-folders
+ * Fix assets for Windows hosts
+ * Some minor style improvements
+
+Version 2.3.5 (Jun 2015)
+ * Upgrade to CodeMirror 5.3
+ * Add a fullscren mode
+ * Add a readOnly-Attribute to textArea for convenience
+ * Let application follow CodeMirror theme
