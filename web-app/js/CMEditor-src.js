@@ -1018,10 +1018,25 @@ this.CMEditor = (function(){
 	 * Parameters: message String: The message to be displayed
 	 */
 	function displayMessage(self, message) {
-		self.rootElem.find(".cmeditor-tab-message").text(message)
-		                .toggle("slide", {"direction":"up"})
-		                .delay(3000)
-		                .toggle("slide", {"direction":"up"});
+		if(typeof self.messagesToDisplay === "undefined" || self.messagesToDisplay.length === 0){
+			self.messagesToDisplay = [message];
+		}else{
+			self.messagesToDisplay.push(message);
+			return;
+		}
+
+		function displayRemainingMessages(){
+			if(self.messagesToDisplay.length === 0)
+				return;
+			self.rootElem.find(".cmeditor-tab-message").text(self.messagesToDisplay[0])
+			                .toggle("slide", {"direction":"up"})
+			                .delay(3000)
+			                .toggle({effect: "slide",
+			                         direction: "up",
+			                         complete: function(){self.messagesToDisplay.shift(); displayRemainingMessages()}});
+		}
+
+		displayRemainingMessages();
 	}
 
 	/* (Public)
