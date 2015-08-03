@@ -414,6 +414,7 @@ this.CMEditor = (function(){
 			var data = {};
 			jQuery.extend(data, self.curDoc.getCustomData()); //'clone' into the data object
 			data[self.options.mapping.idField] = self.curDoc.getID();
+			data[self.options.mapping.folder] = self.curDoc.getFolder();
 			data[self.options.mapping.mode] = self.curDoc.getMode();
 			data[self.options.mapping.name] = self.curDoc.getName();
 			data[self.options.mapping.content] = self.curDoc.getContent();
