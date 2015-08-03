@@ -7,9 +7,11 @@ this.CMEditor = (function(){
 		//allow the user to omit new
 		if (!(this instanceof CMEditor)) return new CMEditor(rootElem, options, instanceName);
 		var self = this;
-		self.instanceNo = CMEditor.instanciated++;
-		self.instanceName = instanceName !== undefined ? instanceName : "";
-        if(self.instanceName == "")
+		self.state = {};
+
+		self.state.instanceNo = CMEditor.instanciated++;
+		self.state.instanceName = instanceName !== undefined ? instanceName : "";
+        if(self.state.instanceName == "")
             log("Warning: No instance name supplied, fullscreen mode will be disabled!");
 
 		self.rootElem = $(rootElem);
@@ -18,8 +20,8 @@ this.CMEditor = (function(){
 		self.options.mapping = options.mapping !== undefined ? options.mapping : {}
 		self.options.defaultContent = options.defaultContent !== undefined ? options.defaultContent : "";
 
-		self.docs = [];
-		self.eventHooks = {};
+		self.state.docs = [];
+		self.state.eventHooks = {};
 		for(var hookName in options.hooks){
 			on(self, hookName, options["hooks"][hookName]);
 		}
@@ -54,7 +56,7 @@ this.CMEditor = (function(){
 			preloadModules(self);
 		}
 
-		registerInstance(self.instanceName, self.instanceNo, self);
+		registerInstance(self.state.instanceName, self.state.instanceNo, self);
 	}
 
 	/*************************************************************************
@@ -86,7 +88,7 @@ this.CMEditor = (function(){
 		var data = [];
 
 		if(arg0 instanceof clazz){
-			instance = " #" + arg0.instanceNo + " '" + arg0.instanceName +"'";
+			instance = " #" + arg0.state.instanceNo + " '" + arg0.state.instanceName +"'";
 			message = arg1;
 			logLevel = (typeof arg2 != "undefined") ? LOGLEVELS[arg2] : LOGLEVELS.INFO;
 			data = ((typeof arg3 != "undefined")? ((arg3 instanceof Array)? arg3 : [arg3]) : []);
@@ -274,7 +276,9 @@ this.CMEditor = (function(){
 	 *	Initiates dialogs for user interaction
 	 */
 	function initDialogs(self){
-		var diff = self.diffDialog = $('<div class="dialog diffDialog" title="diff" style="display: none;"> \
+		self.dialogs = {};
+
+		var diff = self.dialogs.diffDialog = $('<div class="dialog diffDialog" title="diff" style="display: none;"> \
 									<div class="diffoutput"> </div> \
 									<p><strong>Context size (optional):</strong><input name="contextSize" value="1" type="number" /></p> \
 									<p><input type="radio" name="_viewtype" id="sidebyside" checked="checked" /> <label for="sidebyside">Side by Side Diff</label> \
@@ -292,7 +296,7 @@ this.CMEditor = (function(){
 		});
 
 
-		var warn = self.warningDialog = $('<div class="dialog warningDialog" title="warning" style="display: none;"></div>');
+		var warn = self.dialogs.warningDialog = $('<div class="dialog warningDialog" title="warning" style="display: none;"></div>');
 		warn.dialog({
 			autoOpen: false,
 			resize:"auto",
@@ -301,7 +305,7 @@ this.CMEditor = (function(){
 		});
 
 
-		var go = self.gotoDialog = $('<div class="dialog gotoDialog" title="Go to Line" style="display: none;"><p class="gotoLabel"></p> \
+		var go = self.dialogs.gotoDialog = $('<div class="dialog gotoDialog" title="Go to Line" style="display: none;"><p class="gotoLabel"></p> \
 									<input type="text" /><p class="gotoError">&nbsp;</p></div>');
 		go.dialog({
 			autoOpen: false,
@@ -311,7 +315,7 @@ this.CMEditor = (function(){
 			height: "auto",
 			buttons: {Cancel: 	function() { $(this).dialog("close"); },
 					  Ok: 		function() {
-									var line = parseInt(self.gotoDialog.find("input").val())-1;
+									var line = parseInt(self.dialogs.gotoDialog.find("input").val())-1;
 									self.codeMirror.doc.setCursor(line, 0);
 									$(this).dialog("close");
 								}
@@ -353,10 +357,10 @@ this.CMEditor = (function(){
 			return;
 		}
 
-		if (self.curDoc.hasID()) {
+		if (self.state.curDoc.hasID()) {
 
 			var data = {};
-			data[self.options.mapping.idField] = self.curDoc.getID();
+			data[self.options.mapping.idField] = self.state.curDoc.getID();
 
 			$.ajax({
 				type:"GET",
@@ -364,7 +368,7 @@ this.CMEditor = (function(){
 				url: self.options.ajax.deleteURL,
 				success:function(data, textStatus){
 					if (data.status == "success") {
-						removeDocument(self, self.curDoc);
+						removeDocument(self, self.state.curDoc);
 						log(self, "Deleted a document from the server", "INFO");
 					}else{
 						log(self, "Could not delete this file from the server", "WARNING", data);
@@ -372,7 +376,7 @@ this.CMEditor = (function(){
 					}
 					if(data.msg)
 						displayMessage(self, data.msg, textStatus);
-					log(self, "Currently serving these documents locally:", "DEBUG", self.docs)
+					log(self, "Currently serving these documents locally:", "DEBUG", self.state.docs)
 				},
 				error:function(XMLHttpRequest,textStatus,errorThrown){
 					displayMessage(self, "An error occured: "+ textStatus +" " + errorThrown);
@@ -390,11 +394,11 @@ this.CMEditor = (function(){
 	 * Parameters: newId (Integer|String): If supplied the document will be replaced by this one
 	 */
 	function ajax_reload(self, newId) {
-		if (self.curDoc) {
+		if (self.state.curDoc) {
 			if(typeof newId == "undefined")
-				newId = self.curDoc.getID();
+				newId = self.state.curDoc.getID();
 
-			removeDocument(self, self.curDoc);
+			removeDocument(self, self.state.curDoc);
 			ajax_load(self, newId, true);
 		}
 	}
@@ -403,15 +407,15 @@ this.CMEditor = (function(){
 	 *	Triggers updating the document on server side and then reloads it from the server
 	 */
 	function ajax_update(self) {
-		if (self.curDoc) {
+		if (self.state.curDoc) {
 
 			var data = {};
-			jQuery.extend(data, self.curDoc.getCustomData()); //'clone' into the data object
-			data[self.options.mapping.idField] = self.curDoc.getID();
-			data[self.options.mapping.folder] = self.curDoc.getFolder();
-			data[self.options.mapping.mode] = self.curDoc.getMode();
-			data[self.options.mapping.name] = self.curDoc.getName();
-			data[self.options.mapping.content] = self.curDoc.getContent();
+			jQuery.extend(data, self.state.curDoc.getCustomData()); //'clone' into the data object
+			data[self.options.mapping.idField] = self.state.curDoc.getID();
+			data[self.options.mapping.folder] = self.state.curDoc.getFolder();
+			data[self.options.mapping.mode] = self.state.curDoc.getMode();
+			data[self.options.mapping.name] = self.state.curDoc.getName();
+			data[self.options.mapping.content] = self.state.curDoc.getContent();
 
 			$.ajax({
 				type: "POST",
@@ -446,7 +450,7 @@ this.CMEditor = (function(){
 	function customElementChanged(self, elem) {
 		var key = elem.attr("id");
 
-		if (self.curDoc) {
+		if (self.state.curDoc) {
 			var old = null;
 			var doUpdate = true;
 
@@ -456,32 +460,32 @@ this.CMEditor = (function(){
 				doUpdate = false;
 
 			} else if (key == self.options.mapping.mode) {
-				old = self.curDoc.getMode();
-				self.curDoc.setMode(getCustomElementValue(self, elem));
+				old = self.state.curDoc.getMode();
+				self.state.curDoc.setMode(getCustomElementValue(self, elem));
 				if(self.options.menu)
 					self.menu.update();
 
 			} else if (key == self.options.mapping.content) {
-				old = self.curDoc.getContent();
+				old = self.state.curDoc.getContent();
 				sef.curDoc.setContent(getCustomElementValue(self, elem));
 
 			} else if (key == self.options.mapping.idField) {
-				old = self.curDoc.getID();
+				old = self.state.curDoc.getID();
 				sef.curDoc.setID(getCustomElementValue(self, elem));
 
 			}
 			//else handle all other cases
 			else {
 				if (elem.attr("data-field-property")) {
-					if (self.curDoc.getCustomDataField(key)) {
-						old = self.curDoc.getCustomDataField(key)[elem.attr("data-field-property")];
+					if (self.state.curDoc.getCustomDataField(key)) {
+						old = self.state.curDoc.getCustomDataField(key)[elem.attr("data-field-property")];
 					} else {
-						self.curDoc.setCustomDataField(key, {});
+						self.state.curDoc.setCustomDataField(key, {});
 					}
-					self.curDoc.getCustomDataField(key)[elem.attr("data-field-property")] = getCustomElementValue(self, elem);
+					self.state.curDoc.getCustomDataField(key)[elem.attr("data-field-property")] = getCustomElementValue(self, elem);
 				} else {
-					old = self.curDoc.getCustomDataField(key);
-					self.curDoc.setCustomDataField(key, getCustomElementValue(self, elem));
+					old = self.state.curDoc.getCustomDataField(key);
+					self.state.curDoc.setCustomDataField(key, getCustomElementValue(self, elem));
 				}
 			}
 
@@ -526,10 +530,10 @@ this.CMEditor = (function(){
 	 */
 	function decorateDiffDialog(self) {
 
-		var base    = difflib.stringAsLines(self.curDoc.getOrigContent()),
-			newtxt  = difflib.stringAsLines(self.curDoc.getContent()),
-			diffoutputdiv = self.diffDialog.find(".diffoutput"),
-			contextSize   = self.diffDialog.find("input[name=contextSize]").val();
+		var base    = difflib.stringAsLines(self.state.curDoc.getOrigContent()),
+			newtxt  = difflib.stringAsLines(self.state.curDoc.getContent()),
+			diffoutputdiv = self.dialogs.diffDialog.find(".diffoutput"),
+			contextSize   = self.dialogs.diffDialog.find("input[name=contextSize]").val();
 
 		var opcodes = new difflib.SequenceMatcher(base, newtxt).get_opcodes();
 
@@ -546,7 +550,7 @@ this.CMEditor = (function(){
 				baseTextName: "Base Text",
 				newTextName: "New Text",
 				contextSize: contextSize,
-				viewType: self.diffDialog.find("input[name=viewType]:checked").val()
+				viewType: self.dialogs.diffDialog.find("input[name=viewType]:checked").val()
 			}));
 		}
 	}
@@ -559,9 +563,9 @@ this.CMEditor = (function(){
 	 *             args Array: the parameters to pass to the hook as an array
 	 */
 	function executeHooks(self, eventName, context, args){
-		for(var i=0; self.eventHooks[eventName] && i<self.eventHooks[eventName].length; i++){
-			if(typeof self.eventHooks[eventName][i] == "function")
-				self.eventHooks[eventName][i].apply(context, args);
+		for(var i=0; self.state.eventHooks[eventName] && i<self.state.eventHooks[eventName].length; i++){
+			if(typeof self.state.eventHooks[eventName][i] == "function")
+				self.state.eventHooks[eventName][i].apply(context, args);
 			else
 				log(self, "A hook was not executed because it is not a function", "WARNING");
 		}
@@ -588,7 +592,7 @@ this.CMEditor = (function(){
 	 * Returns:    CMEditor.Doc: The document
 	 */
 	function getDocumentByName(self, name) {
-		return self.docs[getDocumentPositionByName(self, name)];
+		return self.state.docs[getDocumentPositionByName(self, name)];
 	}
 
 	/*
@@ -598,9 +602,9 @@ this.CMEditor = (function(){
 		var first = self.codeMirror.doc.firstLine()+1;
 		var last = self.codeMirror.doc.lastLine()+1;
 
-		self.gotoDialog.find(".gotoLabel").text("Enter line number ("+first+".."+last+"):");
-		self.gotoDialog.find("input").val(self.codeMirror.doc.getCursor().line+1);
-		self.gotoDialog.find("input").on("keyup", function() {
+		self.dialogs.gotoDialog.find(".gotoLabel").text("Enter line number ("+first+".."+last+"):");
+		self.dialogs.gotoDialog.find("input").val(self.codeMirror.doc.getCursor().line+1);
+		self.dialogs.gotoDialog.find("input").on("keyup", function() {
 			var lineInput = $(this).val();
 
 			var errMsg = "";
@@ -617,14 +621,14 @@ this.CMEditor = (function(){
 			}
 
 			if(errMsg !== "" && lineInput !== ""){
-				self.gotoDialog.find(":button:contains('Ok')").prop("disabled", true).addClass("ui-state-disabled");
+				self.dialogs.gotoDialog.find(":button:contains('Ok')").prop("disabled", true).addClass("ui-state-disabled");
 			}else{
-				self.gotoDialog.find(":button:contains('Ok')").prop("disabled", true).removeClass("ui-state-disabled");
+				self.dialogs.gotoDialog.find(":button:contains('Ok')").prop("disabled", true).removeClass("ui-state-disabled");
 			}
-			self.gotoDialog.find(".gotoError").text(errMsg);
+			self.dialogs.gotoDialog.find(".gotoError").text(errMsg);
 		});
 
-		self.gotoDialog.dialog("open");
+		self.dialogs.gotoDialog.dialog("open");
 	}
 
 	/*
@@ -633,7 +637,7 @@ this.CMEditor = (function(){
 	 * Parameters: newDoc CMEditor.Doc: The document to insert
 	 */
 	function insertNewDocument(self, newDoc) {
-		self.docs.push(newDoc);
+		self.state.docs.push(newDoc);
 
 		var docTabs = self.rootElem.find(".docs").get(0);
 		var li = docTabs.appendChild(document.createElement("li"));
@@ -655,11 +659,11 @@ this.CMEditor = (function(){
 		li.appendChild(closeButton.get(0));
 
 		if (self.codeMirror.getDoc() == newDoc.getCMDoc()) {
-			markDocumentAsSelected(self, self.docs.length - 1);
-			self.curDoc = newDoc;
+			markDocumentAsSelected(self, self.state.docs.length - 1);
+			self.state.curDoc = newDoc;
 		}
 
-		selectDocumentByIndex(self, self.docs.length - 1);
+		selectDocumentByIndex(self, self.state.docs.length - 1);
 		removeUntitledDocument(self);
 
 		log(self, "Inserted a new document", "INFO");
@@ -670,8 +674,8 @@ this.CMEditor = (function(){
 	 * Creates and registers a new (empty) document if there is none opened
 	 */
 	function insertNewUntitledDocument(self) {
-		if (self.docs.length < 1) {
-			var name = self.unregDocName = getUnambiguousName(self, "Untitled Document");
+		if (self.state.docs.length < 1) {
+			var name = self.state.unregDocName = getUnambiguousName(self, "Untitled Document");
 
 			var newDoc = new Doc(name, "/", self.options.defaultMode, self.options.defaultContent,
 									(self.options.readOnly||self.options.defaultReadOnly)?"nocursor":"");
@@ -695,7 +699,7 @@ this.CMEditor = (function(){
 	 */
 	function markDocumentAsChanged(self, pos) {
 		var docTab = self.rootElem.find(".tabs li:nth-child("+(pos+1)+") .tabName");
-		docTab.text("*"+ self.docs[pos].getName());
+		docTab.text("*"+ self.state.docs[pos].getName());
 
 	}
 
@@ -718,7 +722,7 @@ this.CMEditor = (function(){
 	 */
 	function markDocumentAsUnchanged(self, pos) {
 		var docTab = self.rootElem.find(".tabs li:nth-child("+(pos+1)+") .tabName");
-		docTab.text(self.docs[pos].getName());
+		docTab.text(self.state.docs[pos].getName());
 
 	}
 
@@ -740,8 +744,8 @@ this.CMEditor = (function(){
 	 * Parameters: doc CMEditor.Doc: The document to remove
 	 */
 	function removeDocument(self, doc) {
-		for (var i = 0; i < self.docs.length && doc != self.docs[i]; ++i) {}
-		self.docs.splice(i, 1);
+		for (var i = 0; i < self.state.docs.length && doc != self.state.docs[i]; ++i) {}
+		self.state.docs.splice(i, 1);
 
 		var docList = self.rootElem.find(".docs").get(0);
 		docList.removeChild(docList.childNodes[i]);
@@ -755,8 +759,8 @@ this.CMEditor = (function(){
 	 * Unregisters a document previously created by `insertNewUntitledDocument`
 	 */
 	function removeUntitledDocument(self) {
-		if (self.docs.length > 1) {
-			var doc = getDocumentByName(self, self.unregDocName)
+		if (self.state.docs.length > 1) {
+			var doc = getDocumentByName(self, self.state.unregDocName)
 			if (doc && doc.isNew()) {
 				removeDocument(self, doc);
 			}
@@ -770,10 +774,10 @@ this.CMEditor = (function(){
 	 */
 	function selectDocumentByIndex(self, pos) {
 		markDocumentAsSelected(self, pos);
-		self.curDoc = self.docs[pos];
+		self.state.curDoc = self.state.docs[pos];
 
-		self.codeMirror.swapDoc(self.curDoc.getCMDoc());
-		setMode(self, self.curDoc.getMode());
+		self.codeMirror.swapDoc(self.state.curDoc.getCMDoc());
+		setMode(self, self.state.curDoc.getMode());
 		updateCurrentDocument(self);
 
 		if(self.options.menu){
@@ -802,9 +806,9 @@ this.CMEditor = (function(){
 			}
 		}
 
-		self.warningDialog.text(message);
-		self.warningDialog.dialog("option", "buttons", buttons);
-		self.warningDialog.dialog("open");
+		self.dialogs.warningDialog.text(message);
+		self.dialogs.warningDialog.dialog("option", "buttons", buttons);
+		self.dialogs.warningDialog.dialog("open");
 	}
 
 	/*
@@ -860,22 +864,22 @@ this.CMEditor = (function(){
 		var docName = "no curDoc";
 		var changed = false;
 
-		if (self.curDoc) {
-			docName = self.curDoc.getName();
+		if (self.state.curDoc) {
+			docName = self.state.curDoc.getName();
 
-			if (self.curDoc.getMode() != self.codeMirror.getOption("mode")) {
-				self.setMode(self.curDoc.getMode());
+			if (self.state.curDoc.getMode() != self.codeMirror.getOption("mode")) {
+				setMode(self, self.state.curDoc.getMode());
 				changed = true;
 			}
 
 			if (cmChangeObjects && !cmChangeObjects.propertyIsEnumerable("cmeditor_custom_field")) {
-				self.curDoc.setContent(self.curDoc.getCMDoc().getValue());
+				self.state.curDoc.setContent(self.state.curDoc.getCMDoc().getValue());
 				changed = true;
 			}
 
-			if (self.curDoc.getReadOnly() != self.codeMirror.getOption("readOnly")) {
-				if (self.curDoc.getReadOnly()) {
-					self.codeMirror.setOption("readOnly", self.curDoc.getReadOnly());
+			if (self.state.curDoc.getReadOnly() != self.codeMirror.getOption("readOnly")) {
+				if (self.state.curDoc.getReadOnly()) {
+					self.codeMirror.setOption("readOnly", self.state.curDoc.getReadOnly());
 				} else {
 					self.codeMirror.setOption("readOnly", false);
 				}
@@ -886,11 +890,11 @@ this.CMEditor = (function(){
 			}
 
 			if (changed || cmChangeObjects) {
-				markDocumentAsChanged(self, getDocumentPositionByName(self, self.curDoc.getName()));
-				if (self.curDoc.isNew()) {
-					self.curDoc.markUnsaved();
-				} else if (self.curDoc.isUnchanged()) {
-					self.curDoc.markChanged()
+				markDocumentAsChanged(self, getDocumentPositionByName(self, self.state.curDoc.getName()));
+				if (self.state.curDoc.isNew()) {
+					self.state.curDoc.markUnsaved();
+				} else if (self.state.curDoc.isUnchanged()) {
+					self.state.curDoc.markChanged()
 				}
 			}
 
@@ -961,15 +965,15 @@ this.CMEditor = (function(){
 	 * Closes the currently opened document
 	 */
 	function close(self, cm) {
-		if (self.curDoc.needsSaving()) {
+		if (self.state.curDoc.needsSaving()) {
 			showWarning(self, "The changes to the current document will be lost",
 				{Close: function() {
-							removeDocument(self, self.curDoc);
+							removeDocument(self, self.state.curDoc);
 							$(this).dialog("close");
 						}
 				});
 		} else {
-			removeDocument(self, self.curDoc);
+			removeDocument(self, self.state.curDoc);
 		}
 	}
 
@@ -1005,8 +1009,8 @@ this.CMEditor = (function(){
 
 		decorateDiffDialog(self);
 
-		self.diffDialog.dialog("option", "buttons", buttons);
-		self.diffDialog.dialog("open");
+		self.dialogs.diffDialog.dialog("option", "buttons", buttons);
+		self.dialogs.diffDialog.dialog("open");
 	}
 
 	/* (Public)
@@ -1015,22 +1019,22 @@ this.CMEditor = (function(){
 	 * Parameters: message String: The message to be displayed
 	 */
 	function displayMessage(self, message) {
-		if(typeof self.messagesToDisplay === "undefined" || self.messagesToDisplay.length === 0){
-			self.messagesToDisplay = [message];
+		if(typeof self.state.messagesToDisplay === "undefined" || self.state.messagesToDisplay.length === 0){
+			self.state.messagesToDisplay = [message];
 		}else{
-			self.messagesToDisplay.push(message);
+			self.state.messagesToDisplay.push(message);
 			return;
 		}
 
 		function displayRemainingMessages(){
-			if(self.messagesToDisplay.length === 0)
+			if(self.state.messagesToDisplay.length === 0)
 				return;
-			self.rootElem.find(".cmeditor-tab-message").text(self.messagesToDisplay[0])
+			self.rootElem.find(".cmeditor-tab-message").text(self.state.messagesToDisplay[0])
 			                .toggle("slide", {"direction":"up"})
 			                .delay(3000)
 			                .toggle({effect: "slide",
 			                         direction: "up",
-			                         complete: function(){self.messagesToDisplay.shift(); displayRemainingMessages()}});
+			                         complete: function(){self.state.messagesToDisplay.shift(); displayRemainingMessages()}});
 		}
 
 		displayRemainingMessages();
@@ -1053,15 +1057,15 @@ this.CMEditor = (function(){
 	 * Returns:    Integer: the id of the document
 	 */
 	function getDocumentPositionByName(self, name) {
-		for (var i = 0; i < self.docs.length; ++i)
-			if (self.docs[i].getName() == name) return i;
+		for (var i = 0; i < self.state.docs.length; ++i)
+			if (self.state.docs[i].getName() == name) return i;
 	}
 
 	/* (Public)
 	 * Returns the mode in which the current document is opened
 	 */
 	function getCurrentCMEditorMode(self) {
-		return self.curDoc.getMode();
+		return self.state.curDoc.getMode();
 	}
 
 	/* (Public)
@@ -1092,7 +1096,7 @@ this.CMEditor = (function(){
 		var i = 0;
 		while (true){
 			var isCurrentlyOpened = false;
-			$.each(self.docs, function(idx, doc){
+			$.each(self.state.docs, function(idx, doc){
 				if(doc.getName() === name + (i || "") && (folder === null || typeof folder === "undefined" || folder === doc.getFolder()))
 					isCurrentlyOpened = true;
 			});
@@ -1123,16 +1127,16 @@ this.CMEditor = (function(){
 		if(self.options.readOnly){
 			displayMessage("This document is opened read only and cannot be renamed!");
 		}else{
-			if(newFolder === self.curDoc.getFolder())
+			if(newFolder === self.state.curDoc.getFolder())
 				return;
 
 			//REFACTOR: document should keep track of this!
-			if(self.curDoc.isNew() || self.curDoc.isUnsaved())
-				self.curDoc.markUnsaved();
+			if(self.state.curDoc.isNew() || self.state.curDoc.isUnsaved())
+				self.state.curDoc.markUnsaved();
 			else
-				self.curDoc.markChanged();
+				self.state.curDoc.markChanged();
 
-			self.curDoc.setFolder(newFolder);
+			self.state.curDoc.setFolder(newFolder);
 		}
 	}
 
@@ -1151,7 +1155,7 @@ this.CMEditor = (function(){
 
 
 			insertNewDocument(self, newDoc);
-			selectDocumentByIndex(self, self.docs.length - 1);
+			selectDocumentByIndex(self, self.state.docs.length - 1);
 		}
 	}
 
@@ -1182,10 +1186,10 @@ this.CMEditor = (function(){
 	 *
 	 */
 	function on(self, eventName, hook){
-		if(self.eventHooks[eventName] === undefined)
-			self.eventHooks[eventName] = [];
+		if(self.state.eventHooks[eventName] === undefined)
+			self.state.eventHooks[eventName] = [];
 
-		self.eventHooks[eventName].push(hook);
+		self.state.eventHooks[eventName].push(hook);
 
 	}
 
@@ -1198,16 +1202,17 @@ this.CMEditor = (function(){
 		if(self.options.readOnly){
 			displayMessage("This document is opened read only and cannot be renamed!");
 		}else{
-			var docId = getDocumentPositionByName(self, self.curDoc.getName());
-			var oldName = self.docs[docId].getName();
+			//REFACTOR: If document knew its DOM-Node this would be way easier
+			var docId = getDocumentPositionByName(self, self.state.curDoc.getName());
+			var oldName = self.state.docs[docId].getName();
 
-			self.docs[docId].setName(newName);
+			self.state.docs[docId].setName(newName);
 			markDocumentAsChanged(self, docId);
 
-			if(self.docs[docId].isRenamed())
-				self.docs[docId].markUnsaved();
+			if(self.state.docs[docId].isRenamed())
+				self.state.docs[docId].markUnsaved();
 			else
-				self.docs[docId].markChanged();
+				self.state.docs[docId].markChanged();
 
 			updateCurrentDocument(self);
 
@@ -1223,10 +1228,10 @@ this.CMEditor = (function(){
 			return;
 		}
 
-		var pos = getDocumentPositionByName(self, self.curDoc.getName());
+		var pos = getDocumentPositionByName(self, self.state.curDoc.getName());
 		updateCurrentDocument(self);
 
-		if (self.doDiffBeforeSaving) {
+		if (self.state.doDiffBeforeSaving) {
 			var additionalButtons = {
 					Save: function() { ajax_update(self); $(this).dialog("close"); },
 				};
@@ -1249,7 +1254,7 @@ this.CMEditor = (function(){
 		if (!name) name = "test";
 
 		rename(self, getUnambiguousName(self, name));
-		self.curDoc.setID("");
+		self.state.curDoc.setID("");
 
 		save(self);
 	}
@@ -1258,7 +1263,7 @@ this.CMEditor = (function(){
 	 * Sets whether this CMEditor should show a diff before it saves
 	 */
 	function setDoDiffBeforeSaving(self, value) {
-		self.doDiffBeforeSaving = value;
+		self.state.doDiffBeforeSaving = value;
 	}
 
 	/* (Public)
@@ -1286,25 +1291,25 @@ this.CMEditor = (function(){
 	 * Enters or leaves fullscreen mode
 	 */
 	function toggleFullscreen(self){
-		if(self.instanceName == ""){
+		if(self.state.instanceName == ""){
             return;
 		}
 
-        if(self.cssBeforeFullscreen == undefined){
-            self.cssBeforeFullscreen = {"position": self.rootElem.css("position"),
+        if(self.state.cssBeforeFullscreen == undefined){
+            self.state.cssBeforeFullscreen = {"position": self.rootElem.css("position"),
                                 "top":  self.rootElem.css("top"),
                                 "left":  self.rootElem.css("left"),
                                 "height":  self.rootElem.css("height"),
                                 "width":  self.rootElem.css("width")};
-            self.oldDocumentOverflow = document.documentElement.style.overflow;
+            self.state.oldDocumentOverflow = document.documentElement.style.overflow;
             document.documentElement.style.overflow = "hidden";
             self.rootElem.css({"position": "fixed", "top": "0", "left": "0", "height": "100%", "width": "100%"});
             self.rootElem.addClass("cmeditor-fullscreen");
 
             self.layout = self.rootElem.layout({
-					east__paneSelector:   "#cmeditor-"+self.instanceName+"-easternpane",
-					center__paneSelector: "#cmeditor-"+self.instanceName+"-centerpane",
-					north__paneSelector:  "#cmeditor-"+self.instanceName+"-northernpane",
+					east__paneSelector:   "#cmeditor-"+self.state.instanceName+"-easternpane",
+					center__paneSelector: "#cmeditor-"+self.state.instanceName+"-centerpane",
+					north__paneSelector:  "#cmeditor-"+self.state.instanceName+"-northernpane",
 					north__size: 75,
 					north__resizable:false
 					});
@@ -1317,9 +1322,9 @@ this.CMEditor = (function(){
         	self.layout.destroy();
 
             self.rootElem.removeClass("cmeditor-fullscreen");
-            self.rootElem.css(self.cssBeforeFullscreen);
-            document.documentElement.style.overflow = self.oldDocumentOverflow;
-            self.cssBeforeFullscreen = undefined;
+            self.rootElem.css(self.state.cssBeforeFullscreen);
+            document.documentElement.style.overflow = self.state.oldDocumentOverflow;
+            self.state.cssBeforeFullscreen = undefined;
 
             self.codeMirror.refresh();
 			syncTabIndent(self);
@@ -1332,24 +1337,24 @@ this.CMEditor = (function(){
 	 */
 	function update(self) {
 		var docName = "no curDoc";
-		if(self.curDoc){
-			docName = self.curDoc.getName();
+		if(self.state.curDoc){
+			docName = self.state.curDoc.getName();
 
-			if(self.curDoc.getReadOnly() != self.codeMirror.getOption("readOnly")){
-				self.curDoc.setReadOnly(self.codeMirror.getOption("readOnly"));
+			if(self.state.curDoc.getReadOnly() != self.codeMirror.getOption("readOnly")){
+				self.state.curDoc.setReadOnly(self.codeMirror.getOption("readOnly"));
 			}
 
-			if(self.curDoc.getMode() != self.codeMirror.getOption("mode")){
+			if(self.state.curDoc.getMode() != self.codeMirror.getOption("mode")){
 				var mode = self.codeMirror.getOption("mode");
-				self.curDoc.setMode(mode);
-				self.setMode(mode)
+				self.state.curDoc.setMode(mode);
+				setMode(self, mode)
 
-				markDocumentAsChanged(self, getDocumentPositionByName(self, self.curDoc.getName()));
+				markDocumentAsChanged(self, getDocumentPositionByName(self, self.state.curDoc.getName()));
 
-				if (self.curDoc.isNew()){
-					self.curDoc.markUnsaved();
-				}else if(self.curDoc.isUnchanged()){
-					self.curDoc.markChanged();
+				if (self.state.curDoc.isNew()){
+					self.state.curDoc.markUnsaved();
+				}else if(self.state.curDoc.isUnchanged()){
+					self.state.curDoc.markChanged();
 				}
 			}
 
@@ -1361,21 +1366,21 @@ this.CMEditor = (function(){
 	 * Serializes the currently opened document to the editor's form
 	 */
 	function writeCurrentDocToForm(self) {
-		executeHooks(self, "preSerializeDoc", self.rootElem, [self.curDoc]);
+		executeHooks(self, "preSerializeDoc", self.rootElem, [self.state.curDoc]);
 
 		self.rootElem.find("form .cmeditor-field").each(function(){
 			var elem = $(this);
 			var key = elem.attr("name");
 
-			if (elem.attr("data-field-property") && self.curDoc.getCustomDataField(key)) {
+			if (elem.attr("data-field-property") && self.state.curDoc.getCustomDataField(key)) {
 				//if the element indicates to use the property of an object, use it
-				setInputValue(self, elem, self.curDoc.getCustomDataField(key)[elem.attr("data-field-property")] || "");
+				setInputValue(self, elem, self.state.curDoc.getCustomDataField(key)[elem.attr("data-field-property")] || "");
 			} else {
-				setInputValue(self, elem, self.curDoc[key] || self.curDoc.getCustomDataField(key) || "");
+				setInputValue(self, elem, self.state.curDoc[key] || self.state.curDoc.getCustomDataField(key) || "");
 			}
 		});
 
-		executeHooks(self, "postSerializeDoc", self.rootElem, [self.curDoc]);
+		executeHooks(self, "postSerializeDoc", self.rootElem, [self.state.curDoc]);
 
 	}
 

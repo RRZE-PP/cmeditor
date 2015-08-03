@@ -9,15 +9,17 @@ this.textAreaCMEditor = function (){
         //allow the user to omit new
         if (!(this instanceof textAreaCMEditor)) return new textAreaCMEditor(rootElem, options, instanceName);
         var self = this;
-        self.instanceNo = textAreaCMEditor.instanciated++;
-        self.instanceName = instanceName !== undefined ? instanceName : "";
-        if(self.instanceName == "")
+        self.state = {};
+
+        self.state.instanceNo = textAreaCMEditor.instanciated++;
+        self.state.instanceName = instanceName !== undefined ? instanceName : "";
+        if(self.state.instanceName == "")
             log("No instance name supplied, fullscreen mode will be disabled!", "WARNING");
 
         var rootElem = self.rootElem = $(rootElem);
         self.options  = options  = options !== undefined ? options : {};
 
-        self.eventHooks = {};
+        self.state.eventHooks = {};
         for(var hookName in options.hooks){
             on(self, hookName, options["hooks"][hookName]);
         }
@@ -47,21 +49,21 @@ this.textAreaCMEditor = function (){
         CodeMirror.defineOption("fullScreen", false, function() {
             var focusElems = jQuery.grep(self.rootElem.find("*"),function(elem){return $(elem).is(":focus")});
             if(focusElems.length != 0){
-                if(self.oldSizeMem == undefined){
-                    self.oldSizeMem = {"position": self.rootElem.css("position"),
+                if(self.state.oldSizeMem == undefined){
+                    self.state.oldSizeMem = {"position": self.rootElem.css("position"),
                                         "top":  self.rootElem.css("top"),
                                         "left":  self.rootElem.css("left"),
                                         "height":  self.rootElem.css("height"),
                                         "width":  self.rootElem.css("width"),
                                         "overflow": self.rootElem.css("overflow"),
                                         "box-sizing": self.rootElem.css("box-sizing")};
-                    self.oldDocumentOverflow = document.documentElement.style.overflow;
+                    self.state.oldDocumentOverflow = document.documentElement.style.overflow;
                     document.documentElement.style.overflow = "hidden";
                     self.rootElem.css({"position": "fixed", "top": "0", "left": "0", "height": "100%", "width": "100%", "overflow-y": "scroll", "box-sizing": "border-box"});
                 }else{
-                    self.rootElem.css(self.oldSizeMem);
-                    document.documentElement.style.overflow = self.oldDocumentOverflow;
-                    self.oldSizeMem = undefined;
+                    self.rootElem.css(self.state.oldSizeMem);
+                    document.documentElement.style.overflow = self.state.oldDocumentOverflow;
+                    self.state.oldSizeMem = undefined;
                 }
             }
         });
@@ -70,7 +72,7 @@ this.textAreaCMEditor = function (){
             preloadModules(self);
         }
 
-        registerInstance(self.instanceName, self.instanceNo, self);
+        registerInstance(self.state.instanceName, self.state.instanceNo, self);
     }
 
     /*************************************************************************
@@ -102,7 +104,7 @@ this.textAreaCMEditor = function (){
         var data = [];
 
         if(arg0 instanceof clazz){
-            instance = " #" + arg0.instanceNo + " '" + arg0.instanceName +"'";
+            instance = " #" + arg0.state.instanceNo + " '" + arg0.state.instanceName +"'";
             message = arg1;
             logLevel = (typeof arg2 != "undefined") ? LOGLEVELS[arg2] : LOGLEVELS.INFO;
             data = ((typeof arg3 != "undefined")? ((arg3 instanceof Array)? arg3 : [arg3]) : []);
@@ -218,9 +220,9 @@ this.textAreaCMEditor = function (){
      *             args Array: the parameters to pass to the hook as an array
      */
     function executeHooks(self, eventName, context, args){
-        for(var i=0; self.eventHooks[eventName] && i<self.eventHooks[eventName].length; i++){
-            if(typeof self.eventHooks[eventName][i] == "function")
-                self.eventHooks[eventName][i].apply(context, args);
+        for(var i=0; self.state.eventHooks[eventName] && i<self.state.eventHooks[eventName].length; i++){
+            if(typeof self.state.eventHooks[eventName][i] == "function")
+                self.state.eventHooks[eventName][i].apply(context, args);
         }
     }
 
@@ -361,10 +363,10 @@ this.textAreaCMEditor = function (){
      *
      */
     function on(self, eventName, hook){
-        if(self.eventHooks[eventName] === undefined)
-            self.eventHooks[eventName] = [];
+        if(self.state.eventHooks[eventName] === undefined)
+            self.state.eventHooks[eventName] = [];
 
-        self.eventHooks[eventName].push(hook);
+        self.state.eventHooks[eventName].push(hook);
     }
 
 
@@ -391,24 +393,24 @@ this.textAreaCMEditor = function (){
      * Enters or leaves fullscreen mode
      */
     function toggleFullscreen(self){
-        if(self.instanceName == ""){
+        if(self.state.instanceName == ""){
             return;
         }
 
-        if(self.cssBeforeFullscreen == undefined){
-            self.cssBeforeFullscreen = {"position": self.rootElem.css("position"),
+        if(self.state.cssBeforeFullscreen == undefined){
+            self.state.cssBeforeFullscreen = {"position": self.rootElem.css("position"),
                                 "top":  self.rootElem.css("top"),
                                 "left":  self.rootElem.css("left"),
                                 "height":  self.rootElem.css("height"),
                                 "width":  self.rootElem.css("width")};
-            self.oldDocumentOverflow = document.documentElement.style.overflow;
+            self.state.oldDocumentOverflow = document.documentElement.style.overflow;
             document.documentElement.style.overflow = "hidden";
             self.rootElem.css({"position": "fixed", "top": "0", "left": "0", "height": "100%", "width": "100%"});
             self.rootElem.addClass("cmeditor-fullscreen");
 
             self.layout = self.rootElem.layout({
-                    center__paneSelector: "#cmeditor-"+self.instanceName+"-centerpane",
-                    north__paneSelector:  "#cmeditor-"+self.instanceName+"-northernpane",
+                    center__paneSelector: "#cmeditor-"+self.state.instanceName+"-centerpane",
+                    north__paneSelector:  "#cmeditor-"+self.state.instanceName+"-northernpane",
                     north__size: 75,
                     north__resizable:false
                     });
@@ -420,9 +422,9 @@ this.textAreaCMEditor = function (){
             self.layout.destroy();
 
             self.rootElem.removeClass("cmeditor-fullscreen");
-            self.rootElem.css(self.cssBeforeFullscreen);
-            document.documentElement.style.overflow = self.oldDocumentOverflow;
-            self.cssBeforeFullscreen = undefined;
+            self.rootElem.css(self.state.cssBeforeFullscreen);
+            document.documentElement.style.overflow = self.state.oldDocumentOverflow;
+            self.state.cssBeforeFullscreen = undefined;
 
             self.codeMirror.refresh();
         }

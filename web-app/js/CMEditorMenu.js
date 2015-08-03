@@ -9,8 +9,10 @@ this.CMEditorMenu = (function(){
 
 	function CMEditorMenu(cmeditor, rootElem, options, instanceName){
 		var self = this;
-		self.instanceNo = CMEditorMenu.instanciated++;
-		self.instanceName = instanceName !== undefined ? instanceName : "";
+		self.state = {};
+
+		self.state.instanceNo = CMEditorMenu.instanciated++;
+		self.state.instanceName = instanceName !== undefined ? instanceName : "";
 
 		self.cmeditor = cmeditor;
 		self.rootElem = rootElem = $(rootElem);
@@ -31,7 +33,7 @@ this.CMEditorMenu = (function(){
 
 		self.cmeditor.focus();
 
-		registerInstance(self.instanceName, self.instanceNo, self);
+		registerInstance(self.state.instanceName, self.state.instanceNo, self);
 	}
 
 	/*************************************************************************
@@ -62,7 +64,7 @@ this.CMEditorMenu = (function(){
 		var data = [];
 
 		if(arg0 instanceof clazz){
-			instance = " #" + arg0.instanceNo + " '" + arg0.instanceName +"'";
+			instance = " #" + arg0.state.instanceNo + " '" + arg0.state.instanceName +"'";
 			message = arg1;
 			logLevel = (typeof arg2 != "undefined") ? LOGLEVELS[arg2] : LOGLEVELS.INFO;
 			data = ((typeof arg3 != "undefined")? ((arg3 instanceof Array)? arg3 : [arg3]) : []);
@@ -124,10 +126,12 @@ this.CMEditorMenu = (function(){
 	 * Initialises menu objects where the keys are the menu items' anchor's names and the values are callbacks
 	 */
 	function initMenus(self){
-		self.fileMenu = {
+		self.menus = {};
+
+		self.menus.fileMenu = {
 			new: function(cm) {
-				var nameElem = self.newFileDialog.find("input[name=name]");
-				var folderElem = self.newFileDialog.find("input[name=folder]");
+				var nameElem = self.dialogs.newFileDialog.find("input[name=name]");
+				var folderElem = self.dialogs.newFileDialog.find("input[name=folder]");
 
 				nameElem.val("");
 				folderElem.val("/");
@@ -152,19 +156,19 @@ this.CMEditorMenu = (function(){
 						}
 
 						self.cmeditor.newDoc(unambigousName, folder);
-						self.newFileDialog.dialog("close");
+						self.dialogs.newFileDialog.dialog("close");
 					},
 					Cancel: function(){
-						self.newFileDialog.dialog("close");
+						self.dialogs.newFileDialog.dialog("close");
 					}
 				}
 
-				self.newFileDialog.dialog("option", "buttons", buttons);
-				self.newFileDialog.dialog("open");
+				self.dialogs.newFileDialog.dialog("option", "buttons", buttons);
+				self.dialogs.newFileDialog.dialog("open");
 			},
 			open: function(cm) {
 
-				self.openDialog.children().remove();
+				self.dialogs.openDialog.children().remove();
 				var s = $("<select class=\"fileSelect\" name=\"cmeditor-menu-open-select\" multiple=\"multiple\" style=\"width:100%\"/><div class=\"fileSelectTree\" />");
 
 				if(self.options.ajax.listURL){
@@ -179,11 +183,11 @@ this.CMEditorMenu = (function(){
 								available = true;
 							}
 							if (available == true) {
-								s.appendTo(self.openDialog);
-								self.openDialog.find(".fileSelect").select2({placeholder: "Select a file",
+								s.appendTo(self.dialogs.openDialog);
+								self.dialogs.openDialog.find(".fileSelect").select2({placeholder: "Select a file",
   																			 allowClear: true});
 
-								self.openDialog.find(".fileSelectTree").fileTree({script:function(fileTreeData){
+								self.dialogs.openDialog.find(".fileSelectTree").fileTree({script:function(fileTreeData){
 									//this is called each time the user opens a directory (including root)
 									var val = $('<ul class="jqueryFileTree" style="display: none;"></ul>');
 
@@ -219,15 +223,15 @@ this.CMEditorMenu = (function(){
 									return val;
 								}}, function(fileId){
 									//this is called each time a user selects a file
-									var option = self.openDialog.find(".fileSelect option[value="+fileId+"]");
+									var option = self.dialogs.openDialog.find(".fileSelect option[value="+fileId+"]");
 									option.attr("selected", !option.attr("selected")).trigger("change");
 								});
 
 								//workaround a width calculation bug in select2
-								self.openDialog.find(".select2-search__field").css("width", "auto");
+								self.dialogs.openDialog.find(".select2-search__field").css("width", "auto");
 
 								myButtons.Open = function() {
-									var vals = self.openDialog.find(".fileSelect").val();
+									var vals = self.dialogs.openDialog.find(".fileSelect").val();
 									for (var i in vals) {
 										self.cmeditor.ajax_load(vals[i]);
 									}
@@ -235,11 +239,11 @@ this.CMEditorMenu = (function(){
 								};
 							} else {
 								s = $("<p class=\"noFiles\" name=\"cmeditor-menu-open-no-files\">No files available.</p>");
-								s.appendTo(self.openDialog);
+								s.appendTo(self.dialogs.openDialog);
 							}
 
-							self.openDialog.dialog("option", "buttons", myButtons);
-							self.openDialog.dialog("open");
+							self.dialogs.openDialog.dialog("option", "buttons", myButtons);
+							self.dialogs.openDialog.dialog("open");
 						} else {
 							self.cmeditor.displayMessage(data.msg);
 						}
@@ -249,8 +253,8 @@ this.CMEditorMenu = (function(){
 			save: function(cm) { self.cmeditor.saveDoc(); },
 			saveas: function(cm) { self.cmeditor.saveDocAs(); },
 			rename: function(cm) {
-				var newNameElem = self.renameDialog.find("input[name=newName]");
-				var newFolderElem = self.renameDialog.find("input[name=newFolder]");
+				var newNameElem = self.dialogs.renameDialog.find("input[name=newName]");
+				var newFolderElem = self.dialogs.renameDialog.find("input[name=newFolder]");
 
 				var oldName = self.cmeditor.curDoc.getName();
 				var oldFolder = self.cmeditor.curDoc.getFolder();
@@ -283,15 +287,15 @@ this.CMEditorMenu = (function(){
 							}
 						}
 
-						self.renameDialog.dialog("close");
+						self.dialogs.renameDialog.dialog("close");
 					},
 					Cancel: function(){
-						self.renameDialog.dialog("close");
+						self.dialogs.renameDialog.dialog("close");
 					}
 				}
 
-				self.renameDialog.dialog("option", "buttons", buttons);
-				self.renameDialog.dialog("open");
+				self.dialogs.renameDialog.dialog("option", "buttons", buttons);
+				self.dialogs.renameDialog.dialog("open");
 			},
 			delete: function(cm) { self.cmeditor.deleteDoc(); },
 			close: function(cm) { self.cmeditor.closeDoc(); },
@@ -305,7 +309,7 @@ this.CMEditorMenu = (function(){
 			},
 		};
 
-		self.viewMenu = {
+		self.menus.viewMenu = {
 			readOnly: function(cm) {
 				if (!cm.getOption("readOnly")) {
 					cm.setOption("readOnly", "nocursor");
@@ -332,12 +336,12 @@ this.CMEditorMenu = (function(){
 
 		for(var i=0; i < self.options.availableModes.length; i++){
 			var mode = self.options.availableModes[i];
-			self.viewMenu["mode"+mode] = (function(mode){return function(){self.cmeditor.setMode(mode)}})(mode);
+			self.menus.viewMenu["mode"+mode] = (function(mode){return function(){self.cmeditor.setMode(mode)}})(mode);
 			modesMenuElem.append('<li><a href="#" value="mode'+mode+'"><span></span>'+mode+'</a></li>');
 		}
 
 
-		self.optionsMenu = {
+		self.menus.optionsMenu = {
 			diffBeforeSave: function(cm) {
 				if(typeof self.cmeditor.setDoDiffBeforeSaving == "function")
 					self.cmeditor.setDoDiffBeforeSaving(self.rootElem.find(".optionsMenu a[value='diffBeforeSave']").children("span").hasClass("ui-icon-check")); },
@@ -357,14 +361,14 @@ this.CMEditorMenu = (function(){
 		}
 		for(var i=0; i < self.options.availableThemes.length; i++){
 			var theme = self.options.availableThemes[i];
-			self.optionsMenu["theme"+theme] = getThemeCallback(self, theme);
+			self.menus.optionsMenu["theme"+theme] = getThemeCallback(self, theme);
 			themesMenuElem.append('<li><a href="#" value="theme'+theme+'"><span></span>'+theme+'</a></li>');
 		}
 
 
-		self.addonsMenu = {
+		self.menus.addonsMenu = {
 			addondonation: function(cm) {
-				self.donationDialog.dialog("open");
+				self.dialogs.donationDialog.dialog("open");
 			},
 		};
 	}
@@ -373,7 +377,9 @@ this.CMEditorMenu = (function(){
 	 * Initialises the modal dialogs
 	 */
 	function initDialogs(self){
-		self.donationDialog = self.rootElem.find(".donationDialog").dialog({
+		self.dialogs = {};
+
+		self.dialogs.donationDialog = self.rootElem.find(".donationDialog").dialog({
 					autoOpen: false,
 					height: 300,
 					buttons: {
@@ -382,19 +388,19 @@ this.CMEditorMenu = (function(){
 					},
 				});
 
-		self.openDialog = self.rootElem.find(".openMenu").dialog({
+		self.dialogs.openDialog = self.rootElem.find(".openMenu").dialog({
 					autoOpen: false,
 					height: 500,
 					width: 300
 				});
 
-		self.renameDialog = self.rootElem.find(".renameDialog").dialog({
+		self.dialogs.renameDialog = self.rootElem.find(".renameDialog").dialog({
 					autoOpen: false,
 					height: 300,
 					width: 500
 				});
 
-		self.newFileDialog = self.rootElem.find(".newFileDialog").dialog({
+		self.dialogs.newFileDialog = self.rootElem.find(".newFileDialog").dialog({
 					autoOpen: false,
 					height: 300,
 					width: 500
@@ -410,7 +416,7 @@ this.CMEditorMenu = (function(){
 			for(var name in self.options.overlayDefinitionsVar) {
 				var s = $("<li><a href=\"#\" value=\"mode"+name+"\"><span></span>"+name+"</a></li>");
 				s.appendTo(self.rootElem.find(".modesMenu"));
-				self.viewMenu["mode"+name] = function(name) {
+				self.menus.viewMenu["mode"+name] = function(name) {
 					return function(cm) { cm.setOption("mode", name); };
 				}(name);
 			}
@@ -472,7 +478,7 @@ this.CMEditorMenu = (function(){
 	 */
 	function registerMenuCallbacks(self){
 		self.rootElem.find(".fileMenu a").click(function(event) {
-			var found = self.fileMenu[$(this).attr("value")];
+			var found = self.menus.fileMenu[$(this).attr("value")];
 		    self.cmeditor.focus();
 
 		    if (found) found(self.cmeditor.getCodeMirror());
@@ -481,7 +487,7 @@ this.CMEditorMenu = (function(){
 		});
 
 		self.rootElem.find(".viewMenu a").click(function(event) {
-			var found = self.viewMenu[$(this).attr("value")];
+			var found = self.menus.viewMenu[$(this).attr("value")];
 		    self.cmeditor.focus();
 
 		    if (found) found(self.cmeditor.getCodeMirror());
@@ -513,7 +519,7 @@ this.CMEditorMenu = (function(){
 				$(this).children("span").addClass("ui-icon ui-icon-check");
 			}
 
-			var found = self.optionsMenu[$(this).attr("value")];
+			var found = self.menus.optionsMenu[$(this).attr("value")];
 		    self.cmeditor.focus();
 
 		    if (found) found(self.cmeditor.getCodeMirror())
@@ -528,7 +534,7 @@ this.CMEditorMenu = (function(){
 		});
 
 		self.rootElem.find(".addonsMenu a").click(function(event) {
-			var found = self.addonsMenu[$(this).attr("value")];
+			var found = self.menus.addonsMenu[$(this).attr("value")];
 		    self.cmeditor.focus();
 		    if (found) found(self.cmeditor.getCodeMirror());
 
