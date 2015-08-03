@@ -1046,7 +1046,7 @@ this.CMEditor = (function(){
 	 */
 	function focus(self){
 		//FIXME: warum funktioniert das nicht sofort?
-		window.setTimeout(function(){self.codeMirror.focus()}, 50);
+		self.codeMirror.focus();
 	}
 
 	/* (Public)
