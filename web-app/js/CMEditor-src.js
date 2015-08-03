@@ -1121,6 +1121,27 @@ this.CMEditor = (function(){
 	}
 
 	/* (Public)
+	 *
+	 * Moves the current file to another folder
+	 */
+	function moveDoc(self, newFolder){
+		if(self.options.readOnly){
+			displayMessage("This document is opened read only and cannot be renamed!");
+		}else{
+			if(newFolder === self.curDoc.getFolder())
+				return;
+
+			//REFACTOR: document should keep track of this!
+			if(self.curDoc.isNew() || self.curDoc.isUnsaved())
+				self.curDoc.markUnsaved();
+			else
+				self.curDoc.markChanged();
+
+			self.curDoc.setFolder(newFolder);
+		}
+	}
+
+	/* (Public)
 	 * Creates a new document with a name supplied by the user
 	 *
 	 * Parameters: fileName String: the new filename
@@ -1379,6 +1400,7 @@ this.CMEditor = (function(){
 	CMEditor.prototype.getCurrentCMEditorMode    = function(){Array.prototype.unshift.call(arguments, this); return getCurrentCMEditorMode.apply(this, arguments)};
 	CMEditor.prototype.getCodeMirror             = function(){Array.prototype.unshift.call(arguments, this); return getCodeMirror.apply(this, arguments)};
 	CMEditor.prototype.goto                      = function(){Array.prototype.unshift.call(arguments, this); return goto.apply(this, arguments)};
+	CMEditor.prototype.moveDoc                   = function(){Array.prototype.unshift.call(arguments, this); return moveDoc.apply(this, arguments)};
 	CMEditor.prototype.newDoc                    = function(){Array.prototype.unshift.call(arguments, this); return newDoc.apply(this, arguments)};
 	CMEditor.prototype.on                        = function(){Array.prototype.unshift.call(arguments, this); return on.apply(this, arguments)};
 	CMEditor.prototype.saveDoc                   = function(){Array.prototype.unshift.call(arguments, this); return save.apply(this, arguments)};

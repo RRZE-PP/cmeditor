@@ -212,10 +212,49 @@ this.CMEditorMenu = (function(){
 			save: function(cm) { self.cmeditor.saveDoc(); },
 			saveas: function(cm) { self.cmeditor.saveDocAs(); },
 			rename: function(cm) {
-				var name = prompt("Name of the new buffer", "");
-				if (name == null) return;
-				if (!name) name = "test";
-				self.cmeditor.renameDoc(self.cmeditor.getUnambiguousName(name));
+				var newNameElem = self.renameDialog.find("input[name=newName]");
+				var newFolderElem = self.renameDialog.find("input[name=newFolder]");
+
+				var oldName = self.cmeditor.curDoc.getName();
+				var oldFolder = self.cmeditor.curDoc.getFolder();
+
+				newNameElem.val(oldName);
+				newFolderElem.val(oldFolder);
+
+				var buttons = {
+					Rename : function(){
+						var newName = newNameElem.val().trim();
+						var newFolder = newFolderElem.val().trim();
+
+						if(newName === ""){
+							alert("Please supply a name");
+							return;
+						}
+						if(newFolder === ""){
+							newFolder = null;
+							self.cmeditor.displayMessage("Your file will be hidden in the folder view. Use the searchbar to find it.");
+						}
+
+						if(newName !== oldName || newFolder !== oldFolder){
+							var unambigousName = self.cmeditor.getUnambiguousName(newName, newFolder);
+
+							self.cmeditor.moveDoc(newFolder);
+							self.cmeditor.renameDoc(unambigousName);
+
+							if(newName !== unambigousName){
+								self.cmeditor.displayMessage("A number was appended to the filename, because it is already in use");
+							}
+						}
+
+						self.renameDialog.dialog("close");
+					},
+					Cancel: function(){
+						self.renameDialog.dialog("close");
+					}
+				}
+
+				self.renameDialog.dialog("option", "buttons", buttons);
+				self.renameDialog.dialog("open");
 			},
 			delete: function(cm) { self.cmeditor.deleteDoc(); },
 			close: function(cm) { self.cmeditor.closeDoc(); },
@@ -310,6 +349,12 @@ this.CMEditorMenu = (function(){
 					autoOpen: false,
 					height: 500,
 					width: 300
+				});
+
+		self.renameDialog = self.rootElem.find(".renameDialog").dialog({
+					autoOpen: false,
+					height: 300,
+					width: 500
 				});
 
 	}

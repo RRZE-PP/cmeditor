@@ -5,6 +5,10 @@
 	</div>
 	<div class="dialog openMenu" title="Open" style="display: none;">
 	</div>
+	<div class="dialog renameDialog" title="Rename and Move" style="display: none;">
+		New filename: <input type="text" name="newName" /> <br />
+		New folder: <input type="text" name="newFolder" /> (Leave empty to hide in folder view)
+	</div>
 	<ul class="cmeditor-menubar menu">
 		<li><a href="#">File</a>
 			<ul class="fileMenu">
@@ -13,7 +17,7 @@
 				<li><a href="#" value="open"><span class="ui-icon ui-icon-newwin"></span>Open</a></li>
 				<li><a href="#" value="save"><span class="ui-icon ui-icon-disk"></span>Save</a></li>
 				<li><a href="#" value="saveas"><span class="ui-icon ui-icon-disk"></span>Save As</a></li>
-				<li><a href="#" value="rename"><span></span>Rename</a></li>
+				<li><a href="#" value="rename"><span></span>Rename and Move</a></li>
 				<li><a href="#" value="delete"><span class="ui-icon ui-icon-trash"></span>Delete</a></li>
 				<li><a href="#" value="close"><span class="ui-icon ui-icon-close"></span>Close</a></li>
 				</g:if>
