@@ -3,6 +3,7 @@
 //=require cmeditor-dependencies
 
 this.textAreaCMEditor = function (){
+    "use strict";
 
     function textAreaCMEditor(rootElem, options, instanceName){
         //allow the user to omit new
@@ -17,7 +18,7 @@ this.textAreaCMEditor = function (){
         self.options  = options  = options !== undefined ? options : {};
 
         self.eventHooks = {};
-        for(hookName in options.hooks){
+        for(var hookName in options.hooks){
             on(self, hookName, options["hooks"][hookName]);
         }
 

@@ -1,12 +1,7 @@
 //= require cmeditor-dependencies
 
 this.CMEditor = (function(){
-
-	//FIXME: IE kann kein Function.name (siehe log())
-	//FIXME: custom elements funktionieren noch nicht
-	//TODO: focus() hat probleme
-	//TODO: Sachen optimieren? zB mehr dom-objekte speichern, dialoge nicht mit html und jquery erzeugen...
-	//TODO: add loglevel
+	"use strict";
 
 	function CMEditor(rootElem, options, instanceName){
 		//allow the user to omit new
@@ -25,7 +20,7 @@ this.CMEditor = (function(){
 
 		self.docs = [];
 		self.eventHooks = {};
-		for(hookName in options.hooks){
+		for(var hookName in options.hooks){
 			on(self, hookName, options["hooks"][hookName]);
 		}
 
@@ -60,7 +55,6 @@ this.CMEditor = (function(){
 		}
 
 		registerInstance(self.instanceName, self.instanceNo, self);
-
 	}
 
 	/*************************************************************************
@@ -632,6 +626,7 @@ this.CMEditor = (function(){
 
 		self.gotoDialog.dialog("open");
 	}
+
 	/*
 	 * Creates a new tab and sets the supplied document as its content
 	 *

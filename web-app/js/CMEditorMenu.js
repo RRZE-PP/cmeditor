@@ -5,6 +5,7 @@
 //= require select2-4.0.0/dist/js/select2.min.js
 
 this.CMEditorMenu = (function(){
+	"use strict";
 
 	function CMEditorMenu(cmeditor, rootElem, options, instanceName){
 		var self = this;
@@ -187,7 +188,7 @@ this.CMEditorMenu = (function(){
 									var val = $('<ul class="jqueryFileTree" style="display: none;"></ul>');
 
 									var curPathElems = fileTreeData.dir.split("/");
-									folders = {};
+									var folders = {};
 
 									for(var i=0; i < data.result.length; ++i) {
 										if(typeof data.result[i][self.options.mapping["folder"]] !== "undefined" &&
