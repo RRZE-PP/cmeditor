@@ -45,29 +45,6 @@ this.textAreaCMEditor = function (){
             }
         });
 
-        //replace code mirror's fullscreen mode addon
-        CodeMirror.defineOption("fullScreen", false, function() {
-            var focusElems = jQuery.grep(self.rootElem.find("*"),function(elem){return $(elem).is(":focus")});
-            if(focusElems.length != 0){
-                if(self.state.oldSizeMem == undefined){
-                    self.state.oldSizeMem = {"position": self.rootElem.css("position"),
-                                        "top":  self.rootElem.css("top"),
-                                        "left":  self.rootElem.css("left"),
-                                        "height":  self.rootElem.css("height"),
-                                        "width":  self.rootElem.css("width"),
-                                        "overflow": self.rootElem.css("overflow"),
-                                        "box-sizing": self.rootElem.css("box-sizing")};
-                    self.state.oldDocumentOverflow = document.documentElement.style.overflow;
-                    document.documentElement.style.overflow = "hidden";
-                    self.rootElem.css({"position": "fixed", "top": "0", "left": "0", "height": "100%", "width": "100%", "overflow-y": "scroll", "box-sizing": "border-box"});
-                }else{
-                    self.rootElem.css(self.state.oldSizeMem);
-                    document.documentElement.style.overflow = self.state.oldDocumentOverflow;
-                    self.state.oldSizeMem = undefined;
-                }
-            }
-        });
-
         if(self.options.preloadModules){
             preloadModules(self);
         }
