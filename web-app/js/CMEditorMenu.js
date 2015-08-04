@@ -578,8 +578,10 @@ this.CMEditorMenu = (function(){
 	}
 
 	function update(self) {
+		var curMode = self.cmeditor.getCurrentCMEditorMode();
+		var cmMode = CodeMirror.findModeByName(curMode) || CodeMirror.findModeByMIME(curMode);
 		self.rootElem.find(".modesMenu").find("span").removeClass("ui-icon ui-icon-check");
-		self.rootElem.find(".modesMenu a[value='mode"+self.cmeditor.getCurrentCMEditorMode()+"']").children("span").addClass("ui-icon ui-icon-check");
+		self.rootElem.find(".modesMenu a[value='mode"+cmMode.name+"']").children("span").addClass("ui-icon ui-icon-check");
 
 		if (self.cmeditor.getCodeMirror().getOption("readOnly")) {
 			self.rootElem.find(".view a[value='readOnly'] span").addClass("ui-icon ui-icon-check");

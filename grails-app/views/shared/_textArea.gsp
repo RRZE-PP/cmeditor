@@ -9,13 +9,13 @@
 <script type="text/javascript">
 
 	<plugin:isAvailable name="resources">
-	CMEditor.themeBaseURL = "${resource(dir: '/static/lib/codemirror-5.3/theme/')}";
-	CMEditor.modeBaseURL = "${resource(dir: '/static/lib/codemirror-5.3/mode/')}";
+	textAreaCMEditor.themeBaseURL = "${resource(dir: '/static/lib/codemirror-5.3/theme/')}";
+	textAreaCMEditor.modeBaseURL = "${resource(dir: '/static/lib/codemirror-5.3/mode/')}";
 	</plugin:isAvailable>
 
 	<plugin:isAvailable name="asset-pipeline">
-	CMEditor.themeBaseURL = "${assetPath(src: 'codemirror-5.3/theme/')}";
-	CMEditor.modeBaseURL = "${assetPath(src: 'codemirror-5.3/mode/')}";
+	textAreaCMEditor.themeBaseURL = "${assetPath(src: 'codemirror-5.3/theme/')}";
+	textAreaCMEditor.modeBaseURL = "${assetPath(src: 'codemirror-5.3/mode/')}";
 	</plugin:isAvailable>
 
 	$(document).ready(function() {

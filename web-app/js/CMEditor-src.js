@@ -1226,7 +1226,7 @@ this.CMEditor = (function(){
 			return;
 		}
 
-		CMEditor.loadMode(cmMode.mode, function(){
+		loadMode(cmMode.mode, function(){
 			log(self, "Setting a mode:", "DEBUG", mode)
 			self.codeMirror.setOption("mode", cmMode.mime); update(self);
 		});
@@ -1292,7 +1292,7 @@ this.CMEditor = (function(){
 			if(self.state.curDoc.getMode() != self.codeMirror.getOption("mode")){
 				var mode = self.codeMirror.getOption("mode");
 				self.state.curDoc.setMode(mode);
-				setMode(self, mode)
+				setMode(self, mode);
 
 				markDocumentAsChanged(self, getDocumentPositionByName(self, self.state.curDoc.getName()));
 

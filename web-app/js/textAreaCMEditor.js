@@ -233,8 +233,10 @@ this.textAreaCMEditor = function (){
             extraKeys: keyMap,
         }
 
-        if(options.mode)
+        if(options.mode){
             codeMirrorOptions.mode = options.mode;
+            setMode(self, options.mode);
+        }
         if(options.defaultReadOnly || options.readOnly)
             codeMirrorOptions.readOnly = 'nocursor';
 
@@ -324,6 +326,14 @@ this.textAreaCMEditor = function (){
 
     /* (Public)
      *
+     * Returns the current mode
+     */
+    function getCurrentCMEditorMode(self){
+        return self.codeMirror.getOption("mode");
+    }
+
+    /* (Public)
+     *
      * Can be used to register callbacks for events.
      *
      * Available Events in CMEditor:
@@ -362,7 +372,7 @@ this.textAreaCMEditor = function (){
             return;
         }
 
-        CMEditor.loadMode(cmMode.mode, function(){self.codeMirror.setOption("mode", cmMode.mime); update(self);});
+        loadMode(cmMode.mode, function(){self.codeMirror.setOption("mode", cmMode.mime); self.menu.update(self);});
     }
 
 
@@ -421,6 +431,7 @@ this.textAreaCMEditor = function (){
     textAreaCMEditor.prototype.focus         = function(){Array.prototype.unshift.call(arguments, this); return focus.apply(this, arguments)};
     textAreaCMEditor.prototype.update        = function(){Array.prototype.unshift.call(arguments, this); return update.apply(this, arguments)};
     textAreaCMEditor.prototype.getCodeMirror = function(){Array.prototype.unshift.call(arguments, this); return getCodeMirror.apply(this, arguments)};
+    textAreaCMEditor.prototype.getCurrentCMEditorMode = function(){Array.prototype.unshift.call(arguments, this); return getCurrentCMEditorMode.apply(this, arguments)};
     textAreaCMEditor.prototype.setMode                   = function(){Array.prototype.unshift.call(arguments, this); return setMode.apply(this, arguments)};
     textAreaCMEditor.prototype.toggleFullscreen = function(){Array.prototype.unshift.call(arguments, this); return toggleFullscreen.apply(this, arguments)};
 
