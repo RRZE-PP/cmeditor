@@ -512,8 +512,16 @@ this.CMEditorMenu = (function(){
 	 *	Registers click callbacks on anchors in menu items
 	 */
 	function registerMenuCallbacks(self){
+
 		self.rootElem.find(".fileMenu a").click(function(event) {
-			var found = self.menus.fileMenu[$(this).attr("value")];
+			var value = $(this).attr("value");
+
+			if(typeof value === "undefined"){
+		    	event.preventDefault();
+				return;
+			}
+
+			var found = self.menus.fileMenu[value];
 		    self.cmeditor.focus();
 
 		    if (found) found(self.cmeditor.getCodeMirror());
@@ -522,16 +530,23 @@ this.CMEditorMenu = (function(){
 		});
 
 		self.rootElem.find(".viewMenu a").click(function(event) {
-			var found = self.menus.viewMenu[$(this).attr("value")];
+			var value = $(this).attr("value");
+
+			if(typeof value === "undefined"){
+		    	event.preventDefault();
+				return;
+			}
+
+			var found = self.menus.viewMenu[value];
 		    self.cmeditor.focus();
 
 		    if (found) found(self.cmeditor.getCodeMirror());
 
-		    if ($(this).attr("value").indexOf("mode") == 0) {
+		    if (value.indexOf("mode") == 0) {
 				$(this).parent().parent().find("span").removeClass("ui-icon ui-icon-check");
 				$(this).children("span").addClass("ui-icon ui-icon-check");
 		    }
-		    if ($(this).attr("value").indexOf("readOnly") == 0) {
+		    if (value.indexOf("readOnly") == 0) {
 		    	if (self.cmeditor.getCodeMirror().getOption("readOnly")) {
 		    		$(this).children("span").addClass("ui-icon ui-icon-check");
 		    	} else {
@@ -543,7 +558,14 @@ this.CMEditorMenu = (function(){
 		});
 
 		self.rootElem.find(".optionsMenu a").click(function(event) {
-			if ($(this).attr("value").indexOf("diffBeforeSave") == 0) {
+			var value = $(this).attr("value");
+
+			if(typeof value === "undefined"){
+		    	event.preventDefault();
+				return;
+			}
+
+			if (value.indexOf("diffBeforeSave") == 0) {
 				if ($(this).children("span").hasClass("ui-icon-check")) {
 					$(this).children("span").removeClass("ui-icon ui-icon-check");
 				} else {
@@ -554,22 +576,29 @@ this.CMEditorMenu = (function(){
 				$(this).children("span").addClass("ui-icon ui-icon-check");
 			}
 
-			var found = self.menus.optionsMenu[$(this).attr("value")];
+			var found = self.menus.optionsMenu[value];
 		    self.cmeditor.focus();
 
 		    if (found) found(self.cmeditor.getCodeMirror())
 
 			if(self.options.useSession){
-			    if ($(this).attr("value").indexOf("binding") == 0) {localStorage["cmeditor-menu-binding"] = $(this).attr("value").substring(7);}
-			    if ($(this).attr("value").indexOf("theme") == 0) {localStorage["cmeditor-menu-theme"] = $(this).attr("value").substring(5);}
-			    if ($(this).attr("value").indexOf("diffBeforeSave") == 0) {localStorage["cmeditor-menu-diffBeforeSave"] = $(this).children("span").hasClass("ui-icon-check");}
+			    if (value.indexOf("binding") == 0) {localStorage["cmeditor-menu-binding"] = value.substring(7);}
+			    if (value.indexOf("theme") == 0) {localStorage["cmeditor-menu-theme"] = value.substring(5);}
+			    if (value.indexOf("diffBeforeSave") == 0) {localStorage["cmeditor-menu-diffBeforeSave"] = $(this).children("span").hasClass("ui-icon-check");}
 			}
 		    //return false;
 		    event.preventDefault();
 		});
 
 		self.rootElem.find(".addonsMenu a").click(function(event) {
-			var found = self.menus.addonsMenu[$(this).attr("value")];
+			var value = $(this).attr("value");
+
+			if(typeof value === "undefined"){
+		    	event.preventDefault();
+				return;
+			}
+
+			var found = self.menus.addonsMenu[value];
 		    self.cmeditor.focus();
 		    if (found) found(self.cmeditor.getCodeMirror());
 
