@@ -34,12 +34,12 @@
 		<g:if test="${options.menuView}">
 		<li><a href="#">View</a>
 			<ul class="viewMenu">
-				<li><a href="#" value="readOnly"><span></span>readOnly</a></li>
+				<li><a href="#" value="readOnly"><span class="ui-icon ui-icon-blank"></span>readOnly</a></li>
 				<li><a href="#" value="diff"><span></span>diff</a></li>
 				<li><a href="#" value="goto"><span></span>goto</a></li>
 				<li><a href="#" value="addonfullscreen"><span></span>full-screen (f11)</a></li>
 				<li><a href="#"><span></span>Mode</a>
-					<ul class="modesMenu  ui-menu-icons">
+					<ul class="modesMenu ui-menu-icons">
 					</ul>
 				</li>
 			</ul>
