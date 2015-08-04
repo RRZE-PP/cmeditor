@@ -13,6 +13,9 @@
 		Filename: <input type="text" name="name" /> <br />
 		Folder: <input type="text" name="folder" /> (Leave empty to hide in folder view)
 	</div>
+	<div class="dialog gotoDialog" title="Go to line" style="display: none;">
+		<p class="gotoLabel"></p><input type="number" /><p class="gotoError">&nbsp;</p>
+	</div>
 	<ul class="cmeditor-menubar menu">
 		<li><a href="#">File</a>
 			<ul class="fileMenu">

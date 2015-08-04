@@ -320,7 +320,38 @@ this.CMEditorMenu = (function(){
 				}
 			},
 			diff: function(cm) { if(typeof self.cmeditor.diff == "function") self.cmeditor.diff(); },
-			goto: function(cm) { self.cmeditor.goto() },
+			goto: function(cm) {
+
+				var first = self.cmeditor.codeMirror.doc.firstLine()+1;
+				var last = self.cmeditor.codeMirror.doc.lastLine()+1;
+				var current = self.cmeditor.codeMirror.getCursor().line+1;
+
+				var input = self.dialogs.gotoDialog.find("input");
+				input.attr("min", first);
+				input.attr("max", last);
+				input.val(current);
+				window.setTimeout(function(){input.focus()}, 0); //focus does not work directly for some reason
+
+				self.dialogs.gotoDialog.find(".gotoLabel").text("Enter line number ("+first+".."+last+"):");
+
+				var buttons = {Cancel: 	function() { self.dialogs.gotoDialog.dialog("close"); },
+							  Ok: 		function() {
+											var line = parseInt(input.val());
+
+											if(isNaN(line) || line < first || line > last){
+												alert("Please enter a valid line number!");
+												return;
+											}
+
+											self.dialogs.gotoDialog.dialog("close");
+											self.cmeditor.codeMirror.setCursor(line-1, 0);
+										}
+							  }
+				input.keyup(function(e){ if(e.which == 13) buttons.Ok() }); //call ok on enter
+
+				self.dialogs.gotoDialog.dialog("option", "buttons", buttons);
+				self.dialogs.gotoDialog.dialog("open");
+			 },
 			addonfullscreen: function(cm) {
 				if (!cm.getOption("readOnly")) {
 					self.cmeditor.toggleFullscreen();
@@ -405,6 +436,10 @@ this.CMEditorMenu = (function(){
 					height: 300,
 					width: 500
 				});
+
+		self.dialogs.gotoDialog = self.rootElem.find(".gotoDialog").dialog({
+				autoOpen: false
+		});
 
 	}
 

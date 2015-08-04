@@ -303,25 +303,6 @@ this.CMEditor = (function(){
 			width: "auto",
 			height: "auto",
 		});
-
-
-		var go = self.dialogs.gotoDialog = $('<div class="dialog gotoDialog" title="Go to Line" style="display: none;"><p class="gotoLabel"></p> \
-									<input type="text" /><p class="gotoError">&nbsp;</p></div>');
-		go.dialog({
-			autoOpen: false,
-			dialogClass: "dialog-goto",
-			resize:"auto",
-			width: "auto",
-			height: "auto",
-			buttons: {Cancel: 	function() { $(this).dialog("close"); },
-					  Ok: 		function() {
-									var line = parseInt(self.dialogs.gotoDialog.find("input").val())-1;
-									self.codeMirror.doc.setCursor(line, 0);
-									$(this).dialog("close");
-								}
-					  }
-
-		});
 	}
 
 	/*
@@ -593,42 +574,6 @@ this.CMEditor = (function(){
 	 */
 	function getDocumentByName(self, name) {
 		return self.state.docs[getDocumentPositionByName(self, name)];
-	}
-
-	/*
-	 * Prompts the user for a line, then sets the line number to that line
-	 */
-	function goto(self) {
-		var first = self.codeMirror.doc.firstLine()+1;
-		var last = self.codeMirror.doc.lastLine()+1;
-
-		self.dialogs.gotoDialog.find(".gotoLabel").text("Enter line number ("+first+".."+last+"):");
-		self.dialogs.gotoDialog.find("input").val(self.codeMirror.doc.getCursor().line+1);
-		self.dialogs.gotoDialog.find("input").on("keyup", function() {
-			var lineInput = $(this).val();
-
-			var errMsg = "";
-			if (lineInput !== "") {
-				if (cmeditorbase_is_int(lineInput)) {
-					var line = parseInt(lineInput);
-
-					if(line < first || line > last) {
-						errMsg = "Line number out of range";
-					}
-				} else {
-					errMsg = "Not a number";
-				}
-			}
-
-			if(errMsg !== "" && lineInput !== ""){
-				self.dialogs.gotoDialog.find(":button:contains('Ok')").prop("disabled", true).addClass("ui-state-disabled");
-			}else{
-				self.dialogs.gotoDialog.find(":button:contains('Ok')").prop("disabled", true).removeClass("ui-state-disabled");
-			}
-			self.dialogs.gotoDialog.find(".gotoError").text(errMsg);
-		});
-
-		self.dialogs.gotoDialog.dialog("open");
 	}
 
 	/*
@@ -1399,7 +1344,6 @@ this.CMEditor = (function(){
 	CMEditor.prototype.getUnambiguousName        = function(){Array.prototype.unshift.call(arguments, this); return getUnambiguousName.apply(this, arguments)};
 	CMEditor.prototype.getCurrentCMEditorMode    = function(){Array.prototype.unshift.call(arguments, this); return getCurrentCMEditorMode.apply(this, arguments)};
 	CMEditor.prototype.getCodeMirror             = function(){Array.prototype.unshift.call(arguments, this); return getCodeMirror.apply(this, arguments)};
-	CMEditor.prototype.goto                      = function(){Array.prototype.unshift.call(arguments, this); return goto.apply(this, arguments)};
 	CMEditor.prototype.moveDoc                   = function(){Array.prototype.unshift.call(arguments, this); return moveDoc.apply(this, arguments)};
 	CMEditor.prototype.newDoc                    = function(){Array.prototype.unshift.call(arguments, this); return newDoc.apply(this, arguments)};
 	CMEditor.prototype.on                        = function(){Array.prototype.unshift.call(arguments, this); return on.apply(this, arguments)};
