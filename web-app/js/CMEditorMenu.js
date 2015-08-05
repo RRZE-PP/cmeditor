@@ -256,8 +256,8 @@ this.CMEditorMenu = (function(){
 				var newNameElem = self.dialogs.renameDialog.find("input[name=newName]");
 				var newFolderElem = self.dialogs.renameDialog.find("input[name=newFolder]");
 
-				var oldName = self.cmeditor.curDoc.getName();
-				var oldFolder = self.cmeditor.curDoc.getFolder();
+				var oldName = self.cmeditor.state.curDoc.getName();
+				var oldFolder = self.cmeditor.state.curDoc.getFolder();
 
 				newNameElem.val(oldName);
 				newFolderElem.val(oldFolder);
