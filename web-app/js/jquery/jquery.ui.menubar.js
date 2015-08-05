@@ -105,7 +105,8 @@ $.widget( "ui.menubar", {
 				// TODO don't hardcode markup selectors
 				ui.item.parents( "ul.ui-menu:last" ).hide();
 				menubar._close();
-				ui.item.parents( ".ui-menubar-item" ).children().first().focus();
+				// this kept stealing focus from freshly opened dialogs
+				// ui.item.parents( ".ui-menubar-item" ).children().first().focus();
 				menubar._trigger( "select", event, ui );
 			},
 			menus: this.options.menus

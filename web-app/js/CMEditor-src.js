@@ -280,9 +280,11 @@ this.CMEditor = (function(){
 
 		var diff = self.dialogs.diffDialog = $('<div class="dialog diffDialog" title="diff" style="display: none;"> \
 									<div class="diffoutput"> </div> \
-									<p><strong>Context size (optional):</strong><input name="contextSize" value="1" type="number" /></p> \
-									<p><input type="radio" name="_viewtype" id="sidebyside" checked="checked" /> <label for="sidebyside">Side by Side Diff</label> \
-										&nbsp; &nbsp; <input type="radio" name="_viewtype" id="inline" /> <label for="inline">Inline Diff</label> </p> \
+									<p><strong>Context size (optional):</strong><input name="contextSize" value="1" type="number" autofocus="autofocus"/></p> \
+									<p><input type="radio" name="_viewtype" id="sidebyside'+self.state.instanceNo+'" checked="checked"/> \
+									<label for="sidebyside'+self.state.instanceNo+'">Side by Side Diff</label> \
+									&nbsp; &nbsp; <input type="radio" name="_viewtype" id="inline'+self.state.instanceNo+'" /> \
+									<label for="inline'+self.state.instanceNo+'">Inline Diff</label> </p> \
 									</div>');
 
 		diff.find("input[name=contextSize]").on("keyup", function(){decorateDiffDialog(self)});
@@ -303,6 +305,10 @@ this.CMEditor = (function(){
 			width: "auto",
 			height: "auto",
 		});
+
+
+		// .cmeditor-ui-dialog s have the defaultButton-thingie activated
+		$.each(self.dialogs, function(key, val){val.parent().addClass("cmeditor-ui-dialog")});
 	}
 
 	/*
@@ -940,10 +946,12 @@ this.CMEditor = (function(){
 	 *
 	 * Parameters: additionalButtons: Object: The keys are the button labels and the values are the
 	 *                                        callbacks for when the associated button is clicked.
+	 *             defaultButton function (optional): if supplied, this function will be called when
+	 *                                                the user hits enter while the dialog has focus
 	 */
-	function diff(self, additionalButtons) {
+	function diff(self, additionalButtons, defaultButton) {
 		var buttons = {
-				Cancel: function() { $(this).dialog("close");},
+				Close: function() { self.dialogs.diffDialog.dialog("close");},
 		};
 
 		if (additionalButtons) {
@@ -954,6 +962,8 @@ this.CMEditor = (function(){
 
 		decorateDiffDialog(self);
 
+		self.dialogs.diffDialog.dialog("option", "defaultButton",
+			typeof defaultButton === "undefined" ? buttons.Close : defaultButton);
 		self.dialogs.diffDialog.dialog("option", "buttons", buttons);
 		self.dialogs.diffDialog.dialog("open");
 	}

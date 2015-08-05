@@ -137,6 +137,9 @@ this.CMEditorMenu = (function(){
 				folderElem.val("/");
 
 				var buttons = {
+					Cancel: function(){
+						self.dialogs.newFileDialog.dialog("close");
+					},
 					Create : function(){
 						var name = nameElem.val().trim();
 						var folder = folderElem.val().trim();
@@ -157,12 +160,10 @@ this.CMEditorMenu = (function(){
 
 						self.cmeditor.newDoc(unambigousName, folder);
 						self.dialogs.newFileDialog.dialog("close");
-					},
-					Cancel: function(){
-						self.dialogs.newFileDialog.dialog("close");
 					}
 				}
 
+				self.dialogs.newFileDialog.dialog("option", "defaultButton", buttons.Create);
 				self.dialogs.newFileDialog.dialog("option", "buttons", buttons);
 				self.dialogs.newFileDialog.dialog("open");
 			},
@@ -174,10 +175,8 @@ this.CMEditorMenu = (function(){
 				if(self.options.ajax.listURL){
 					$.get(self.options.ajax.listURL, function(data){
 						if (data.status == "success") {
-							var available = false
-							var myButtons = {
-								Cancel: function() { $(this).dialog( "close" ); },
-							};
+							var available = false;
+							var buttons = {};
 							for(var i=0; i < data.result.length; ++i) {
 								s.append($("<option />", {value: data.result[i][self.options.mapping["idField"]], text: data.result[i][self.options.mapping["name"]]}));
 								available = true;
@@ -230,19 +229,26 @@ this.CMEditorMenu = (function(){
 								//workaround a width calculation bug in select2
 								self.dialogs.openDialog.find(".select2-search__field").css("width", "auto");
 
-								myButtons.Open = function() {
-									var vals = self.dialogs.openDialog.find(".fileSelect").val();
-									for (var i in vals) {
-										self.cmeditor.ajax_load(vals[i]);
-									}
-									$(this).dialog( "close" );
-								};
+								buttons = {
+									Cancel: function() { self.dialogs.openDialog.dialog( "close" ); },
+									Open:   function() {
+												var vals = self.dialogs.openDialog.find(".fileSelect").val();
+												for (var i in vals) {
+													self.cmeditor.ajax_load(vals[i]);
+												}
+												self.dialogs.openDialog.dialog( "close" );
+											}
+								}
 							} else {
+								buttons = {
+									Cancel: function() { self.dialogs.openDialog.dialog( "close" ); }
+								}
 								s = $("<p class=\"noFiles\" name=\"cmeditor-menu-open-no-files\">No files available.</p>");
 								s.appendTo(self.dialogs.openDialog);
 							}
 
-							self.dialogs.openDialog.dialog("option", "buttons", myButtons);
+							self.dialogs.openDialog.dialog("option", "defaultButton", buttons.Open);
+							self.dialogs.openDialog.dialog("option", "buttons", buttons);
 							self.dialogs.openDialog.dialog("open");
 						} else {
 							self.cmeditor.displayMessage(data.msg);
@@ -263,6 +269,9 @@ this.CMEditorMenu = (function(){
 				newFolderElem.val(oldFolder);
 
 				var buttons = {
+					Cancel: function(){
+						self.dialogs.renameDialog.dialog("close");
+					},
 					Rename : function(){
 						var newName = newNameElem.val().trim();
 						var newFolder = newFolderElem.val().trim();
@@ -288,12 +297,10 @@ this.CMEditorMenu = (function(){
 						}
 
 						self.dialogs.renameDialog.dialog("close");
-					},
-					Cancel: function(){
-						self.dialogs.renameDialog.dialog("close");
 					}
 				}
 
+				self.dialogs.renameDialog.dialog("option", "defaultButton", buttons.Rename);
 				self.dialogs.renameDialog.dialog("option", "buttons", buttons);
 				self.dialogs.renameDialog.dialog("open");
 			},
@@ -330,12 +337,11 @@ this.CMEditorMenu = (function(){
 				input.attr("min", first);
 				input.attr("max", last);
 				input.val(current);
-				window.setTimeout(function(){input.focus()}, 0); //focus does not work directly for some reason
 
 				self.dialogs.gotoDialog.find(".gotoLabel").text("Enter line number ("+first+".."+last+"):");
 
 				var buttons = {Cancel: 	function() { self.dialogs.gotoDialog.dialog("close"); },
-							  Ok: 		function() {
+							   Goto: 		function() {
 											var line = parseInt(input.val());
 
 											if(isNaN(line) || line < first || line > last){
@@ -347,8 +353,8 @@ this.CMEditorMenu = (function(){
 											self.cmeditor.codeMirror.setCursor(line-1, 0);
 										}
 							  }
-				input.keyup(function(e){ if(e.which == 13) buttons.Ok() }); //call ok on enter
 
+				self.dialogs.gotoDialog.dialog("option", "defaultButton", buttons.Goto);
 				self.dialogs.gotoDialog.dialog("option", "buttons", buttons);
 				self.dialogs.gotoDialog.dialog("open");
 			 },
@@ -399,7 +405,7 @@ this.CMEditorMenu = (function(){
 
 		self.menus.addonsMenu = {
 			addondonation: function(cm) {
-				self.dialogs.donationDialog.dialog("open");
+				 self.rootElem.find(".donationDialog").css("display", "block")
 			},
 		};
 	}
@@ -416,7 +422,7 @@ this.CMEditorMenu = (function(){
 					buttons: {
 						Yes: function() { $( this ).dialog( "close" ); },
 						No: function() { $( this ).dialog( "close" ); },
-					},
+					}
 				});
 
 		self.dialogs.openDialog = self.rootElem.find(".openMenu").dialog({
@@ -441,6 +447,8 @@ this.CMEditorMenu = (function(){
 				autoOpen: false
 		});
 
+		// .cmeditor-ui-dialog s have the defaultButton-thingie activated
+		$.each(self.dialogs, function(key, val){val.parent().addClass("cmeditor-ui-dialog")});
 	}
 
 	/*

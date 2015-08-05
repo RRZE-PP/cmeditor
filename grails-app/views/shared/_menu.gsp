@@ -6,15 +6,15 @@
 	<div class="dialog openMenu" title="Open" style="display: none;">
 	</div>
 	<div class="dialog renameDialog" title="Rename and Move" style="display: none;">
-		New filename: <input type="text" name="newName" /> <br />
+		New filename: <input type="text" name="newName"  autofocus="autofocus" /> <br />
 		New folder: <input type="text" name="newFolder" /> (Leave empty to hide in folder view)
 	</div>
 	<div class="dialog newFileDialog" title="Create new file" style="display: none;">
-		Filename: <input type="text" name="name" /> <br />
+		Filename: <input type="text" name="name"  autofocus="autofocus" /> <br />
 		Folder: <input type="text" name="folder" /> (Leave empty to hide in folder view)
 	</div>
 	<div class="dialog gotoDialog" title="Go to line" style="display: none;">
-		<p class="gotoLabel"></p><input type="number" /><p class="gotoError">&nbsp;</p>
+		<p class="gotoLabel"></p><input type="number" autofocus="autofocus"/><p class="gotoError">&nbsp;</p>
 	</div>
 	<ul class="cmeditor-menubar menu">
 		<li><a href="#">File</a>

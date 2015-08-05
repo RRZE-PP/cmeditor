@@ -1,3 +1,17 @@
+$(document).delegate('.cmeditor-ui-dialog', 'keyup', function(e) {
+	var tagName = e.target.tagName.toLowerCase();
+
+	tagName = (tagName === 'input' && e.target.type === 'button') ? 'button' : tagName;
+
+	if (e.which === $.ui.keyCode.ENTER && tagName !== 'textarea' && tagName !== 'select' && tagName !== 'button') {
+		var options = $(this).children(".ui-dialog-content").dialog("option");
+		if(typeof options.defaultButton !== "undefined")
+			options.defaultButton();
+
+		return false;
+	}
+});
+
 function cmeditorbase_is_int(value){
   if((parseFloat(value) == parseInt(value)) && !isNaN(value)){
       return true;
