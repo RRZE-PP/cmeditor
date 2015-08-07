@@ -373,8 +373,14 @@ this.CMEditorMenu = (function(){
 
 		for(var i=0; i < self.options.availableModes.length; i++){
 			var mode = self.options.availableModes[i];
-			self.menus.viewMenu["mode"+mode] = (function(mode){return function(){self.cmeditor.setMode(mode)}})(mode);
-			modesMenuElem.append('<li><a href="#" value="mode'+mode+'"><span></span>'+mode+'</a></li>');
+			var cmMode = CodeMirror.findModeByName(mode) || CodeMirror.findModeByMIME(mode);
+
+			if(cmMode === undefined){
+				log(self, "Could not add mode "+mode+", because no valid corresponding mode was found!");
+				continue;
+			}
+			self.menus.viewMenu["mode"+cmMode.name] = (function(cmMode){return function(){self.cmeditor.setMode(cmMode.name)}})(cmMode);
+			modesMenuElem.append('<li><a href="#" value="mode'+cmMode.name+'"><span></span>'+cmMode.name+'</a></li>');
 		}
 
 
