@@ -1094,6 +1094,7 @@ this.CMEditor = (function(){
 
 			insertNewDocument(self, newDoc);
 			selectDocumentByIndex(self, self.state.docs.length - 1);
+			markDocumentAsChanged(self, newDoc);
 		}
 	}
 
