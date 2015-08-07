@@ -625,16 +625,6 @@ this.CMEditor = (function(){
 	}
 
 	/*
-	 * Gets the document by document name
-	 *
-	 * Parameters: name String: The name of the document
-	 * Returns:    CMEditor.Doc: The document
-	 */
-	function getDocumentByName(self, name) {
-		return self.state.docs[getDocumentPositionByName(self, name)];
-	}
-
-	/*
 	 * Creates a new tab and sets the supplied document as its content
 	 *
 	 * Parameters: newDoc CMEditor.Doc: The document to insert
@@ -648,21 +638,21 @@ this.CMEditor = (function(){
 
 		var closeButton = $('<span class="closeButton">&#10005;</span>');
 		closeButton.on("click", function(e){
-									var doc = getDocumentByName(self, newDoc.getName());
-
-									if(doc.needsSaving()){
+									if(newDoc.needsSaving()){
 										showWarning(self, "Do you really want to close this buffer? Unsaved changes will be lost.",
-											{Close: function(){removeDocument(self, doc); $(this).dialog("close");}})
+											{Close: function(){removeDocument(self, newDoc); $(this).dialog("close");}})
 									}else{
-										removeDocument(self, doc);
+										removeDocument(self, newDoc);
 									}
 									e.stopPropagation();
 
 								});
 		li.appendChild(closeButton.get(0));
 
+		newDoc.setTabElem($(li));
+
 		if (self.codeMirror.getDoc() == newDoc.getCMDoc()) {
-			markDocumentAsSelected(self, self.state.docs.length - 1);
+			markDocumentAsSelected(self, newDoc);
 			self.state.curDoc = newDoc;
 		}
 
@@ -678,7 +668,7 @@ this.CMEditor = (function(){
 	 */
 	function insertNewUntitledDocument(self) {
 		if (self.state.docs.length < 1) {
-			var name = self.state.unregDocName = getUnambiguousName(self, "Untitled Document");
+			var name = getUnambiguousName(self, "Untitled Document");
 
 			var newDoc = new Doc(name, "/", self.options.defaultMode, self.options.defaultContent,
 									(self.options.readOnly||self.options.defaultReadOnly)?"nocursor":"");
@@ -691,6 +681,7 @@ this.CMEditor = (function(){
 				newDoc.setCustomDataField(key, elem.attr('value')!=undefined?elem.attr('value'):"");
 			});
 
+			self.state.initialDoc = newDoc;
 			insertNewDocument(self, newDoc);
 		}
 	}
@@ -698,34 +689,34 @@ this.CMEditor = (function(){
 	/*
 	 * Marks a document as changed by placing a star next to its name
 	 *
-	 * Parameters: pos Integer: the index of the document to change
+	 * Parameters: doc CMEditor.Document: the document to mark
 	 */
-	function markDocumentAsChanged(self, pos) {
-		var docTab = self.rootElem.find(".tabs li:nth-child("+(pos+1)+") .tabName");
-		docTab.text("*"+ self.state.docs[pos].getName());
+	function markDocumentAsChanged(self, doc) {
+		var docTab = doc.getTabElem().find(".tabName");
+		docTab.text("*"+ doc.getName());
 
 	}
 
 	/*
 	 * Adds a selected class to a document and removes it from all others
 	 *
-	 * Parameters: pos Integer: the index of the document to add the class to
+	 * Parameters: doc CMEditor.Document: the document to mark
 	 */
-	function markDocumentAsSelected(self, pos) {
+	function markDocumentAsSelected(self, doc) {
 		var docTabs = self.rootElem.find(".tabs").children();
 		docTabs.removeClass("selected");
-		docTabs.eq(pos).addClass("selected");
+		doc.getTabElem().addClass("selected");
 
 	}
 
 	/*
 	 * Marks a document as unchanged by removing the star next to its name
 	 *
-	 * Parameters: pos Integer: the index of the document to change
+	 * Parameters: doc CMEditor.Document: the document to mark
 	 */
-	function markDocumentAsUnchanged(self, pos) {
-		var docTab = self.rootElem.find(".tabs li:nth-child("+(pos+1)+") .tabName");
-		docTab.text(self.state.docs[pos].getName());
+	function markDocumentAsUnchanged(self, doc) {
+		var docTab = doc.getTabElem().find(".tabName");
+		docTab.text(doc.getName());
 
 	}
 
@@ -763,10 +754,11 @@ this.CMEditor = (function(){
 	 */
 	function removeUntitledDocument(self) {
 		if (self.state.docs.length > 1) {
-			var doc = getDocumentByName(self, self.state.unregDocName)
-			if (doc && doc.isNew()) {
+			var doc = self.state.initialDoc;
+			if (doc !== null && doc.isNew()) {
 				removeDocument(self, doc);
 			}
+			self.state.initialDoc = null;
 		}
 	}
 
@@ -776,8 +768,8 @@ this.CMEditor = (function(){
 	 * Parameters: pos Integer: the index of the document to select
 	 */
 	function selectDocumentByIndex(self, pos) {
-		markDocumentAsSelected(self, pos);
 		self.state.curDoc = self.state.docs[pos];
+		markDocumentAsSelected(self, self.state.curDoc);
 
 		self.codeMirror.swapDoc(self.state.curDoc.getCMDoc());
 		setMode(self, self.state.curDoc.getMode());
@@ -893,7 +885,7 @@ this.CMEditor = (function(){
 			}
 
 			if (changed || cmChangeObjects) {
-				markDocumentAsChanged(self, getDocumentPositionByName(self, self.state.curDoc.getName()));
+				markDocumentAsChanged(self, self.state.curDoc);
 				if (self.state.curDoc.isNew()) {
 					self.state.curDoc.markUnsaved();
 				} else if (self.state.curDoc.isUnchanged()) {
@@ -1006,17 +998,6 @@ this.CMEditor = (function(){
 		self.codeMirror.focus();
 	}
 
-	/* (Public)
-	 *
-	 * Gets the document id by document name
-	 *
-	 * Parameters: name String: The name of the document
-	 * Returns:    Integer: the id of the document
-	 */
-	function getDocumentPositionByName(self, name) {
-		for (var i = 0; i < self.state.docs.length; ++i)
-			if (self.state.docs[i].getName() == name) return i;
-	}
 
 	/* (Public)
 	 * Returns the mode in which the current document is opened
@@ -1175,17 +1156,13 @@ this.CMEditor = (function(){
 		if(self.options.readOnly){
 			displayMessage("This document is opened read only and cannot be renamed!");
 		}else{
-			//REFACTOR: If document knew its DOM-Node this would be way easier
-			var docId = getDocumentPositionByName(self, self.state.curDoc.getName());
-			var oldName = self.state.docs[docId].getName();
+			self.state.curDoc.setName(newName);
+			markDocumentAsChanged(self, self.state.curDoc);
 
-			self.state.docs[docId].setName(newName);
-			markDocumentAsChanged(self, docId);
-
-			if(self.state.docs[docId].isRenamed())
-				self.state.docs[docId].markUnsaved();
+			if(self.state.curDoc.isRenamed())
+				self.state.curDoc.markUnsaved();
 			else
-				self.state.docs[docId].markChanged();
+				self.state.curDoc.markChanged();
 
 			updateCurrentDocument(self);
 
@@ -1201,7 +1178,6 @@ this.CMEditor = (function(){
 			return;
 		}
 
-		var pos = getDocumentPositionByName(self, self.state.curDoc.getName());
 		updateCurrentDocument(self);
 
 		if (self.state.doDiffBeforeSaving) {
@@ -1322,7 +1298,7 @@ this.CMEditor = (function(){
 				self.state.curDoc.setMode(mode);
 				setMode(self, mode);
 
-				markDocumentAsChanged(self, getDocumentPositionByName(self, self.state.curDoc.getName()));
+				markDocumentAsChanged(self, self.state.curDoc);
 
 				if (self.state.curDoc.isNew()){
 					self.state.curDoc.markUnsaved();
@@ -1366,7 +1342,6 @@ this.CMEditor = (function(){
 	CMEditor.prototype.copyCMTheme               = function(){Array.prototype.unshift.call(arguments, this); return copyCMTheme.apply(this, arguments)};
 	CMEditor.prototype.diff                      = function(){Array.prototype.unshift.call(arguments, this); return diff.apply(this, arguments)};
 	CMEditor.prototype.deleteDoc                 = function(){Array.prototype.unshift.call(arguments, this); return deleteDoc.apply(this, arguments)};
-	CMEditor.prototype.getDocumentPositionByName = function(){Array.prototype.unshift.call(arguments, this); return getDocumentPositionByName.apply(this, arguments)};
 	CMEditor.prototype.focus                     = function(){Array.prototype.unshift.call(arguments, this); return focus.apply(this, arguments)};
 	CMEditor.prototype.getUnambiguousName        = function(){Array.prototype.unshift.call(arguments, this); return getUnambiguousName.apply(this, arguments)};
 	CMEditor.prototype.getCurrentCMEditorMode    = function(){Array.prototype.unshift.call(arguments, this); return getCurrentCMEditorMode.apply(this, arguments)};
@@ -1390,8 +1365,6 @@ this.CMEditor = (function(){
                                                               Array.prototype.unshift.call(arguments, this); return close.apply(this, arguments)};
 	CMEditor.prototype.delete                    = function(){log("using delete is deprecated. use deleteDoc instead", "WARNING");
                                                               Array.prototype.unshift.call(arguments, this); return deleteDoc.apply(this, arguments)};
-	CMEditor.prototype.doc_id                    = function(){log("using doc_id is deprecated. use getDocumentPositionByName instead", "WARNING");
-                                                              Array.prototype.unshift.call(arguments, this); return getDocumentPositionByName.apply(this, arguments)};
 	CMEditor.prototype.get_name                  = function(){log("using get_name is deprecated. use getUnambiguousName instead", "WARNING");
                                                               Array.prototype.unshift.call(arguments, this); return getUnambiguousName.apply(this, arguments)};
 	CMEditor.prototype.get_mode                  = function(){log("using get_mode is deprecated. use getCurrentCMEditorMode instead", "WARNING");
@@ -1420,6 +1393,7 @@ this.CMEditor = (function(){
 		this.readOnly = readOnly;
 		this.status = "new";
 		this.customData = {};
+		this.tabElem = null;
 
 		if(cmDoc === undefined)
 			this.codeMirrorDoc = new CodeMirror.Doc(content, mode);
@@ -1445,6 +1419,7 @@ this.CMEditor = (function(){
 	Doc.prototype.getMode     = function(){return this.mode};
 	Doc.prototype.getName     = function(){return this.name};
 	Doc.prototype.getOrigContent = function(){return this.origContent};
+	Doc.prototype.getTabElem  = function(){return this.tabElem};
 	Doc.prototype.getReadOnly = function(){return this.readOnly};
 	Doc.prototype.hasID       = function(){return this.idField !== undefined};
 	Doc.prototype.isNew       = function(){return this.status == Doc.status.NEW};
@@ -1466,6 +1441,7 @@ this.CMEditor = (function(){
 	Doc.prototype.setMode       = function(mode){this.mode = mode};
 	Doc.prototype.setName       = function(name){this.name = name;};
 	Doc.prototype.setReadOnly   = function(readOnly){this.readOnly = readOnly};
+	Doc.prototype.setTabElem    = function(tabElem){this.tabElem = tabElem};
 
 	return CMEditor;
 })();
