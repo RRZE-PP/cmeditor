@@ -234,7 +234,7 @@ this.CMEditorMenu = (function(){
 									Open:   function() {
 												var vals = self.dialogs.openDialog.find(".fileSelect").val();
 												for (var i in vals) {
-													self.cmeditor.ajax_load(vals[i]);
+													self.cmeditor.open(vals[i]);
 												}
 												self.dialogs.openDialog.dialog( "close" );
 											}

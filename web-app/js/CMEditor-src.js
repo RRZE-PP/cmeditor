@@ -376,6 +376,56 @@ this.CMEditor = (function(){
 	}
 
 	/*
+	 * Loads a document from the server
+	 *
+	 * Parameters: fileId (Integer|String): The document's id
+	 *             readWrite Boolean: If true document will always be writable, else it will be readOnly
+	 *                                if options.readOnly or options.defaultReadOnly is set to true
+	 */
+	function ajax_load(self, fileId, readWrite) {
+		var data = {};
+		data[self.options.mapping.idField] = fileId;
+
+		$.ajax({
+			type:"GET",
+			data: data,
+			url: self.options.ajax.getURL,
+			success: function(data){
+				if (data.status == "success" && data.result) {
+					var newDoc = new Doc(data.result[self.options.mapping.name],
+					                        data.result[self.options.mapping.folder] || null,
+					                        data.result[self.options.mapping.mode] || self.options.defaultMode,
+					                        data.result[self.options.mapping.content],
+					                        readWrite ? "" : ((self.options.readOnly || self.options.defaultReadOnly) ? "nocursor" : ""));
+					newDoc.setID(data.result[self.options.mapping.idField]);
+
+					//insert custom data, if it is present in the form
+					self.rootElem.find("form .cmeditor-field").each(function(){
+						var elem = $(this);
+						var key = elem.attr("name");
+
+						if(listContainsElem(self, Object.keys(self.options.mapping), key))
+							return true; //jquery-Each continue
+
+						elem.val(data.result[key]);
+						newDoc.setCustomDataField(key, data.result[key]!=undefined?data.result[key]:"");
+					});
+
+					newDoc.markUnchanged();
+					insertNewDocument(self, newDoc);
+
+					if(data.msg)
+						displayMessage(self, data.msg);
+				} else {
+					displayMessage(self, data.msg);
+				}
+			},
+
+		error:function(XMLHttpRequest,textStatus,errorThrown){displayMessage(self, "An error occured: "+ textStatus +" " + errorThrown);},
+		});
+	}
+
+	/*
 	 * Reinitiates the current document from the server
 	 *
 	 * Parameters: newId (Integer|String): If supplied the document will be replaced by this one
@@ -865,56 +915,6 @@ this.CMEditor = (function(){
 	 *************************************************************************/
 
 	/* (Public)
-	 * Loads a document from the server
-	 *
-	 * Parameters: fileId (Integer|String): The document's id
-	 *             readWrite Boolean: If true document will always be writable, else it will be readOnly
-	 *                                if options.readOnly or options.defaultReadOnly is set to true
-	 */
-	function ajax_load(self, fileId, readWrite) {
-		var data = {};
-		data[self.options.mapping.idField] = fileId;
-
-		$.ajax({
-			type:"GET",
-			data: data,
-			url: self.options.ajax.getURL,
-			success: function(data){
-				if (data.status == "success" && data.result) {
-					var newDoc = new Doc(data.result[self.options.mapping.name],
-					                        data.result[self.options.mapping.folder] || null,
-					                        data.result[self.options.mapping.mode] || self.options.defaultMode,
-					                        data.result[self.options.mapping.content],
-					                        readWrite ? "" : ((self.options.readOnly || self.options.defaultReadOnly) ? "nocursor" : ""));
-					newDoc.setID(data.result[self.options.mapping.idField]);
-
-					//insert custom data, if it is present in the form
-					self.rootElem.find("form .cmeditor-field").each(function(){
-						var elem = $(this);
-						var key = elem.attr("name");
-
-						if(listContainsElem(self, Object.keys(self.options.mapping), key))
-							return true; //jquery-Each continue
-
-						elem.val(data.result[key]);
-						newDoc.setCustomDataField(key, data.result[key]!=undefined?data.result[key]:"");
-					});
-
-					newDoc.markUnchanged();
-					insertNewDocument(self, newDoc);
-
-					if(data.msg)
-						displayMessage(self, data.msg);
-				} else {
-					displayMessage(self, data.msg);
-				}
-			},
-
-		error:function(XMLHttpRequest,textStatus,errorThrown){displayMessage(self, "An error occured: "+ textStatus +" " + errorThrown);},
-		});
-	}
-
-	/* (Public)
 	 * Closes the currently opened document
 	 */
 	function close(self, cm) {
@@ -1151,6 +1151,22 @@ this.CMEditor = (function(){
 	}
 
 	/* (Public)
+	 * Opens a file if it is not opened yet
+	 *
+	 * Parameters: fileId Integer: The id of the file
+	 *             readWrite Boolean: If true document will always be writable, else it will be readOnly
+	 *                                if options.readOnly or options.defaultReadOnly is set to true
+	 */
+	function open(self, fileId, readWrite) {
+		for(var i=0; i<self.state.docs.length; i++){
+			if(self.state.docs[i].getID() == fileId){
+				return;
+			}
+		}
+		ajax_load(self, fileId, readWrite);
+	}
+
+	/* (Public)
 	 * Renames the currently opened document. Shows an error message if the document is read only
 	 *
 	 * Parameters: newName String: the new name of the document
@@ -1346,7 +1362,6 @@ this.CMEditor = (function(){
 	CMEditor.prototype.constructor = CMEditor;
 
 	//public methods
-	CMEditor.prototype.ajax_load                 = function(){Array.prototype.unshift.call(arguments, this); return ajax_load.apply(this, arguments)};
 	CMEditor.prototype.closeDoc                  = function(){Array.prototype.unshift.call(arguments, this); return close.apply(this, arguments)};
 	CMEditor.prototype.copyCMTheme               = function(){Array.prototype.unshift.call(arguments, this); return copyCMTheme.apply(this, arguments)};
 	CMEditor.prototype.diff                      = function(){Array.prototype.unshift.call(arguments, this); return diff.apply(this, arguments)};
@@ -1359,6 +1374,7 @@ this.CMEditor = (function(){
 	CMEditor.prototype.moveDoc                   = function(){Array.prototype.unshift.call(arguments, this); return moveDoc.apply(this, arguments)};
 	CMEditor.prototype.newDoc                    = function(){Array.prototype.unshift.call(arguments, this); return newDoc.apply(this, arguments)};
 	CMEditor.prototype.on                        = function(){Array.prototype.unshift.call(arguments, this); return on.apply(this, arguments)};
+	CMEditor.prototype.open                      = function(){Array.prototype.unshift.call(arguments, this); return open.apply(this, arguments)};
 	CMEditor.prototype.saveDoc                   = function(){Array.prototype.unshift.call(arguments, this); return save.apply(this, arguments)};
 	CMEditor.prototype.saveDocAs                 = function(){Array.prototype.unshift.call(arguments, this); return saveas.apply(this, arguments)};
 	CMEditor.prototype.setDoDiffBeforeSaving     = function(){Array.prototype.unshift.call(arguments, this); return setDoDiffBeforeSaving.apply(this, arguments)};
