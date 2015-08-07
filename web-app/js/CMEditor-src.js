@@ -281,14 +281,14 @@ this.CMEditor = (function(){
 		var diff = self.dialogs.diffDialog = $('<div class="dialog diffDialog" title="diff" style="display: none;"> \
 									<div class="diffoutput"> </div> \
 									<p><strong>Context size (optional):</strong><input name="contextSize" value="1" type="number" autofocus="autofocus"/></p> \
-									<p><input type="radio" name="_viewtype" id="sidebyside'+self.state.instanceNo+'" checked="checked"/> \
+									<p><input type="radio" value="0" name="_viewType" id="sidebyside'+self.state.instanceNo+'" checked="checked"/> \
 									<label for="sidebyside'+self.state.instanceNo+'">Side by Side Diff</label> \
-									&nbsp; &nbsp; <input type="radio" name="_viewtype" id="inline'+self.state.instanceNo+'" /> \
+									&nbsp; &nbsp; <input type="radio" value="1" name="_viewType" id="inline'+self.state.instanceNo+'" /> \
 									<label for="inline'+self.state.instanceNo+'">Inline Diff</label> </p> \
 									</div>');
 
 		diff.find("input[name=contextSize]").on("keyup", function(){decorateDiffDialog(self)});
-		diff.find("input[name=_viewtype]").on("click",   function(){decorateDiffDialog(self)});
+		diff.find("input[name=_viewType]").on("click",   function(){decorateDiffDialog(self)});
 
 		diff.dialog({
 			autoOpen: false,
@@ -516,6 +516,8 @@ this.CMEditor = (function(){
 	 * Calculates and draws the diff
 	 */
 	function decorateDiffDialog(self) {
+		log(self, "Decorating a diff dialog", "INFO");
+		console.log(self.dialogs.diffDialog.find("input[name=_viewType]:checked").val());
 
 		var base    = difflib.stringAsLines(self.state.curDoc.getOrigContent()),
 			newtxt  = difflib.stringAsLines(self.state.curDoc.getContent()),
@@ -537,7 +539,7 @@ this.CMEditor = (function(){
 				baseTextName: "Base Text",
 				newTextName: "New Text",
 				contextSize: contextSize,
-				viewType: self.dialogs.diffDialog.find("input[name=viewType]:checked").val()
+				viewType: parseInt(self.dialogs.diffDialog.find("input[name=_viewType]:checked").val())
 			}));
 		}
 	}
