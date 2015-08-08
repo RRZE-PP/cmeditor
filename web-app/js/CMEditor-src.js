@@ -381,8 +381,10 @@ this.CMEditor = (function(){
 	 * Parameters: fileId (Integer|String): The document's id
 	 *             readWrite Boolean: If true document will always be writable, else it will be readOnly
 	 *                                if options.readOnly or options.defaultReadOnly is set to true
+	 *             finishedCallback Function: This will be called after the document was loaded and passed
+	 *                                        the loaded CMEditor.Doc
 	 */
-	function ajax_load(self, fileId, readWrite) {
+	function ajax_load(self, fileId, readWrite, finishedCallback) {
 		var data = {};
 		data[self.options.mapping.idField] = fileId;
 
@@ -412,7 +414,7 @@ this.CMEditor = (function(){
 					});
 
 					newDoc.markUnchanged();
-					insertNewDocument(self, newDoc);
+					finishedCallback(newDoc);
 
 					if(data.msg)
 						displayMessage(self, data.msg);
@@ -435,8 +437,24 @@ this.CMEditor = (function(){
 			if(typeof newId == "undefined")
 				newId = self.state.curDoc.getID();
 
-			removeDocument(self, self.state.curDoc);
-			ajax_load(self, newId, true);
+			var curDocIdx;
+			for(curDocIdx=0; curDocIdx<self.state.docs.length; curDocIdx++){
+				if(self.state.docs[curDocIdx] === self.state.curDoc){
+					break;
+				}
+			}
+
+			ajax_load(self, newId, true, function(newDoc){
+				newDoc.setTabElem(self.state.curDoc.getTabElem());
+				self.state.docs[curDocIdx] = newDoc;
+				self.state.curDoc = newDoc;
+
+				newDoc.getTabElem().find(".closeButton").off("click");
+				newDoc.getTabElem().find(".closeButton").on("click", function(e){close(self, newDoc);e.stopPropagation()});
+
+				updateCurrentDocument(self);
+				markDocumentAsUnchanged(self, newDoc);
+			});
 		}
 	}
 
@@ -637,16 +655,7 @@ this.CMEditor = (function(){
 		li.appendChild($('<span class="tabName"></span>').text(newDoc.getName()).get(0));
 
 		var closeButton = $('<span class="closeButton">&#10005;</span>');
-		closeButton.on("click", function(e){
-									if(newDoc.needsSaving()){
-										showWarning(self, "Do you really want to close this buffer? Unsaved changes will be lost.",
-											{Close: function(){removeDocument(self, newDoc); $(this).dialog("close");}})
-									}else{
-										removeDocument(self, newDoc);
-									}
-									e.stopPropagation();
-
-								});
+		closeButton.on("click", function(e){close(self, newDoc); e.stopPropagation();});
 		li.appendChild(closeButton.get(0));
 
 		newDoc.setTabElem($(li));
@@ -738,11 +747,13 @@ this.CMEditor = (function(){
 	 * Parameters: doc CMEditor.Doc: The document to remove
 	 */
 	function removeDocument(self, doc) {
-		for (var i = 0; i < self.state.docs.length && doc != self.state.docs[i]; ++i) {}
-		self.state.docs.splice(i, 1);
-
-		var docList = self.rootElem.find(".docs").get(0);
-		docList.removeChild(docList.childNodes[i]);
+		for (var i=0; i < self.state.docs.length; ++i) {
+			if(self.state.docs[i] === doc){
+				self.state.docs.splice(i, 1);
+				break;
+			}
+		}
+		doc.getTabElem().remove();
 
 		insertNewUntitledDocument(self);
 		selectDocumentByIndex(self, Math.max(0, i - 1));
@@ -908,17 +919,22 @@ this.CMEditor = (function(){
 
 	/* (Public)
 	 * Closes the currently opened document
+	 *
+	 * Parameters: doc CMEditor.Doc: if supplied this document will be closed,
+	 *                               else the current document
 	 */
-	function close(self, cm) {
-		if (self.state.curDoc.needsSaving()) {
-			showWarning(self, "The changes to the current document will be lost",
+	function close(self, doc) {
+		var closeThis = typeof doc === "undefined" ? self.state.curDoc : doc;
+
+		if (closeThis.needsSaving()) {
+			showWarning(self, "The changes to the document will be lost",
 				{Close: function() {
-							removeDocument(self, self.state.curDoc);
+							removeDocument(self, closeThis);
 							$(this).dialog("close");
 						}
 				});
 		} else {
-			removeDocument(self, self.state.curDoc);
+			removeDocument(self, closeThis);
 		}
 	}
 
@@ -1145,7 +1161,7 @@ this.CMEditor = (function(){
 				return;
 			}
 		}
-		ajax_load(self, fileId, readWrite);
+		ajax_load(self, fileId, readWrite, function(newDoc){insertNewDocument(self, newDoc)});
 	}
 
 	/* (Public)
