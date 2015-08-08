@@ -50,7 +50,7 @@ this.CMEditor = (function(){
 				toggleFullscreen(self);
 				e.preventDefault();
 			}
-		});
+		})
 
 		if(self.options.preloadModules){
 			preloadModules(self);
@@ -69,6 +69,28 @@ this.CMEditor = (function(){
 	clazz.instancesString = {};
 	clazz.instances = [];
 	clazz.loadedResources = [];
+
+	/*
+	 * Checks if any files are unsaved in any instance and warns the user
+	 */
+	var checkForUnsavedFiles = clazz.checkForUnsavedFiles = function(e){
+		console.log('bye')
+		var hasUnsaved = false;
+		for(var i=0; i<clazz.instances.length; i++){
+			var instance = clazz.instances[i];
+			for(var j=0; j<instance.state.docs.length; j++){
+				if(instance.state.docs[j].needsSaving()){
+					hasUnsaved = true;
+					break;
+				}
+			}
+		}
+
+		if(hasUnsaved){
+			return "At least one CMEditor has unsaved files. All changes will be lost."
+		}
+	}
+	$(window).bind("beforeunload", checkForUnsavedFiles);
 
 	/*
 	 * Logs to the console. If possible prefixed by class name, instance number. The default logLevel is INFO.
