@@ -4,6 +4,11 @@
 //= require jquery/jquery.ui.menubar
 //= require select2-4.0.0/dist/js/select2.min.js
 
+if(typeof String.prototype.endsWith === "undefined")
+	String.prototype.endsWith = function(suffix) {
+	    return this.indexOf(suffix, this.length - suffix.length) !== -1;
+	};
+
 this.CMEditorMenu = (function(){
 	"use strict";
 
@@ -151,6 +156,8 @@ this.CMEditorMenu = (function(){
 						if(folder === ""){
 							folder = null;
 							self.cmeditor.displayMessage("Your file will be hidden in the folder view. Use the searchbar to find it.");
+						}else{
+							folder = folder.endsWith("/")?folder:folder+"/"
 						}
 
 						var unambigousName = self.cmeditor.getUnambiguousName(name, folder);
@@ -283,6 +290,8 @@ this.CMEditorMenu = (function(){
 						if(newFolder === ""){
 							newFolder = null;
 							self.cmeditor.displayMessage("Your file will be hidden in the folder view. Use the searchbar to find it.");
+						}else{
+							newFolder = newFolder.endsWith("/")?newFolder:newFolder+"/"
 						}
 
 						if(newName !== oldName || newFolder !== oldFolder){
