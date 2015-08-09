@@ -132,7 +132,8 @@ div.cmeditor-menu {
     font-family: "Ubuntu Mono";
     list-style: none outside none;
     margin: 0 0 -1px;
-    overflow: hidden;
+    overflow:auto;
+    overflow-y:hidden;
     padding: 5px 0 0 37px;
 }
 .cmeditor ul.tabs li {
@@ -152,7 +153,6 @@ div.cmeditor-menu {
     display: inline-block;
     font-size: 11pt;
     margin: 0 2px 0 0;
-    padding: 2px 20px 5px 5px;
     position: relative;
     z-index: 1;
     opacity:0.6;
@@ -160,6 +160,11 @@ div.cmeditor-menu {
 .cmeditor ul.tabs li:hover {
     color: #444444;
     opacity:1;
+}
+
+.cmeditor ul.tabs li span.tabName {
+    padding: 2px 20px 5px 5px;
+    display: inline-block;
 }
 
 .cmeditor ul.tabs li span.changed::before {

@@ -37,6 +37,34 @@ this.CMEditor = (function(){
 			executeHooks(self, "postMenuInit", menuRootElem, [self.menu]);
 		}
 
+		self.rootElem.find(".docs").sortable({containment: "parent", tolerance: "pointer", distance: 8, appendTo: self.rootElem,
+			sort: function (event, ui) {
+				var self = $(this),
+				width = ui.helper.outerWidth(),
+				top = ui.helper.position().top;
+
+				self.children().each(function () {
+					if($(this).hasClass('ui-sortable-placeholder')){
+						$(this).css("height", "");
+					}
+					if ($(this).hasClass('ui-sortable-helper') || $(this).hasClass('ui-sortable-placeholder')) {
+						return true;
+					}
+					// If overlap is more than half of the dragged item
+					var distance = Math.abs(ui.position.left - $(this).position().left),
+					before = ui.position.left > $(this).position().left;
+
+					if ((width - distance) > (width / 2) && (distance < width) && $(this).position().top === top) {
+						if (before) {
+							$('.ui-sortable-placeholder', self).insertBefore($(this));
+						} else {
+							$('.ui-sortable-placeholder', self).insertAfter($(this));
+						}
+						return false;
+					}
+				});
+			}
+		});
 		insertNewUntitledDocument(self);
 		syncTabIndent(self);
 
@@ -50,7 +78,8 @@ this.CMEditor = (function(){
 				toggleFullscreen(self);
 				e.preventDefault();
 			}
-		})
+		});
+
 
 		if(self.options.preloadModules){
 			preloadModules(self);
@@ -74,7 +103,6 @@ this.CMEditor = (function(){
 	 * Checks if any files are unsaved in any instance and warns the user
 	 */
 	var checkForUnsavedFiles = clazz.checkForUnsavedFiles = function(e){
-		console.log('bye')
 		var hasUnsaved = false;
 		for(var i=0; i<clazz.instances.length; i++){
 			var instance = clazz.instances[i];
@@ -340,15 +368,12 @@ this.CMEditor = (function(){
 		var mainForm = self.rootElem.find(".cmeditor-main form");
 
 		//switch tabs
-		self.rootElem.find(".tabs").on("click", function(e) {
-			var target = e.target;
-			if(target.nodeName.toLowerCase() != "li" && target.parentNode.nodeName.toLowerCase() == "li")
-				target = target.parentNode;
-
-			if (target.nodeName.toLowerCase() != "li") return true;
-			for (var i = 0, c = target.parentNode.firstChild; ; ++i, (c = c.nextSibling)) {
-				if (c == target) return selectDocumentByIndex(self, i);
+		self.rootElem.find(".tabs").delegate("li", "click", function(e) {
+			var target = $(e.target);
+			if(!target.is("li")){
+				target = target.parent();
 			}
+			selectDocumentByIndex(self, self.rootElem.find(".tabs li").index(target));
 		});
 
 		//changes in custom inputs
@@ -613,7 +638,6 @@ this.CMEditor = (function(){
 	 */
 	function decorateDiffDialog(self) {
 		log(self, "Decorating a diff dialog", "INFO");
-		console.log(self.dialogs.diffDialog.find("input[name=_viewType]:checked").val());
 
 		var base    = difflib.stringAsLines(self.state.curDoc.getOrigContent()),
 			newtxt  = difflib.stringAsLines(self.state.curDoc.getContent()),
@@ -707,6 +731,7 @@ this.CMEditor = (function(){
 
 		selectDocumentByIndex(self, self.state.docs.length - 1);
 		removeUntitledDocument(self);
+		docTabs.sortable( "refreshPositions" );
 
 		log(self, "Inserted a new document", "INFO");
 		log(self, "This document was inserted", "DEBUG", newDoc);
@@ -815,7 +840,16 @@ this.CMEditor = (function(){
 	 * Parameters: pos Integer: the index of the document to select
 	 */
 	function selectDocumentByIndex(self, pos) {
-		self.state.curDoc = self.state.docs[pos];
+		var nthTab = self.rootElem.find(".docs li:eq("+pos+")");
+		var newDoc = null;
+		for(var i=0; i<self.state.docs.length; i++){
+			var curDoc = self.state.docs[i];
+			if(nthTab.get(0) === curDoc.getTabElem().get(0)){
+				newDoc = curDoc;
+				break;
+			}
+		}
+		self.state.curDoc = newDoc;
 		markDocumentAsSelected(self, self.state.curDoc);
 
 		self.codeMirror.swapDoc(self.state.curDoc.getCMDoc());
