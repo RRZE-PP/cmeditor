@@ -1,3 +1,17 @@
+Version 2.4.1 (Aug 2015)
+ * Improved UI
+    * Cancel always is the leftmost button
+    * Escape closes dialogs
+    * Enter launches dialogs' default action
+    * Dialogs' first input is selected on open
+    * Clicking empty menu items does not cause the view to jump
+ * Be less picky about correct mode names
+ * Files with equal filename in different folders show their folder
+ * All tabs show the folder of the file in a hint
+ * Warn user when he/she is leaving and some files are unsaved
+ * Some Bug Fixes
+ * Code improvement (use strict)
+
 Version 2.4.0 (Aug 2015)
  * Load theme and mode files on demand
  * Available themes and modes can be defined per instance
