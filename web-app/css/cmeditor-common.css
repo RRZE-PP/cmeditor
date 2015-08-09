@@ -25,7 +25,6 @@
     z-index: 96;
 }
 
-
 div.cmeditor {
 	-moz-border-bottom-colors: none;
     -moz-border-left-colors: none;
@@ -162,6 +161,11 @@ div.cmeditor-menu {
     color: #444444;
     opacity:1;
 }
+
+.cmeditor ul.tabs li span.changed::before {
+    content:"*";
+}
+
 .cmeditor ul.tabs li.selected {
     background: none repeat scroll 0 0 #FFFFFF;
     color: #222222;

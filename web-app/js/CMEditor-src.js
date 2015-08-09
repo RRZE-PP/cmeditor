@@ -467,12 +467,18 @@ this.CMEditor = (function(){
 			}
 
 			ajax_load(self, newId, true, function(newDoc){
+				//this duplicates a lot of code from insertNewDocument, maybe refactor this?
 				newDoc.setTabElem(self.state.curDoc.getTabElem());
 				self.state.docs[curDocIdx] = newDoc;
 				self.state.curDoc = newDoc;
 
-				newDoc.getTabElem().find(".closeButton").off("click");
-				newDoc.getTabElem().find(".closeButton").on("click", function(e){close(self, newDoc);e.stopPropagation()});
+				newDoc.getTabElem().attr("title", newDoc.getFolder() !== null
+					? newDoc.getFolder()+newDoc.getName()
+					: newDoc.getName()+" (no folder)");
+
+				var closeButton = newDoc.getTabElem().find(".closeButton");
+				closeButton.off("click");
+				closeButton.on("click", function(e){close(self, newDoc);e.stopPropagation()});
 
 				updateCurrentDocument(self);
 				markDocumentAsUnchanged(self, newDoc);
@@ -672,13 +678,25 @@ this.CMEditor = (function(){
 	function insertNewDocument(self, newDoc) {
 		self.state.docs.push(newDoc);
 
-		var docTabs = self.rootElem.find(".docs").get(0);
-		var li = docTabs.appendChild(document.createElement("li"));
-		li.appendChild($('<span class="tabName"></span>').text(newDoc.getName()).get(0));
-
+		var docTabs = self.rootElem.find(".docs");
+		var li = $("<li/>");
+		var name = $('<span class="tabName"></span>').text(newDoc.getName());
 		var closeButton = $('<span class="closeButton">&#10005;</span>');
+
+		for(var i=0; i<self.state.docs.length; i++){
+			var otherDoc = self.state.docs[i];
+			if(otherDoc.getName() === newDoc.getName() && otherDoc !== newDoc){
+				otherDoc.getTabElem().find(".tabName").text(otherDoc.getFolder()+otherDoc.getName());
+				name.text(newDoc.getFolder()+newDoc.getName());
+			}
+		}
+
+		docTabs.append(li);
+		li.attr("title", newDoc.getFolder()!== null?newDoc.getFolder()+newDoc.getName():newDoc.getName()+" (no folder)");
+		li.append(name);
+		li.append(closeButton);
+
 		closeButton.on("click", function(e){close(self, newDoc); e.stopPropagation();});
-		li.appendChild(closeButton.get(0));
 
 		newDoc.setTabElem($(li));
 
@@ -723,9 +741,7 @@ this.CMEditor = (function(){
 	 * Parameters: doc CMEditor.Document: the document to mark
 	 */
 	function markDocumentAsChanged(self, doc) {
-		var docTab = doc.getTabElem().find(".tabName");
-		docTab.text("*"+ doc.getName());
-
+		doc.getTabElem().find(".tabName").addClass("changed");
 	}
 
 	/*
@@ -746,9 +762,7 @@ this.CMEditor = (function(){
 	 * Parameters: doc CMEditor.Document: the document to mark
 	 */
 	function markDocumentAsUnchanged(self, doc) {
-		var docTab = doc.getTabElem().find(".tabName");
-		docTab.text(doc.getName());
-
+		doc.getTabElem().find(".tabName").removeClass("changed");
 	}
 
 	/*
@@ -948,14 +962,37 @@ this.CMEditor = (function(){
 	function close(self, doc) {
 		var closeThis = typeof doc === "undefined" ? self.state.curDoc : doc;
 
+		function removeFolderIfPossible(){
+			for(var i=0; i<self.state.docs.length; i++){
+				var otherDoc = self.state.docs[i];
+				if(otherDoc.getName() === doc.getName() && otherDoc !== doc){
+
+					var canBeRemoved = true;
+					for(var j=0; j<self.state.docs.length; j++){
+						var otherOtherDoc = self.state.docs[j];
+
+						if(otherDoc.getName() === otherOtherDoc.getName()
+							&& otherOtherDoc !== otherDoc && otherOtherDoc !== doc){
+							canBeRemoved = false;
+						}
+					}
+				}
+				if(canBeRemoved){
+					otherDoc.getTabElem().find(".tabName").text(otherDoc.getName());
+				}
+			}
+		}
+
 		if (closeThis.needsSaving()) {
 			showWarning(self, "The changes to the document will be lost",
 				{Close: function() {
+							removeFolderIfPossible();
 							removeDocument(self, closeThis);
 							$(this).dialog("close");
 						}
 				});
 		} else {
+			removeFolderIfPossible();
 			removeDocument(self, closeThis);
 		}
 	}
