@@ -29,6 +29,7 @@
 				<li><a href="#" value="import"><span></span>Import</a></li>
 				<li><a href="#" value="save"><span class="ui-icon ui-icon-disk"></span>Save</a></li>
 				<li><a href="#" value="saveas"><span class="ui-icon ui-icon-disk"></span>Save As</a></li>
+				<li><a href="#" value="export"><span></span>Export</a></li>
 				<li><a href="#" value="rename"><span></span>Rename and Move</a></li>
 				<li><a href="#" value="delete"><span class="ui-icon ui-icon-trash"></span>Delete</a></li>
 				<li><a href="#" value="close"><span class="ui-icon ui-icon-close"></span>Close</a></li>

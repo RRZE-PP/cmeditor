@@ -372,6 +372,9 @@ this.CMEditorMenu = (function(){
 				self.dialogs.importDialog.dialog("option", "buttons", buttons);
 				self.dialogs.importDialog.dialog("open");
 			},
+			export: function(){
+				self.cmeditor.exportDoc();
+			},
 			close: function(cm) { self.cmeditor.closeDoc(); },
 			quit: function(cm) {
 				if (typeof cm.toTextArea == "function") {

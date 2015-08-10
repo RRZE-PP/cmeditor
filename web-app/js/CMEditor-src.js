@@ -1098,6 +1098,15 @@ this.CMEditor = (function(){
 		displayRemainingMessages();
 	}
 
+    /* (Public)
+     *
+     * Exports the current document as a download
+     */
+    function exportDoc(self){
+        var file = new Blob([self.state.curDoc.getContent()], {type: self.state.curDoc.getMode()+";charset=UTF-8"});
+        window.saveAs(file, self.state.curDoc.getName());
+    }
+
 	/* (Public)
 	 *
 	 * Sets focus to the text editor
@@ -1469,6 +1478,7 @@ this.CMEditor = (function(){
 	CMEditor.prototype.copyCMTheme               = function(){Array.prototype.unshift.call(arguments, this); return copyCMTheme.apply(this, arguments)};
 	CMEditor.prototype.diff                      = function(){Array.prototype.unshift.call(arguments, this); return diff.apply(this, arguments)};
 	CMEditor.prototype.deleteDoc                 = function(){Array.prototype.unshift.call(arguments, this); return deleteDoc.apply(this, arguments)};
+	CMEditor.prototype.exportDoc                 = function(){Array.prototype.unshift.call(arguments, this); return exportDoc.apply(this, arguments)};
 	CMEditor.prototype.focus                     = function(){Array.prototype.unshift.call(arguments, this); return focus.apply(this, arguments)};
 	CMEditor.prototype.getUnambiguousName        = function(){Array.prototype.unshift.call(arguments, this); return getUnambiguousName.apply(this, arguments)};
 	CMEditor.prototype.getCurrentCMEditorMode    = function(){Array.prototype.unshift.call(arguments, this); return getCurrentCMEditorMode.apply(this, arguments)};
