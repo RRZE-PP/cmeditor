@@ -716,7 +716,7 @@ this.CMEditor = (function(){
 		}
 
 		docTabs.append(li);
-		li.attr("title", newDoc.getFolder()!== null?newDoc.getFolder()+newDoc.getName():newDoc.getName()+" (no folder)");
+		li.attr("title", newDoc.getFolder() !== null?newDoc.getFolder()+newDoc.getName():newDoc.getName()+" (no folder)");
 		li.append(name);
 		li.append(closeButton);
 
@@ -1168,6 +1168,23 @@ this.CMEditor = (function(){
 
 	/* (Public)
 	 *
+	 * Imports a file into the editor
+	 *
+	 * Parameters: fileName String: the filename of the document to import
+	 *             fileContent String: the content of the file to import
+	 *             fileMode String (optional): if set the file will have this mode, else the options.default mode
+	 */
+	function importDoc(self, fileName, fileContent, fileMode){
+		var newDoc = new Doc(fileName,
+		                        null,
+		                        fileMode || self.options.defaultMode,
+		                        fileContent,
+		                        (self.options.readOnly || self.options.defaultReadOnly) ? "nocursor" : "");
+		insertNewDocument(self, newDoc);
+	}
+
+	/* (Public)
+	 *
 	 * Moves the current file to another folder
 	 */
 	function moveDoc(self, newFolder){
@@ -1456,6 +1473,7 @@ this.CMEditor = (function(){
 	CMEditor.prototype.getUnambiguousName        = function(){Array.prototype.unshift.call(arguments, this); return getUnambiguousName.apply(this, arguments)};
 	CMEditor.prototype.getCurrentCMEditorMode    = function(){Array.prototype.unshift.call(arguments, this); return getCurrentCMEditorMode.apply(this, arguments)};
 	CMEditor.prototype.getCodeMirror             = function(){Array.prototype.unshift.call(arguments, this); return getCodeMirror.apply(this, arguments)};
+	CMEditor.prototype.importDoc                 = function(){Array.prototype.unshift.call(arguments, this); return importDoc.apply(this, arguments)};
 	CMEditor.prototype.moveDoc                   = function(){Array.prototype.unshift.call(arguments, this); return moveDoc.apply(this, arguments)};
 	CMEditor.prototype.newDoc                    = function(){Array.prototype.unshift.call(arguments, this); return newDoc.apply(this, arguments)};
 	CMEditor.prototype.on                        = function(){Array.prototype.unshift.call(arguments, this); return on.apply(this, arguments)};

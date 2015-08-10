@@ -20,6 +20,8 @@
 
 //= require_full_tree jquery-layout-1.4.0
 
+//= require_full_tree spin-2.3.2
+
 // after our pull request was merged upstream, this can be changed to dist/...min.js
 //= require jqueryfiletree-2.0.1/src/jQueryFileTree
 

@@ -314,6 +314,64 @@ this.CMEditorMenu = (function(){
 				self.dialogs.renameDialog.dialog("open");
 			},
 			delete: function(cm) { self.cmeditor.deleteDoc(); },
+			import: function(){
+				var fileElem = self.dialogs.importDialog.find("input[type=file]");
+				var fileNameElem = self.dialogs.importDialog.find(".fileName");
+				var fileList = null;
+
+				fileElem.on("change", function(e){fileList = e.target.files});
+				fileElem.val("");
+
+				if(typeof self.dialogs.importDialog.spinner === "undefined"){
+					var opts = {lines: 9, width: 12, length: 0 , radius: 18, corners: 0.9,
+					            opacity: 0, trail: 79, shadow: true, className: ""}
+					self.dialogs.importDialog.spinner = new Spinner(opts);
+					self.dialogs.importDialog.spinner.spin(self.dialogs.importDialog.find(".cmeditor-spinner").get(0));
+				}
+
+				self.dialogs.importDialog.spinner.stop();
+
+				var buttons = {
+					Cancel: function(){
+						self.dialogs.importDialog.dialog("close");
+					},
+					Import: function(){
+						if(fileList === null || fileList.length === 0){
+							alert("Please select a file!");
+							return;
+						}
+
+						self.dialogs.importDialog.spinner.spin(self.dialogs.importDialog.find(".cmeditor-spinner").get(0));
+
+						var filesToLoad = fileList.length;
+						for(var i=0; i<fileList.length; i++){
+
+							var fileReader = new FileReader();
+							fileReader.onload = function(origFile){
+								return function(e){
+										var unambigousName = self.cmeditor.getUnambiguousName(origFile.name);
+										if(origFile.name !== unambigousName){
+											self.cmeditor.displayMessage("A number was appended to the filename, because it is already in use");
+										}
+
+										self.cmeditor.importDoc(unambigousName, e.target.result, origFile.type);
+
+										filesToLoad--;
+										if(filesToLoad == 0){
+											self.dialogs.importDialog.dialog("close");
+										}
+								}
+							}(fileList[i]);
+
+							fileReader.readAsText(fileList[i]);
+						}
+
+					}
+				}
+
+				self.dialogs.importDialog.dialog("option", "buttons", buttons);
+				self.dialogs.importDialog.dialog("open");
+			},
 			close: function(cm) { self.cmeditor.closeDoc(); },
 			quit: function(cm) {
 				if (typeof cm.toTextArea == "function") {
@@ -460,6 +518,12 @@ this.CMEditorMenu = (function(){
 
 		self.dialogs.gotoDialog = self.rootElem.find(".gotoDialog").dialog({
 				autoOpen: false
+		});
+
+		self.dialogs.importDialog = self.rootElem.find(".importDialog").dialog({
+				autoOpen: false,
+				height: 300,
+				width: 500
 		});
 
 		// .cmeditor-ui-dialog s have the defaultButton-thingie activated
@@ -632,8 +696,10 @@ this.CMEditorMenu = (function(){
 	function update(self) {
 		var curMode = self.cmeditor.getCurrentCMEditorMode();
 		var cmMode = CodeMirror.findModeByName(curMode) || CodeMirror.findModeByMIME(curMode);
+
 		self.rootElem.find(".modesMenu").find("span").removeClass("ui-icon ui-icon-check");
-		self.rootElem.find(".modesMenu a[value='mode"+cmMode.name+"']").children("span").addClass("ui-icon ui-icon-check");
+		if(typeof cmMode !== "undefined")
+			self.rootElem.find(".modesMenu a[value='mode"+cmMode.name+"']").children("span").addClass("ui-icon ui-icon-check");
 
 		if (self.cmeditor.getCodeMirror().getOption("readOnly")) {
 			self.rootElem.find(".view a[value='readOnly'] span").addClass("ui-icon ui-icon-check");

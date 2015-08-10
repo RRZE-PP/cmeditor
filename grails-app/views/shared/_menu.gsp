@@ -16,12 +16,17 @@
 	<div class="dialog gotoDialog" title="Go to line" style="display: none;">
 		<p class="gotoLabel"></p><input type="number" autofocus="autofocus"/><p class="gotoError">&nbsp;</p>
 	</div>
+	<div class="dialog importDialog" title="Import a file" style="display: none;">
+		Select a file: <input type="file" autofocus="autofocus" multiple="multiple"/>
+		<div class="cmeditor-spinner" style=""></div>
+	</div>
 	<ul class="cmeditor-menubar menu">
 		<li><a href="#">File</a>
 			<ul class="fileMenu">
 				<g:if test="${options.menuFile}">
 				<li><a href="#" value="new"><span class="ui-icon ui-icon-newwin"></span>New</a></li>
 				<li><a href="#" value="open"><span class="ui-icon ui-icon-newwin"></span>Open</a></li>
+				<li><a href="#" value="import"><span></span>Import</a></li>
 				<li><a href="#" value="save"><span class="ui-icon ui-icon-disk"></span>Save</a></li>
 				<li><a href="#" value="saveas"><span class="ui-icon ui-icon-disk"></span>Save As</a></li>
 				<li><a href="#" value="rename"><span></span>Rename and Move</a></li>

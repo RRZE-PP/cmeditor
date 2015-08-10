@@ -72,6 +72,8 @@ modules = {
 		resource url:'lib/jqueryfiletree-2.0.1/src/jQueryFileTree.js', disposition:'head'
 		resource url:'lib/jqueryfiletree-2.0.1/dist/jQueryFileTree.min.css', disposition:'head'
 
+		resource url:'lib/spin-2.3.2/spin.min.js', disposition:'head'
+
 		resource url:'/js/CMEditorMenu.js', disposition:'head'
 	}
 
