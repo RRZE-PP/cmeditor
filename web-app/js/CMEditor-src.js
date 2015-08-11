@@ -729,7 +729,7 @@ this.CMEditor = (function(){
 			self.state.curDoc = newDoc;
 		}
 
-		selectDocumentByIndex(self, self.state.docs.length - 1);
+		selectDocument(self, newDoc);
 		removeUntitledDocument(self);
 		docTabs.sortable( "refreshPositions" );
 
@@ -837,18 +837,9 @@ this.CMEditor = (function(){
 	/*
 	 * Selects a document and displays its contents in the editor
 	 *
-	 * Parameters: pos Integer: the index of the document to select
+	 * Parameters: doc CMEditor.Doc: the document to select
 	 */
-	function selectDocumentByIndex(self, pos) {
-		var nthTab = self.rootElem.find(".docs li:eq("+pos+")");
-		var newDoc = null;
-		for(var i=0; i<self.state.docs.length; i++){
-			var curDoc = self.state.docs[i];
-			if(nthTab.get(0) === curDoc.getTabElem().get(0)){
-				newDoc = curDoc;
-				break;
-			}
-		}
+	function selectDocument(self, newDoc) {
 		self.state.curDoc = newDoc;
 		markDocumentAsSelected(self, self.state.curDoc);
 
@@ -861,6 +852,25 @@ this.CMEditor = (function(){
 		}
 
 		focus(self);
+
+	/*
+	 * Selects a document and displays its contents in the editor
+	 *
+	 * Parameters: pos Integer: the tab-index of the document to select
+	 */
+	function selectDocumentByIndex(self, pos) {
+		var nthTab = self.rootElem.find(".docs li:eq("+pos+")");
+		var newDoc = null;
+		for(var i=0; i<self.state.docs.length; i++){
+			var curDoc = self.state.docs[i];
+			if(nthTab.get(0) === curDoc.getTabElem().get(0)){
+				newDoc = curDoc;
+				break;
+			}
+		}
+
+		selectDocument(self, newDoc);
+
 	}
 
 	/*
@@ -1228,7 +1238,7 @@ this.CMEditor = (function(){
 
 
 			insertNewDocument(self, newDoc);
-			selectDocumentByIndex(self, self.state.docs.length - 1);
+			selectDocument(self, newDoc);
 			markDocumentAsChanged(self, newDoc);
 		}
 	}
