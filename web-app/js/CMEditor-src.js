@@ -818,7 +818,6 @@ this.CMEditor = (function(){
 
 		insertNewUntitledDocument(self);
 		selectDocumentByIndex(self, Math.max(0, i - 1));
-
 	}
 
 	/*
@@ -852,6 +851,7 @@ this.CMEditor = (function(){
 		}
 
 		focus(self);
+	}
 
 	/*
 	 * Selects a document and displays its contents in the editor

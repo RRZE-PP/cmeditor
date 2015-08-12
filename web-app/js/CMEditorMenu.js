@@ -141,42 +141,43 @@ this.CMEditorMenu = (function(){
 				nameElem.val("");
 				folderElem.val("/");
 
-				var buttons = {
-					Cancel: function(){
-						self.dialogs.newFileDialog.dialog("close");
-					},
-					Create : function(){
-						var name = nameElem.val().trim();
-						var folder = folderElem.val().trim();
+				var buttons = {};
+				buttons[self.options.messages.buttons.cancel] = function(){
+					self.dialogs.newFileDialog.dialog("close");
+				};
+				buttons[self.options.messages.buttons.create] = function(){
+					var name = nameElem.val().trim();
+					var folder = folderElem.val().trim();
 
-						if(name === ""){
-							alert("Please supply a name");
-							return;
-						}
-						if(folder === ""){
-							folder = null;
-							self.cmeditor.displayMessage("Your file will be hidden in the folder view. Use the searchbar to find it.");
-						}else{
-							folder = folder.endsWith("/")?folder:folder+"/"
-						}
-
-						var unambigousName = self.cmeditor.getUnambiguousName(name, folder);
-						if(name !== unambigousName){
-							self.cmeditor.displayMessage("A number was appended to the filename, because it is already in use");
-						}
-
-						self.cmeditor.newDoc(unambigousName, folder);
-						self.dialogs.newFileDialog.dialog("close");
+					if(name === ""){
+						alert(self.options.messages.errors.supplyaname);
+						return;
 					}
-				}
+					if(folder === ""){
+						folder = null;
+						self.cmeditor.displayMessage(self.options.messages.hints.filewillbehidden);
+					}else{
+						folder = folder.endsWith("/")?folder:folder+"/"
+					}
 
-				self.dialogs.newFileDialog.dialog("option", "defaultButton", buttons.Create);
+					var unambigousName = self.cmeditor.getUnambiguousName(name, folder);
+					if(name !== unambigousName){
+						self.cmeditor.displayMessage(self.options.messages.hints.numberappended);
+					}
+
+					self.cmeditor.newDoc(unambigousName, folder);
+					self.dialogs.newFileDialog.dialog("close");
+				};
+
+				self.dialogs.newFileDialog.dialog("option", "defaultButton", buttons[self.options.messages.buttons.create]);
 				self.dialogs.newFileDialog.dialog("option", "buttons", buttons);
 				self.dialogs.newFileDialog.dialog("open");
 			},
 			open: function(cm) {
 
-				self.dialogs.openDialog.children().remove();
+				var errorMsg = self.dialogs.openDialog.find(".noFiles");
+				errorMsg.hide(0).siblings().remove();
+
 				var s = $("<select class=\"fileSelect\" name=\"cmeditor-menu-open-select\" multiple=\"multiple\" style=\"width:100%\"/><div class=\"fileSelectTree\" />");
 
 				if(self.options.ajax.listURL){
@@ -190,7 +191,7 @@ this.CMEditorMenu = (function(){
 							}
 							if (available == true) {
 								s.appendTo(self.dialogs.openDialog);
-								self.dialogs.openDialog.find(".fileSelect").select2({placeholder: "Select a file",
+								self.dialogs.openDialog.find(".fileSelect").select2({placeholder: self.options.messages.fileselectplaceholder,
   																			 allowClear: true});
 
 								self.dialogs.openDialog.find(".fileSelectTree").fileTree({script:function(fileTreeData){
@@ -236,31 +237,30 @@ this.CMEditorMenu = (function(){
 								//workaround a width calculation bug in select2
 								self.dialogs.openDialog.find(".select2-search__field").css("width", "auto");
 
-								buttons = {
-									Cancel: function() { self.dialogs.openDialog.dialog( "close" ); },
-									Open:   function() {
-												var vals = self.dialogs.openDialog.find(".fileSelect").val();
-												for (var i in vals) {
-													self.cmeditor.open(vals[i]);
-												}
-												self.dialogs.openDialog.dialog( "close" );
-											}
-								}
+								buttons[self.options.messages.buttons.cancel] = function() {
+									 self.dialogs.openDialog.dialog( "close" );
+								};
+								buttons[self.options.messages.buttons.open] = function() {
+									var vals = self.dialogs.openDialog.find(".fileSelect").val();
+									for (var i in vals) {
+										self.cmeditor.open(vals[i]);
+									}
+									self.dialogs.openDialog.dialog( "close" );
+								};
 							} else {
-								buttons = {
-									Cancel: function() { self.dialogs.openDialog.dialog( "close" ); }
-								}
-								s = $("<p class=\"noFiles\" name=\"cmeditor-menu-open-no-files\">No files available.</p>");
-								s.appendTo(self.dialogs.openDialog);
+								buttons[self.options.messages.buttons.cancel] = function() {
+									 self.dialogs.openDialog.dialog( "close" );
+								};
+								errorMsg.show(0)
 							}
 
-							self.dialogs.openDialog.dialog("option", "defaultButton", buttons.Open);
+							self.dialogs.openDialog.dialog("option", "defaultButton", buttons[self.options.messages.buttons.open]);
 							self.dialogs.openDialog.dialog("option", "buttons", buttons);
 							self.dialogs.openDialog.dialog("open");
 						} else {
 							self.cmeditor.displayMessage(data.msg);
 						}
-					}).fail(function(XMLHttpRequest,textStatus,errorThrown){self.cmeditor.displayMessage("An error occured: "+ textStatus +" " + errorThrown);});
+					}).fail(function(XMLHttpRequest,textStatus,errorThrown){self.cmeditor.displayMessage(self.options.messages.errorIntro+" "+ textStatus +" " + errorThrown);});
 				}
 			},
 			save: function(cm) { self.cmeditor.saveDoc(); },
@@ -275,41 +275,41 @@ this.CMEditorMenu = (function(){
 				newNameElem.val(oldName);
 				newFolderElem.val(oldFolder);
 
-				var buttons = {
-					Cancel: function(){
-						self.dialogs.renameDialog.dialog("close");
-					},
-					Rename : function(){
-						var newName = newNameElem.val().trim();
-						var newFolder = newFolderElem.val().trim();
+				var buttons = {};
+				buttons[self.options.messages.buttons.cancel] = function() {
+					self.dialogs.renameDialog.dialog("close");
+				};
+				buttons[self.options.messages.buttons.rename] = function() {
+					var newName = newNameElem.val().trim();
+					var newFolder = newFolderElem.val().trim();
 
-						if(newName === ""){
-							alert("Please supply a name");
-							return;
-						}
-						if(newFolder === ""){
-							newFolder = null;
-							self.cmeditor.displayMessage("Your file will be hidden in the folder view. Use the searchbar to find it.");
-						}else{
-							newFolder = newFolder.endsWith("/")?newFolder:newFolder+"/"
-						}
-
-						if(newName !== oldName || newFolder !== oldFolder){
-							var unambigousName = self.cmeditor.getUnambiguousName(newName, newFolder);
-
-							self.cmeditor.moveDoc(newFolder);
-							self.cmeditor.renameDoc(unambigousName);
-
-							if(newName !== unambigousName){
-								self.cmeditor.displayMessage("A number was appended to the filename, because it is already in use");
-							}
-						}
-
-						self.dialogs.renameDialog.dialog("close");
+					if(newName === ""){
+						alert(self.options.messages.errors.supplyaname);
+						return;
 					}
-				}
+					if(newFolder === ""){
+						newFolder = null;
+						self.cmeditor.displayMessage(self.options.messages.hints.filewillbehidden);
+					}else{
+						newFolder = newFolder.endsWith("/")?newFolder:newFolder+"/"
+					}
 
-				self.dialogs.renameDialog.dialog("option", "defaultButton", buttons.Rename);
+					if(newName !== oldName || newFolder !== oldFolder){
+						var unambigousName = self.cmeditor.getUnambiguousName(newName, newFolder);
+
+						self.cmeditor.moveDoc(newFolder);
+						self.cmeditor.renameDoc(unambigousName);
+
+						if(newName !== unambigousName){
+							self.cmeditor.displayMessage(self.options.messages.hints.numberappended);
+						}
+					}
+
+					self.dialogs.renameDialog.dialog("close");
+				};
+				
+
+				self.dialogs.renameDialog.dialog("option", "defaultButton", buttons[self.options.messages.buttons.rename]);
 				self.dialogs.renameDialog.dialog("option", "buttons", buttons);
 				self.dialogs.renameDialog.dialog("open");
 			},
@@ -331,45 +331,45 @@ this.CMEditorMenu = (function(){
 
 				self.dialogs.importDialog.spinner.stop();
 
-				var buttons = {
-					Cancel: function(){
+				var buttons = {};
+				buttons[self.options.messages.buttons.cancel] = function(){
 						self.dialogs.importDialog.dialog("close");
-					},
-					Import: function(){
-						if(fileList === null || fileList.length === 0){
-							alert("Please select a file!");
-							return;
-						}
-
-						self.dialogs.importDialog.spinner.spin(self.dialogs.importDialog.find(".cmeditor-spinner").get(0));
-
-						var filesToLoad = fileList.length;
-						for(var i=0; i<fileList.length; i++){
-
-							var fileReader = new FileReader();
-							fileReader.onload = function(origFile){
-								return function(e){
-										var unambigousName = self.cmeditor.getUnambiguousName(origFile.name);
-										if(origFile.name !== unambigousName){
-											self.cmeditor.displayMessage("A number was appended to the filename, because it is already in use");
-										}
-
-										self.cmeditor.importDoc(unambigousName, e.target.result, origFile.type);
-
-										filesToLoad--;
-										if(filesToLoad == 0){
-											self.dialogs.importDialog.dialog("close");
-										}
-								}
-							}(fileList[i]);
-
-							fileReader.readAsText(fileList[i]);
-						}
-
+				};
+				buttons[self.options.messages.buttons.import] = function(){
+					if(fileList === null || fileList.length === 0){
+						alert(self.options.messages.errors.selectafile);
+						return;
 					}
-				}
 
-				self.dialogs.importDialog.dialog("option", "buttons", buttons);
+					self.dialogs.importDialog.spinner.spin(self.dialogs.importDialog.find(".cmeditor-spinner").get(0));
+
+					var filesToLoad = fileList.length;
+					for(var i=0; i<fileList.length; i++){
+
+						var fileReader = new FileReader();
+						fileReader.onload = function(origFile){
+							return function(e){
+									var unambigousName = self.cmeditor.getUnambiguousName(origFile.name);
+									if(origFile.name !== unambigousName){
+										self.cmeditor.displayMessage(self.options.messages.hints.numberappended);
+									}
+
+									self.cmeditor.importDoc(unambigousName, e.target.result, origFile.type);
+
+									filesToLoad--;
+									if(filesToLoad == 0){
+										self.dialogs.importDialog.dialog("close");
+									}
+							}
+						}(fileList[i]);
+
+						fileReader.readAsText(fileList[i]);
+					}
+
+				};
+				
+
+				self.dialogs.importDialog.dialog("option", "buttons", buttons[self.options.messages.buttons.import]);
 				self.dialogs.importDialog.dialog("open");
 			},
 			export: function(){
@@ -408,23 +408,25 @@ this.CMEditorMenu = (function(){
 				input.attr("max", last);
 				input.val(current);
 
-				self.dialogs.gotoDialog.find(".gotoLabel").text("Enter line number ("+first+".."+last+"):");
+				self.dialogs.gotoDialog.find(".gotoLabel").text(" ("+first+".."+last+"):");
 
-				var buttons = {Cancel: 	function() { self.dialogs.gotoDialog.dialog("close"); },
-							   Goto: 		function() {
-											var line = parseInt(input.val());
+				var buttons = {};
+				buttons[self.options.messages.buttons.cancel] = function(){
+					self.dialogs.gotoDialog.dialog("close");
+				};
+				buttons[self.options.messages.buttons.goto] = function(){
+					var line = parseInt(input.val());
 
-											if(isNaN(line) || line < first || line > last){
-												alert("Please enter a valid line number!");
-												return;
-											}
+					if(isNaN(line) || line < first || line > last){
+						alert(self.options.messages.errors.validlineno);
+						return;
+					}
 
-											self.dialogs.gotoDialog.dialog("close");
-											self.cmeditor.codeMirror.setCursor(line-1, 0);
-										}
-							  }
+					self.dialogs.gotoDialog.dialog("close");
+					self.cmeditor.codeMirror.setCursor(line-1, 0);
+				}
 
-				self.dialogs.gotoDialog.dialog("option", "defaultButton", buttons.Goto);
+				self.dialogs.gotoDialog.dialog("option", "defaultButton", buttons[self.options.messages.buttons.goto]);
 				self.dialogs.gotoDialog.dialog("option", "buttons", buttons);
 				self.dialogs.gotoDialog.dialog("open");
 			 },

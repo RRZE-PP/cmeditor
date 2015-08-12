@@ -70,7 +70,28 @@
 			availableThemes: ${availableThemes.encodeAsJSON()},      //List of Strings: names of all themes that should be available to the user
 			availableModes:  ${availableModes.encodeAsJSON()},       //List of Strings: names of all modes (file extensions) that should be available to the user
 			</g:applyCodec>
-			preloadModules: ${options.preloadModules}				 //Boolean: whether to load themes and modules at document load or on demand
+			preloadModules: ${options.preloadModules},				 //Boolean: whether to load themes and modules at document load or on demand
+			messages: {
+				fileselectplaceholder : "${g.message(code:'cmeditor.menu.messages.fileselectplaceholder')}",
+				hints: {
+					filewillbehidden:	"${g.message(code:'cmeditor.menu.messages.hints.filewillbehidden')}",
+					numberappended:		"${g.message(code:'cmeditor.menu.messages.hints.numberappended')}",
+				},
+				errorIntro:		"${g.message(code:'cmeditor.menu.messages.errorIntro')}",
+				errors: {
+					validlineno:	"${g.message(code:'cmeditor.menu.messages.errors.validlineno')}",
+					supplyaname:	"${g.message(code:'cmeditor.menu.messages.errors.supplyaname')}",
+					selectafile:	"${g.message(code:'cmeditor.menu.messages.errors.selectafile')}",
+				},
+				buttons : {
+					cancel:		"${g.message(code:'cmeditor.menu.messages.buttons.cancel')}",
+					create:		"${g.message(code:'cmeditor.menu.messages.buttons.create')}",
+					open:		"${g.message(code:'cmeditor.menu.messages.buttons.open')}",
+					rename:		"${g.message(code:'cmeditor.menu.messages.buttons.rename')}",
+					import:		"${g.message(code:'cmeditor.menu.messages.buttons.import')}",
+					goto:		"${g.message(code:'cmeditor.menu.messages.buttons.goto')}",
+				}
+			}
 		};
 		CMEditor($("#${name}"), codeMirrorEditorOptions, "${name}");
 
