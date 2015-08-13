@@ -368,8 +368,8 @@ this.CMEditorMenu = (function(){
 
 				};
 				
-
-				self.dialogs.importDialog.dialog("option", "buttons", buttons[self.options.menu.messages.buttons.import]);
+				self.dialogs.importDialog.dialog("option", "defaultButton", [self.options.menu.messages.buttons.import]);
+				self.dialogs.importDialog.dialog("option", "buttons", buttons);
 				self.dialogs.importDialog.dialog("open");
 			},
 			export: function(){
