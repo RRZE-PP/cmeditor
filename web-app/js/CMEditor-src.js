@@ -1194,7 +1194,7 @@ this.CMEditor = (function(){
 	 */
 	function importDoc(self, fileName, fileContent, fileMode){
 		var newDoc = new Doc(fileName,
-		                        null,
+		                        "/imported/",
 		                        fileMode || self.options.defaultMode,
 		                        fileContent,
 		                        (self.options.readOnly || self.options.defaultReadOnly) ? "nocursor" : "");

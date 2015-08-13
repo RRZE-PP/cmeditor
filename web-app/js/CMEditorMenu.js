@@ -349,7 +349,7 @@ this.CMEditorMenu = (function(){
 						var fileReader = new FileReader();
 						fileReader.onload = function(origFile){
 							return function(e){
-									var unambigousName = self.cmeditor.getUnambiguousName(origFile.name);
+									var unambigousName = self.cmeditor.getUnambiguousName(origFile.name, "/imported/");
 									if(origFile.name !== unambigousName){
 										self.cmeditor.displayMessage(self.options.menu.messages.hints.numberappended);
 									}
