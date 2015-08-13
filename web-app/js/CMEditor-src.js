@@ -1148,7 +1148,8 @@ this.CMEditor = (function(){
 					if (json.status == "success" && json.result) {
 						for(var i=0; i<json.result.length; i++){
 							if((typeof folder === "undefined" || folder === null
-									|| json.result[i][self.options.mapping["folder"]] === folder)){
+									|| json.result[i][self.options.mapping["folder"]] === folder
+									|| json.result[i][self.options.mapping["folder"]] === null)){
 								namesOnServer.push(json.result[i][self.options.mapping["name"]]);
 							}
 						}
@@ -1161,7 +1162,7 @@ this.CMEditor = (function(){
 		while (true){
 			var isCurrentlyOpened = false;
 			$.each(self.state.docs, function(idx, doc){
-				if(doc.getName() === name + (i || "") && (folder === null || typeof folder === "undefined" || folder === doc.getFolder()))
+				if(doc.getName() === name + (i || "") && (folder === null || typeof folder === "undefined" || folder === doc.getFolder() || doc.getFolder() === null))
 					isCurrentlyOpened = true;
 			});
 
