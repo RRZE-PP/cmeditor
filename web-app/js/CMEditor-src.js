@@ -115,7 +115,7 @@ this.CMEditor = (function(){
 		}
 
 		if(hasUnsaved){
-			return "At least one CMEditor has unsaved files. All changes will be lost."
+			return clazz.instances[0].options.messages.hints.confirmLeaving
 		}
 	}
 	$(window).bind("beforeunload", checkForUnsavedFiles);
@@ -328,14 +328,9 @@ this.CMEditor = (function(){
 	function initDialogs(self){
 		self.dialogs = {};
 
-		var diff = self.dialogs.diffDialog = $('<div class="dialog diffDialog" title="diff" style="display: none;"> \
-									<div class="diffoutput"> </div> \
-									<p><strong>Context size (optional):</strong><input name="contextSize" value="1" type="number" autofocus="autofocus"/></p> \
-									<p><input type="radio" value="0" name="_viewType" id="sidebyside'+self.state.instanceNo+'" checked="checked"/> \
-									<label for="sidebyside'+self.state.instanceNo+'">Side by Side Diff</label> \
-									&nbsp; &nbsp; <input type="radio" value="1" name="_viewType" id="inline'+self.state.instanceNo+'" /> \
-									<label for="inline'+self.state.instanceNo+'">Inline Diff</label> </p> \
-									</div>');
+		var diff = self.dialogs.diffDialog = self.rootElem.find(".diffDialog");
+		diff.find("input[type=radio]").each(function(idx, elem){$(elem).attr("id", $(elem).attr("id")+self.state.instanceNo)});
+		diff.find("label").each(function(idx, elem){$(elem).attr("for", $(elem).attr("for")+self.state.instanceNo)});
 
 		diff.find("input[name=contextSize]").on("keyup", function(){decorateDiffDialog(self)});
 		diff.find("input[name=_viewType]").on("click",   function(){decorateDiffDialog(self)});
@@ -348,7 +343,7 @@ this.CMEditor = (function(){
 		});
 
 
-		var warn = self.dialogs.warningDialog = $('<div class="dialog warningDialog" title="warning" style="display: none;"></div>');
+		var warn = self.dialogs.warningDialog = self.rootElem.find(".warningDialog")
 		warn.dialog({
 			autoOpen: false,
 			resize:"auto",
@@ -387,7 +382,7 @@ this.CMEditor = (function(){
 	 */
 	function ajax_delete(self) {
 		if(self.options.readOnly){
-			displayMessage("This document is read-only and cannot be deleted");
+			displayMessage(self.options.messages.hints.noDeleteReadOnly);
 			return;
 		}
 
@@ -413,7 +408,7 @@ this.CMEditor = (function(){
 					log(self, "Currently serving these documents locally:", "DEBUG", self.state.docs)
 				},
 				error:function(XMLHttpRequest,textStatus,errorThrown){
-					displayMessage(self, "An error occured: "+ textStatus +" " + errorThrown);
+					displayMessage(self, self.options.messages.errorIntro +" "+ textStatus +" " + errorThrown);
 					log(self, "Could not delete this file from the server", "WARNING", data);
 				}
 			});
@@ -470,7 +465,7 @@ this.CMEditor = (function(){
 				}
 			},
 
-		error:function(XMLHttpRequest,textStatus,errorThrown){displayMessage(self, "An error occured: "+ textStatus +" " + errorThrown);},
+		error:function(XMLHttpRequest,textStatus,errorThrown){displayMessage(self, self.options.messages.errorIntro +" "+ textStatus +" " + errorThrown);},
 		});
 	}
 
@@ -499,7 +494,7 @@ this.CMEditor = (function(){
 
 				newDoc.getTabElem().attr("title", newDoc.getFolder() !== null
 					? newDoc.getFolder()+newDoc.getName()
-					: newDoc.getName()+" (no folder)");
+					: newDoc.getName()+" "+self.options.messages.noFolder);
 
 				var closeButton = newDoc.getTabElem().find(".closeButton");
 				closeButton.off("click");
@@ -544,7 +539,7 @@ this.CMEditor = (function(){
 						displayMessage(self, data.msg, textStatus);
 				},
 				error:function(XMLHttpRequest,textStatus,errorThrown){
-					displayMessage(self, "An error occured: "+ textStatus +" " + errorThrown);
+					displayMessage(self, self.options.messages.errorIntro + " " + textStatus +" " + errorThrown);
 					log(self, "Could not save this document to the server.", "WARNING", data);
 				}
 			});
@@ -650,8 +645,9 @@ this.CMEditor = (function(){
 		contextSize = contextSize || null;
 
 		if (opcodes && opcodes.length == 1 && opcodes[0][0] == "equal") {
-			diffoutputdiv.html("<p>No changes!</p>");
+			self.dialogs.diffDialog.find(".noChanges").show(0);
 		} else {
+			self.dialogs.diffDialog.find(".noChanges").hide(0);
 			diffoutputdiv.append(diffview.buildView({
 				baseTextLines: base,
 				newTextLines: newtxt,
@@ -716,7 +712,7 @@ this.CMEditor = (function(){
 		}
 
 		docTabs.append(li);
-		li.attr("title", newDoc.getFolder() !== null?newDoc.getFolder()+newDoc.getName():newDoc.getName()+" (no folder)");
+		li.attr("title", newDoc.getFolder() !== null?newDoc.getFolder()+newDoc.getName():newDoc.getName()+" "+self.options.messages.noFolder);
 		li.append(name);
 		li.append(closeButton);
 
@@ -742,7 +738,7 @@ this.CMEditor = (function(){
 	 */
 	function insertNewUntitledDocument(self) {
 		if (self.state.docs.length < 1) {
-			var name = getUnambiguousName(self, "Untitled Document");
+			var name = getUnambiguousName(self, self.options.messages.untitledDocName);
 
 			var newDoc = new Doc(name, "/", self.options.defaultMode, self.options.defaultContent,
 									(self.options.readOnly||self.options.defaultReadOnly)?"nocursor":"");
@@ -882,8 +878,9 @@ this.CMEditor = (function(){
 	 *                                                  values: callbacks for button click
 	 */
 	function showWarning(self, message, additionalButtons){
-		var buttons = {
-				Cancel: function() { $(this).dialog("close");},
+		var buttons = {};
+		buttons[self.options.messages.buttons.cancel] = function() {
+			$(this).dialog("close");
 		};
 
 		if (additionalButtons) {
@@ -1028,13 +1025,13 @@ this.CMEditor = (function(){
 		}
 
 		if (closeThis.needsSaving()) {
-			showWarning(self, "The changes to the document will be lost",
-				{Close: function() {
-							removeFolderIfPossible();
-							removeDocument(self, closeThis);
-							$(this).dialog("close");
-						}
-				});
+			var button = {};
+			button[self.options.messages.buttons.close] = function() {
+				removeFolderIfPossible();
+				removeDocument(self, closeThis);
+				$(this).dialog("close");
+			};
+			showWarning(self, self.options.messages.warnings.changesWillBeLost, button);
 		} else {
 			removeFolderIfPossible();
 			removeDocument(self, closeThis);
@@ -1046,12 +1043,12 @@ this.CMEditor = (function(){
 	 *	Deletes the currently opened document, asks for confirmation first
 	 */
 	function deleteDoc(self) {
-		showWarning(self, "Are you sure that you want to delete this document?",
-				{Delete: function() {
-							ajax_delete(self);
-							$(this).dialog("close");
-						}
-				});
+		var button = {};
+		button[self.options.messages.buttons.delete] = function() {
+			ajax_delete(self);
+			$(this).dialog("close");
+		};
+		showWarning(self, self.options.messages.warnings.deleteFile, button);
 	}
 
 	/* (Public)
@@ -1063,8 +1060,9 @@ this.CMEditor = (function(){
 	 *                                                the user hits enter while the dialog has focus
 	 */
 	function diff(self, additionalButtons, defaultButton) {
-		var buttons = {
-				Close: function() { self.dialogs.diffDialog.dialog("close");},
+		var buttons = {};
+		buttons[self.options.messages.buttons.close] = function() {
+			self.dialogs.diffDialog.dialog("close");
 		};
 
 		if (additionalButtons) {
@@ -1076,7 +1074,7 @@ this.CMEditor = (function(){
 		decorateDiffDialog(self);
 
 		self.dialogs.diffDialog.dialog("option", "defaultButton",
-			typeof defaultButton === "undefined" ? buttons.Close : defaultButton);
+			typeof defaultButton === "undefined" ? buttons[self.options.messages.buttons.close] : defaultButton);
 		self.dialogs.diffDialog.dialog("option", "buttons", buttons);
 		self.dialogs.diffDialog.dialog("open");
 	}
@@ -1208,7 +1206,7 @@ this.CMEditor = (function(){
 	 */
 	function moveDoc(self, newFolder){
 		if(self.options.readOnly){
-			displayMessage("This document is opened read only and cannot be renamed!");
+			displayMessage(self.options.messages.hints.noMoveReadOnly);
 		}else{
 			if(newFolder === self.state.curDoc.getFolder())
 				return;
@@ -1231,7 +1229,7 @@ this.CMEditor = (function(){
 	 */
 	function newDoc(self, fileName, folder) {
 		if(self.options.readOnly){
-			displayMessage("This editor read only!");
+			displayMessage(self.messages.hints.editorIsReadOnly);
 		}else{
 			var newDoc = new Doc(fileName, folder, self.options.defaultMode, self.options.defaultContent,
 									(self.options.readOnly || self.options.defaultReadOnly) ? "nocursor":"");
@@ -1300,7 +1298,7 @@ this.CMEditor = (function(){
 	 */
 	function rename(self, newName) {
 		if(self.options.readOnly){
-			displayMessage("This document is opened read only and cannot be renamed!");
+			displayMessage(self.options.messages.hints.noRenameReadOnly);
 		}else{
 			self.state.curDoc.setName(newName);
 			markDocumentAsChanged(self, self.state.curDoc);
@@ -1320,7 +1318,7 @@ this.CMEditor = (function(){
 	 */
 	function save(self) {
 		if(self.options.readOnly === true){
-			displayMessage("This document is opened read only and cannot be saved!");
+			displayMessage(self.options.messages.hints.noSaveReadOnly);
 			return;
 		}
 
@@ -1342,9 +1340,9 @@ this.CMEditor = (function(){
 	 */
 	function saveas(self) {
 		if(self.options.readOnly){
-			displayMessage("This document is opened read only and cannot be saved!");
+			displayMessage(self.options.messages.hints.noSaveReadOnly);
 		}
-		var name = prompt("Name of the new buffer", "");
+		var name = prompt(self.options.messages.newNamePrompt, "");
 		if (name == null) return;
 		if (!name) name = "test";
 
@@ -1372,7 +1370,7 @@ this.CMEditor = (function(){
 
 		if(cmMode === null || cmMode === undefined){
 			log(self, "Could not load this unknown mode: "+mode, "WARNING");
-			displayMessage(self, "Unknown mode");
+			displayMessage(self, self.options.messages.hints.noSuchMode);
 			return;
 		}
 

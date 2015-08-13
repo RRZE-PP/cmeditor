@@ -142,34 +142,34 @@ this.CMEditorMenu = (function(){
 				folderElem.val("/");
 
 				var buttons = {};
-				buttons[self.options.messages.buttons.cancel] = function(){
+				buttons[self.options.menu.messages.buttons.cancel] = function(){
 					self.dialogs.newFileDialog.dialog("close");
 				};
-				buttons[self.options.messages.buttons.create] = function(){
+				buttons[self.options.menu.messages.buttons.create] = function(){
 					var name = nameElem.val().trim();
 					var folder = folderElem.val().trim();
 
 					if(name === ""){
-						alert(self.options.messages.errors.supplyaname);
+						alert(self.options.menu.messages.errors.supplyaname);
 						return;
 					}
 					if(folder === ""){
 						folder = null;
-						self.cmeditor.displayMessage(self.options.messages.hints.filewillbehidden);
+						self.cmeditor.displayMessage(self.options.menu.messages.hints.filewillbehidden);
 					}else{
 						folder = folder.endsWith("/")?folder:folder+"/"
 					}
 
 					var unambigousName = self.cmeditor.getUnambiguousName(name, folder);
 					if(name !== unambigousName){
-						self.cmeditor.displayMessage(self.options.messages.hints.numberappended);
+						self.cmeditor.displayMessage(self.options.menu.messages.hints.numberappended);
 					}
 
 					self.cmeditor.newDoc(unambigousName, folder);
 					self.dialogs.newFileDialog.dialog("close");
 				};
 
-				self.dialogs.newFileDialog.dialog("option", "defaultButton", buttons[self.options.messages.buttons.create]);
+				self.dialogs.newFileDialog.dialog("option", "defaultButton", buttons[self.options.menu.messages.buttons.create]);
 				self.dialogs.newFileDialog.dialog("option", "buttons", buttons);
 				self.dialogs.newFileDialog.dialog("open");
 			},
@@ -191,7 +191,7 @@ this.CMEditorMenu = (function(){
 							}
 							if (available == true) {
 								s.appendTo(self.dialogs.openDialog);
-								self.dialogs.openDialog.find(".fileSelect").select2({placeholder: self.options.messages.fileselectplaceholder,
+								self.dialogs.openDialog.find(".fileSelect").select2({placeholder: self.options.menu.messages.fileselectplaceholder,
   																			 allowClear: true});
 
 								self.dialogs.openDialog.find(".fileSelectTree").fileTree({script:function(fileTreeData){
@@ -237,10 +237,10 @@ this.CMEditorMenu = (function(){
 								//workaround a width calculation bug in select2
 								self.dialogs.openDialog.find(".select2-search__field").css("width", "auto");
 
-								buttons[self.options.messages.buttons.cancel] = function() {
+								buttons[self.options.menu.messages.buttons.cancel] = function() {
 									 self.dialogs.openDialog.dialog( "close" );
 								};
-								buttons[self.options.messages.buttons.open] = function() {
+								buttons[self.options.menu.messages.buttons.open] = function() {
 									var vals = self.dialogs.openDialog.find(".fileSelect").val();
 									for (var i in vals) {
 										self.cmeditor.open(vals[i]);
@@ -248,19 +248,19 @@ this.CMEditorMenu = (function(){
 									self.dialogs.openDialog.dialog( "close" );
 								};
 							} else {
-								buttons[self.options.messages.buttons.cancel] = function() {
+								buttons[self.options.menu.messages.buttons.cancel] = function() {
 									 self.dialogs.openDialog.dialog( "close" );
 								};
 								errorMsg.show(0)
 							}
 
-							self.dialogs.openDialog.dialog("option", "defaultButton", buttons[self.options.messages.buttons.open]);
+							self.dialogs.openDialog.dialog("option", "defaultButton", buttons[self.options.menu.messages.buttons.open]);
 							self.dialogs.openDialog.dialog("option", "buttons", buttons);
 							self.dialogs.openDialog.dialog("open");
 						} else {
 							self.cmeditor.displayMessage(data.msg);
 						}
-					}).fail(function(XMLHttpRequest,textStatus,errorThrown){self.cmeditor.displayMessage(self.options.messages.errorIntro+" "+ textStatus +" " + errorThrown);});
+					}).fail(function(XMLHttpRequest,textStatus,errorThrown){self.cmeditor.displayMessage(self.options.menu.messages.errorIntro+" "+ textStatus +" " + errorThrown);});
 				}
 			},
 			save: function(cm) { self.cmeditor.saveDoc(); },
@@ -276,20 +276,20 @@ this.CMEditorMenu = (function(){
 				newFolderElem.val(oldFolder);
 
 				var buttons = {};
-				buttons[self.options.messages.buttons.cancel] = function() {
+				buttons[self.options.menu.messages.buttons.cancel] = function() {
 					self.dialogs.renameDialog.dialog("close");
 				};
-				buttons[self.options.messages.buttons.rename] = function() {
+				buttons[self.options.menu.messages.buttons.rename] = function() {
 					var newName = newNameElem.val().trim();
 					var newFolder = newFolderElem.val().trim();
 
 					if(newName === ""){
-						alert(self.options.messages.errors.supplyaname);
+						alert(self.options.menu.messages.errors.supplyaname);
 						return;
 					}
 					if(newFolder === ""){
 						newFolder = null;
-						self.cmeditor.displayMessage(self.options.messages.hints.filewillbehidden);
+						self.cmeditor.displayMessage(self.options.menu.messages.hints.filewillbehidden);
 					}else{
 						newFolder = newFolder.endsWith("/")?newFolder:newFolder+"/"
 					}
@@ -301,7 +301,7 @@ this.CMEditorMenu = (function(){
 						self.cmeditor.renameDoc(unambigousName);
 
 						if(newName !== unambigousName){
-							self.cmeditor.displayMessage(self.options.messages.hints.numberappended);
+							self.cmeditor.displayMessage(self.options.menu.messages.hints.numberappended);
 						}
 					}
 
@@ -309,7 +309,7 @@ this.CMEditorMenu = (function(){
 				};
 				
 
-				self.dialogs.renameDialog.dialog("option", "defaultButton", buttons[self.options.messages.buttons.rename]);
+				self.dialogs.renameDialog.dialog("option", "defaultButton", buttons[self.options.menu.messages.buttons.rename]);
 				self.dialogs.renameDialog.dialog("option", "buttons", buttons);
 				self.dialogs.renameDialog.dialog("open");
 			},
@@ -332,12 +332,12 @@ this.CMEditorMenu = (function(){
 				self.dialogs.importDialog.spinner.stop();
 
 				var buttons = {};
-				buttons[self.options.messages.buttons.cancel] = function(){
+				buttons[self.options.menu.messages.buttons.cancel] = function(){
 						self.dialogs.importDialog.dialog("close");
 				};
-				buttons[self.options.messages.buttons.import] = function(){
+				buttons[self.options.menu.messages.buttons.import] = function(){
 					if(fileList === null || fileList.length === 0){
-						alert(self.options.messages.errors.selectafile);
+						alert(self.options.menu.messages.errors.selectafile);
 						return;
 					}
 
@@ -351,7 +351,7 @@ this.CMEditorMenu = (function(){
 							return function(e){
 									var unambigousName = self.cmeditor.getUnambiguousName(origFile.name);
 									if(origFile.name !== unambigousName){
-										self.cmeditor.displayMessage(self.options.messages.hints.numberappended);
+										self.cmeditor.displayMessage(self.options.menu.messages.hints.numberappended);
 									}
 
 									self.cmeditor.importDoc(unambigousName, e.target.result, origFile.type);
@@ -369,7 +369,7 @@ this.CMEditorMenu = (function(){
 				};
 				
 
-				self.dialogs.importDialog.dialog("option", "buttons", buttons[self.options.messages.buttons.import]);
+				self.dialogs.importDialog.dialog("option", "buttons", buttons[self.options.menu.messages.buttons.import]);
 				self.dialogs.importDialog.dialog("open");
 			},
 			export: function(){
@@ -411,14 +411,14 @@ this.CMEditorMenu = (function(){
 				self.dialogs.gotoDialog.find(".gotoLabel").text(" ("+first+".."+last+"):");
 
 				var buttons = {};
-				buttons[self.options.messages.buttons.cancel] = function(){
+				buttons[self.options.menu.messages.buttons.cancel] = function(){
 					self.dialogs.gotoDialog.dialog("close");
 				};
-				buttons[self.options.messages.buttons.goto] = function(){
+				buttons[self.options.menu.messages.buttons.goto] = function(){
 					var line = parseInt(input.val());
 
 					if(isNaN(line) || line < first || line > last){
-						alert(self.options.messages.errors.validlineno);
+						alert(self.options.menu.messages.errors.validlineno);
 						return;
 					}
 
@@ -426,7 +426,7 @@ this.CMEditorMenu = (function(){
 					self.cmeditor.codeMirror.setCursor(line-1, 0);
 				}
 
-				self.dialogs.gotoDialog.dialog("option", "defaultButton", buttons[self.options.messages.buttons.goto]);
+				self.dialogs.gotoDialog.dialog("option", "defaultButton", buttons[self.options.menu.messages.buttons.goto]);
 				self.dialogs.gotoDialog.dialog("option", "buttons", buttons);
 				self.dialogs.gotoDialog.dialog("open");
 			 },

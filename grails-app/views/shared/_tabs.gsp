@@ -1,5 +1,17 @@
 <div id="${name}" class="cmeditor">
 	<style></style>
+	<div class="dialogContainer">
+		<div class="dialog diffDialog" title="${g.message(code:'cmeditor.dialogs.diff')}" style="display: none;">
+			<p class="noChanges"><g:message code="cmeditor.dialogs.diff.noChanges" /></p>
+			<div class="diffoutput"></div>
+			<p><strong><g:message code="cmeditor.dialogs.diff.contextSize" /></strong><input name="contextSize" value="1" type="number" autofocus="autofocus"/></p>
+			<p><input type="radio" value="0" name="_viewType" id="sidebyside" checked="checked"/>
+			<label for="sidebyside"><g:message code="cmeditor.dialogs.diff.sideBySide" /></label>
+			&nbsp; &nbsp; <input type="radio" value="1" name="_viewType" id="inline" />
+			<label for="inline"><g:message code="cmeditor.dialogs.diff.inline" /></label> </p>
+		</div>
+		<div class="dialog warningDialog" title="${g.message(code:'cmeditor.dialogs.warning')}" style="display: none;"></div>
+	</div>
 	<div id="cmeditor-${name}-northernpane">
 		<div class="cmeditor-tab-message" style="display:none;"></div>
 
@@ -71,25 +83,51 @@
 			availableModes:  ${availableModes.encodeAsJSON()},       //List of Strings: names of all modes (file extensions) that should be available to the user
 			</g:applyCodec>
 			preloadModules: ${options.preloadModules},				 //Boolean: whether to load themes and modules at document load or on demand
-			messages: {
-				fileselectplaceholder : "${g.message(code:'cmeditor.menu.messages.fileselectplaceholder')}",
-				hints: {
-					filewillbehidden:	"${g.message(code:'cmeditor.menu.messages.hints.filewillbehidden')}",
-					numberappended:		"${g.message(code:'cmeditor.menu.messages.hints.numberappended')}",
+			menu: {
+				messages: {
+					fileselectplaceholder : "${g.message(code:'cmeditor.menu.messages.fileselectplaceholder')}",
+					hints: {
+						filewillbehidden:	"${g.message(code:'cmeditor.menu.messages.hints.filewillbehidden')}",
+						numberappended:		"${g.message(code:'cmeditor.menu.messages.hints.numberappended')}",
+					},
+					errorIntro:		"${g.message(code:'cmeditor.menu.messages.errorIntro')}",
+					errors: {
+						validlineno:	"${g.message(code:'cmeditor.menu.messages.errors.validlineno')}",
+						supplyaname:	"${g.message(code:'cmeditor.menu.messages.errors.supplyaname')}",
+						selectafile:	"${g.message(code:'cmeditor.menu.messages.errors.selectafile')}",
+					},
+					buttons : {
+						cancel:		"${g.message(code:'cmeditor.menu.messages.buttons.cancel')}",
+						create:		"${g.message(code:'cmeditor.menu.messages.buttons.create')}",
+						open:		"${g.message(code:'cmeditor.menu.messages.buttons.open')}",
+						rename:		"${g.message(code:'cmeditor.menu.messages.buttons.rename')}",
+						import:		"${g.message(code:'cmeditor.menu.messages.buttons.import')}",
+						goto:		"${g.message(code:'cmeditor.menu.messages.buttons.goto')}",
+					}
+				}
+			},
+			messages : {
+				newNamePrompt          : "${g.message(code:'cmeditor.messages.newNamePrompt')}",
+				errorIntro             : "${g.message(code:'cmeditor.messages.errorIntro')}",
+				noFolder               : "${g.message(code:'cmeditor.messages.noFolder')}",
+				untitledDocName        : "${g.message(code:'cmeditor.messages.untitledDocName')}",
+				hints : {
+					noDeleteReadOnly : "${g.message(code:'cmeditor.messages.hints.noDeleteReadOnly')}",
+					noMoveReadOnly   : "${g.message(code:'cmeditor.messages.hints.noMoveReadOnly')}",
+					noRenameReadOnly : "${g.message(code:'cmeditor.messages.hints.noRenameReadOnly')}",
+					noSaveReadOnly   : "${g.message(code:'cmeditor.messages.hints.noSaveReadOnly')}",
+					editorIsReadOnly : "${g.message(code:'cmeditor.messages.hints.editorIsReadOnly')}",
+					noSuchMode       : "${g.message(code:'cmeditor.messages.hints.noSuchMode')}"
 				},
-				errorIntro:		"${g.message(code:'cmeditor.menu.messages.errorIntro')}",
-				errors: {
-					validlineno:	"${g.message(code:'cmeditor.menu.messages.errors.validlineno')}",
-					supplyaname:	"${g.message(code:'cmeditor.menu.messages.errors.supplyaname')}",
-					selectafile:	"${g.message(code:'cmeditor.menu.messages.errors.selectafile')}",
+				warnings : {
+					confirmLeaving       : "${g.message(code:'cmeditor.messages.warnings.confirmLeaving')}",
+					changesWillBeLost    : "${g.message(code:'cmeditor.messages.warnings.changesWillBeLost')}",
+					deleteFile           : "${g.message(code:'cmeditor.messages.warnings.deleteFile')}"
 				},
 				buttons : {
-					cancel:		"${g.message(code:'cmeditor.menu.messages.buttons.cancel')}",
-					create:		"${g.message(code:'cmeditor.menu.messages.buttons.create')}",
-					open:		"${g.message(code:'cmeditor.menu.messages.buttons.open')}",
-					rename:		"${g.message(code:'cmeditor.menu.messages.buttons.rename')}",
-					import:		"${g.message(code:'cmeditor.menu.messages.buttons.import')}",
-					goto:		"${g.message(code:'cmeditor.menu.messages.buttons.goto')}",
+                    cancel : "${g.message(code:'cmeditor.messages.buttons.cancel')}",
+                    close  : "${g.message(code:'cmeditor.messages.buttons.close')}",
+                    delete : "${g.message(code:'cmeditor.messages.buttons.delete')}"
 				}
 			}
 		};
