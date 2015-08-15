@@ -333,6 +333,13 @@ this.textAreaCMEditor = function (){
     }
 
     /* (Public)
+     * Returns whether the whole editor is read only
+     */
+    function isReadOnly(self){
+        return self.options.readOnly
+    }
+
+    /* (Public)
      *
      * Can be used to register callbacks for events.
      *
@@ -422,6 +429,8 @@ this.textAreaCMEditor = function (){
      * Logs its call to the console
      */
     function update(self) {
+        if(typeof self.menu !== "undefined")
+            self.menu.update();
     }
 
     textAreaCMEditor.prototype.constructor = textAreaCMEditor;
@@ -429,10 +438,11 @@ this.textAreaCMEditor = function (){
     //Zugegriffen aus Menu
     textAreaCMEditor.prototype.copyCMTheme   = function(){Array.prototype.unshift.call(arguments, this); return copyCMTheme.apply(this, arguments)};
     textAreaCMEditor.prototype.focus         = function(){Array.prototype.unshift.call(arguments, this); return focus.apply(this, arguments)};
+    textAreaCMEditor.prototype.isReadOnly    = function(){Array.prototype.unshift.call(arguments, this); return isReadOnly.apply(this, arguments)};
     textAreaCMEditor.prototype.update        = function(){Array.prototype.unshift.call(arguments, this); return update.apply(this, arguments)};
     textAreaCMEditor.prototype.getCodeMirror = function(){Array.prototype.unshift.call(arguments, this); return getCodeMirror.apply(this, arguments)};
     textAreaCMEditor.prototype.getCurrentCMEditorMode = function(){Array.prototype.unshift.call(arguments, this); return getCurrentCMEditorMode.apply(this, arguments)};
-    textAreaCMEditor.prototype.setMode                   = function(){Array.prototype.unshift.call(arguments, this); return setMode.apply(this, arguments)};
+    textAreaCMEditor.prototype.setMode        = function(){Array.prototype.unshift.call(arguments, this); return setMode.apply(this, arguments)};
     textAreaCMEditor.prototype.toggleFullscreen = function(){Array.prototype.unshift.call(arguments, this); return toggleFullscreen.apply(this, arguments)};
 
     return textAreaCMEditor;

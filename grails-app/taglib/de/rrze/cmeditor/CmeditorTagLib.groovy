@@ -43,8 +43,9 @@ class CmeditorTagLib {
 		if (attrs.theme) {
 			options.theme = attrs.theme
 		}
-		if (attrs.readOnly && attrs.readOnly.equals("true"))
+		if (attrs.readOnly)
 			options.readOnly = true;
+
 		if (attrs.options) {
 			options.putAll(attrs.options)
 		}
@@ -121,6 +122,10 @@ class CmeditorTagLib {
 		if (attrs.theme) {
 			options.theme = attrs.theme
 		}
+		if (attrs.readOnly)
+			options.readOnly = true;
+
+
 		if (attrs.options) {
 			options.putAll(attrs.options)
 		}

@@ -57,7 +57,8 @@
 			},
 			binding: "${options.binding}",                           //String:  the initial key-binding of the codeMirror
 			defaultContent: "${options.defaultContent}",             //String:  the default content for the editor
-			defaultMode: "${options.defaultMode}",                   //String:  the default mode (e.g. 'htmlmixed', 'javascript') for the editor
+            defaultMode: "${options.defaultMode}",                   //String:  the default mode (e.g. 'htmlmixed', 'javascript') for the editor
+            defaultReadOnly: ${options.defaultReadOnly},           //Boolean: if true all new and opened documents will be read-only
 			defaultDiffBeforeSave: ${options.defaultDiffBeforeSave}, //Boolean: whether a diff should be shown when saving
 			hooks:{                                                  //Object; with the keys being event names (see `CMEditor.on`) and the values being functions
 				"preMenuInit": function(){if(typeof cmeditor_${name}_preMenuInit != "undefined"){cmeditor_${name}_preMenuInit.apply(this, arguments)}},

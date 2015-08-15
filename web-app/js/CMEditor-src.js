@@ -381,8 +381,8 @@ this.CMEditor = (function(){
 	 * Performs the actual deletion
 	 */
 	function ajax_delete(self) {
-		if(self.options.readOnly){
-			displayMessage(self.options.messages.hints.noDeleteReadOnly);
+		if(isReadOnly(self) || self.state.curDoc.isReadOnly()){
+			displayMessage(self, self.options.messages.hints.noDeleteReadOnly);
 			return;
 		}
 
@@ -440,7 +440,7 @@ this.CMEditor = (function(){
 					                        data.result[self.options.mapping.folder] || null,
 					                        data.result[self.options.mapping.mode] || self.options.defaultMode,
 					                        data.result[self.options.mapping.content],
-					                        readWrite ? "" : ((self.options.readOnly || self.options.defaultReadOnly) ? "nocursor" : ""));
+					                        readWrite ? false : ((self.options.readOnly || self.options.defaultReadOnly) ? true : false));
 					newDoc.setID(data.result[self.options.mapping.idField]);
 
 					//insert custom data, if it is present in the form
@@ -741,7 +741,7 @@ this.CMEditor = (function(){
 			var name = getUnambiguousName(self, self.options.messages.untitledDocName);
 
 			var newDoc = new Doc(name, "/", self.options.defaultMode, self.options.defaultContent,
-									(self.options.readOnly||self.options.defaultReadOnly)?"nocursor":"");
+									(self.options.readOnly||self.options.defaultReadOnly)?true:false);
 
 
 			//insert custom data, if it is present in the form
@@ -960,9 +960,9 @@ this.CMEditor = (function(){
 				changed = true;
 			}
 
-			if (self.state.curDoc.getReadOnly() != self.codeMirror.getOption("readOnly")) {
-				if (self.state.curDoc.getReadOnly()) {
-					self.codeMirror.setOption("readOnly", self.state.curDoc.getReadOnly());
+			if (self.state.curDoc.isReadOnly() != self.codeMirror.getOption("readOnly")) {
+				if (self.state.curDoc.isReadOnly()) {
+					self.codeMirror.setOption("readOnly", self.state.curDoc.isReadOnly());
 				} else {
 					self.codeMirror.setOption("readOnly", false);
 				}
@@ -1124,6 +1124,12 @@ this.CMEditor = (function(){
 		self.codeMirror.focus();
 	}
 
+	/* (Public)
+	 * Returns the mode in which the current document is opened
+	 */
+	function getCurDoc(self) {
+		return self.state.curDoc;
+	}
 
 	/* (Public)
 	 * Returns the mode in which the current document is opened
@@ -1193,12 +1199,24 @@ this.CMEditor = (function(){
 	 *             fileMode String (optional): if set the file will have this mode, else the options.default mode
 	 */
 	function importDoc(self, fileName, fileContent, fileMode){
+		if(isReadOnly(self)){
+			displayMessage(self, self.options.messages.hints.editorIsReadOnly);
+			return;
+		}
+
 		var newDoc = new Doc(fileName,
 		                        "/imported/",
 		                        fileMode || self.options.defaultMode,
 		                        fileContent,
-		                        (self.options.readOnly || self.options.defaultReadOnly) ? "nocursor" : "");
+		                        (self.options.readOnly || self.options.defaultReadOnly) ? true : false);
 		insertNewDocument(self, newDoc);
+	}
+
+	/* (Public)
+	 * Returns whether the whole editor is read only
+	 */
+	function isReadOnly(self){
+		return self.options.readOnly
 	}
 
 	/* (Public)
@@ -1206,20 +1224,21 @@ this.CMEditor = (function(){
 	 * Moves the current file to another folder
 	 */
 	function moveDoc(self, newFolder){
-		if(self.options.readOnly){
-			displayMessage(self.options.messages.hints.noMoveReadOnly);
-		}else{
-			if(newFolder === self.state.curDoc.getFolder())
-				return;
-
-			//REFACTOR: document should keep track of this!
-			if(self.state.curDoc.isNew() || self.state.curDoc.isUnsaved())
-				self.state.curDoc.markUnsaved();
-			else
-				self.state.curDoc.markChanged();
-
-			self.state.curDoc.setFolder(newFolder);
+		if(isReadOnly(self) || self.state.curDoc.isReadOnly()){
+			displayMessage(self, self.options.messages.hints.noMoveReadOnly);
+			return;
 		}
+
+		if(newFolder === self.state.curDoc.getFolder())
+			return;
+
+		//REFACTOR: document should keep track of this!
+		if(self.state.curDoc.isNew() || self.state.curDoc.isUnsaved())
+			self.state.curDoc.markUnsaved();
+		else
+			self.state.curDoc.markChanged();
+
+		self.state.curDoc.setFolder(newFolder);
 	}
 
 	/* (Public)
@@ -1229,17 +1248,18 @@ this.CMEditor = (function(){
 	 *             folder String: the folder (or null)
 	 */
 	function newDoc(self, fileName, folder) {
-		if(self.options.readOnly){
-			displayMessage(self.messages.hints.editorIsReadOnly);
-		}else{
-			var newDoc = new Doc(fileName, folder, self.options.defaultMode, self.options.defaultContent,
-									(self.options.readOnly || self.options.defaultReadOnly) ? "nocursor":"");
-
-
-			insertNewDocument(self, newDoc);
-			selectDocument(self, newDoc);
-			markDocumentAsChanged(self, newDoc);
+		if(isReadOnly(self)){
+			displayMessage(self, self.options.messages.hints.editorIsReadOnly);
+			return;
 		}
+
+		var newDoc = new Doc(fileName, folder, self.options.defaultMode, self.options.defaultContent,
+								(self.options.readOnly || self.options.defaultReadOnly) ? true:false);
+
+
+		insertNewDocument(self, newDoc);
+		selectDocument(self, newDoc);
+		markDocumentAsChanged(self, newDoc);
 	}
 
 	/* (Public)
@@ -1284,6 +1304,11 @@ this.CMEditor = (function(){
 	 *                                if options.readOnly or options.defaultReadOnly is set to true
 	 */
 	function open(self, fileId, readWrite) {
+		if(isReadOnly(self)){
+			displayMessage(self, self.options.messages.hints.editorIsReadOnly);
+			return;
+		}
+
 		for(var i=0; i<self.state.docs.length; i++){
 			if(self.state.docs[i].getID() == fileId){
 				return;
@@ -1298,28 +1323,28 @@ this.CMEditor = (function(){
 	 * Parameters: newName String: the new name of the document
 	 */
 	function rename(self, newName) {
-		if(self.options.readOnly){
-			displayMessage(self.options.messages.hints.noRenameReadOnly);
-		}else{
-			self.state.curDoc.setName(newName);
-			markDocumentAsChanged(self, self.state.curDoc);
-
-			if(self.state.curDoc.isRenamed())
-				self.state.curDoc.markUnsaved();
-			else
-				self.state.curDoc.markChanged();
-
-			updateCurrentDocument(self);
-
+		if(isReadOnly(self) || self.state.curDoc.isReadOnly()){
+			displayMessage(self, self.options.messages.hints.noRenameReadOnly);
+			return;
 		}
+
+		self.state.curDoc.setName(newName);
+		markDocumentAsChanged(self, self.state.curDoc);
+
+		if(self.state.curDoc.isRenamed())
+			self.state.curDoc.markUnsaved();
+		else
+			self.state.curDoc.markChanged();
+
+		updateCurrentDocument(self);
 	}
 
 	/* (Public)
 	 * Saves the currently opened document. If it is opened read-only only displays a dialog.
 	 */
 	function save(self) {
-		if(self.options.readOnly === true){
-			displayMessage(self.options.messages.hints.noSaveReadOnly);
+		if(isReadOnly(self) || self.state.curDoc.isReadOnly()){
+			displayMessage(self, self.options.messages.hints.noSaveReadOnly);
 			return;
 		}
 
@@ -1340,9 +1365,11 @@ this.CMEditor = (function(){
 	 * Renames then saves the current document
 	 */
 	function saveas(self) {
-		if(self.options.readOnly){
-			displayMessage(self.options.messages.hints.noSaveReadOnly);
+		if(isReadOnly(self) || self.state.curDoc.isReadOnly()){
+			displayMessage(self, self.options.messages.hints.noSaveReadOnly);
+			return;
 		}
+
 		var name = prompt(self.options.messages.newNamePrompt, "");
 		if (name == null) return;
 		if (!name) name = "test";
@@ -1434,9 +1461,7 @@ this.CMEditor = (function(){
 		if(self.state.curDoc){
 			docName = self.state.curDoc.getName();
 
-			if(self.state.curDoc.getReadOnly() != self.codeMirror.getOption("readOnly")){
-				self.state.curDoc.setReadOnly(self.codeMirror.getOption("readOnly"));
-			}
+			getCodeMirror(self).setOption("readOnly", self.state.curDoc.isReadOnly() ? "nocursor" : "");
 
 			if(self.state.curDoc.getMode() != self.codeMirror.getOption("mode")){
 				var mode = self.codeMirror.getOption("mode");
@@ -1454,6 +1479,8 @@ this.CMEditor = (function(){
 
 			updateCurrentDocument(self);
 		}
+		if(typeof self.menu !== "undefined")
+			self.menu.update();
 	}
 
 	/* (Public)
@@ -1490,9 +1517,11 @@ this.CMEditor = (function(){
 	CMEditor.prototype.exportDoc                 = function(){Array.prototype.unshift.call(arguments, this); return exportDoc.apply(this, arguments)};
 	CMEditor.prototype.focus                     = function(){Array.prototype.unshift.call(arguments, this); return focus.apply(this, arguments)};
 	CMEditor.prototype.getUnambiguousName        = function(){Array.prototype.unshift.call(arguments, this); return getUnambiguousName.apply(this, arguments)};
+	CMEditor.prototype.getCurDoc                 = function(){Array.prototype.unshift.call(arguments, this); return getCurDoc.apply(this, arguments)};
 	CMEditor.prototype.getCurrentCMEditorMode    = function(){Array.prototype.unshift.call(arguments, this); return getCurrentCMEditorMode.apply(this, arguments)};
 	CMEditor.prototype.getCodeMirror             = function(){Array.prototype.unshift.call(arguments, this); return getCodeMirror.apply(this, arguments)};
 	CMEditor.prototype.importDoc                 = function(){Array.prototype.unshift.call(arguments, this); return importDoc.apply(this, arguments)};
+	CMEditor.prototype.isReadOnly                = function(){Array.prototype.unshift.call(arguments, this); return isReadOnly.apply(this, arguments)};
 	CMEditor.prototype.moveDoc                   = function(){Array.prototype.unshift.call(arguments, this); return moveDoc.apply(this, arguments)};
 	CMEditor.prototype.newDoc                    = function(){Array.prototype.unshift.call(arguments, this); return newDoc.apply(this, arguments)};
 	CMEditor.prototype.on                        = function(){Array.prototype.unshift.call(arguments, this); return on.apply(this, arguments)};
@@ -1567,13 +1596,13 @@ this.CMEditor = (function(){
 	Doc.prototype.getName     = function(){return this.name};
 	Doc.prototype.getOrigContent = function(){return this.origContent};
 	Doc.prototype.getTabElem  = function(){return this.tabElem};
-	Doc.prototype.getReadOnly = function(){return this.readOnly};
 	Doc.prototype.hasID       = function(){return this.idField !== undefined};
 	Doc.prototype.isNew       = function(){return this.status == Doc.status.NEW};
 	Doc.prototype.isChanged   = function(){return this.status == Doc.status.CHANGED};
 	Doc.prototype.isUnchanged = function(){return this.status == Doc.status.UNCHANGED};
 	Doc.prototype.isUnsaved   = function(){return this.status == Doc.status.UNSAVED};
 	Doc.prototype.needsSaving = function(){return this.status == Doc.status.UNSAVED || this.status == Doc.status.CHANGED};
+	Doc.prototype.isReadOnly  = function(){return this.readOnly};
 	Doc.prototype.isRenamed   = function(){return this.name != this.origName};
 
 	//Setter

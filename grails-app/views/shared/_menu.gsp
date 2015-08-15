@@ -28,11 +28,11 @@
 				<li><a href="#" value="new"><span class="ui-icon ui-icon-newwin"></span><g:message code="cmeditor.menu.menus.file.new" /></a></li>
 				<li><a href="#" value="open"><span class="ui-icon ui-icon-newwin"></span><g:message code="cmeditor.menu.menus.file.open" /></a></li>
 				<li><a href="#" value="import"><span></span><g:message code="cmeditor.menu.menus.file.import" /></a></li>
-				<li><a href="#" value="save"><span class="ui-icon ui-icon-disk"></span><g:message code="cmeditor.menu.menus.file.save" /></a></li>
-				<li><a href="#" value="saveas"><span class="ui-icon ui-icon-disk"></span><g:message code="cmeditor.menu.menus.file.saveas" /></a></li>
+				<li><a href="#" value="save" class="disabledWhenReadOnly"><span class="ui-icon ui-icon-disk"></span><g:message code="cmeditor.menu.menus.file.save" /></a></li>
+				<li><a href="#" value="saveas" class="disabledWhenReadOnly"><span class="ui-icon ui-icon-disk"></span><g:message code="cmeditor.menu.menus.file.saveas" /></a></li>
 				<li><a href="#" value="export"><span></span><g:message code="cmeditor.menu.menus.file.export" /></a></li>
-				<li><a href="#" value="rename"><span></span><g:message code="cmeditor.menu.menus.file.rename" /></a></li>
-				<li><a href="#" value="delete"><span class="ui-icon ui-icon-trash"></span><g:message code="cmeditor.menu.menus.file.delete" /></a></li>
+				<li><a href="#" value="rename" class="disabledWhenReadOnly"><span></span><g:message code="cmeditor.menu.menus.file.rename" /></a></li>
+				<li><a href="#" value="delete" class="disabledWhenReadOnly"><span class="ui-icon ui-icon-trash"></span><g:message code="cmeditor.menu.menus.file.delete" /></a></li>
 				<li><a href="#" value="close"><span class="ui-icon ui-icon-close"></span><g:message code="cmeditor.menu.menus.file.close" /></a></li>
 				</g:if>
 				<li><a href="#" value="quit"><span></span><g:message code="cmeditor.menu.menus.file.quit" /></a></li>

@@ -127,6 +127,11 @@ div.cmeditor-menu {
 	font-size: 11pt;
 }
 
+.cmeditor .ui-menu li.ui-state-disabled {
+    margin-top:0px;
+    margin-bottom:0px;
+}
+
 
 .cmeditor ul.tabs {
     font-family: "Ubuntu Mono";

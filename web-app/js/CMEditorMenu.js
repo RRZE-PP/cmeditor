@@ -388,13 +388,21 @@ this.CMEditorMenu = (function(){
 
 		self.menus.viewMenu = {
 			readOnly: function(cm) {
-				if (!cm.getOption("readOnly")) {
-					cm.setOption("readOnly", "nocursor");
-					self.rootElem.find(".viewMenu a[value='addonfullscreen']").parent().addClass("ui-state-disabled");
-				} else {
-					cm.setOption("readOnly", false);
-					self.rootElem.find(".viewMenu a[value='addonfullscreen']").parent().removeClass("ui-state-disabled");
+				if(self.cmeditor.isReadOnly()){
+					//if the whole editor is read only, this cannot be changed!
+					return;
 				}
+
+				if(self.cmeditor.getCurDoc){
+					self.cmeditor.getCurDoc().setReadOnly(!self.cmeditor.getCurDoc().isReadOnly())
+				}else{
+					//this is a textAreaCMEditor
+					if(self.cmeditor.getCodeMirror().getOption("readOnly") === "noCursor")
+						self.cmeditor.getCodeMirror().setOption("readOnly", "");
+					else
+						self.cmeditor.getCodeMirror().setOption("readOnly", "noCursor");
+				}
+				self.cmeditor.update();
 			},
 			diff: function(cm) { if(typeof self.cmeditor.diff == "function") self.cmeditor.diff(); },
 			goto: function(cm) {
@@ -431,9 +439,7 @@ this.CMEditorMenu = (function(){
 				self.dialogs.gotoDialog.dialog("open");
 			 },
 			addonfullscreen: function(cm) {
-				if (!cm.getOption("readOnly")) {
-					self.cmeditor.toggleFullscreen();
-		        }
+				self.cmeditor.toggleFullscreen();
 		    }
 		}
 
@@ -582,16 +588,16 @@ this.CMEditorMenu = (function(){
 		}
 
 		if(self.options.defaultReadOnly){
-			self.rootElem.find(".viewMenu a[value='readOnly']").children("span").addClass("ui-icon ui-icon-check");
+			self.rootElem.find(".viewMenu a[value='readOnly'] .ui-icon").removeClass("ui-icon-blank").addClass("ui-icon-check");
 		}
-		if(self.options.readOnly){
-			self.rootElem.find(".viewMenu a[value='readOnly']").children("span").addClass("ui-icon ui-icon-check");
+		if(self.cmeditor.isReadOnly()){
+			//disable some additional elements, when the whole editor is readonly
+			self.rootElem.find(".viewMenu a[value='readOnly'] .ui-icon").removeClass("ui-icon-blank").addClass("ui-icon-check");
 			self.rootElem.find(".viewMenu a[value='readOnly']").parent().addClass("ui-state-disabled");
 			self.rootElem.find(".fileMenu a[value='new']").parent().addClass("ui-state-disabled");
-			self.rootElem.find(".fileMenu a[value='save']").parent().addClass("ui-state-disabled");
-			self.rootElem.find(".fileMenu a[value='saveas']").parent().addClass("ui-state-disabled");
-			self.rootElem.find(".fileMenu a[value='rename']").parent().addClass("ui-state-disabled");
-			self.rootElem.find(".fileMenu a[value='delete']").parent().addClass("ui-state-disabled");
+			self.rootElem.find(".fileMenu a[value='open']").parent().addClass("ui-state-disabled");
+			self.rootElem.find(".fileMenu a[value='import']").parent().addClass("ui-state-disabled");
+			self.rootElem.find(".fileMenu a[value='close']").parent().addClass("ui-state-disabled");
 		}
 
 		if(typeof self.cmeditor.diff != "function") {
@@ -608,7 +614,7 @@ this.CMEditorMenu = (function(){
 		self.rootElem.find(".fileMenu a").click(function(event) {
 			var value = $(this).attr("value");
 
-			if(typeof value === "undefined"){
+			if(typeof value === "undefined" || $(this).parent().hasClass("ui-state-disabled")){
 		    	event.preventDefault();
 				return;
 			}
@@ -624,7 +630,7 @@ this.CMEditorMenu = (function(){
 		self.rootElem.find(".viewMenu a").click(function(event) {
 			var value = $(this).attr("value");
 
-			if(typeof value === "undefined"){
+			if(typeof value === "undefined" || $(this).parent().hasClass("ui-state-disabled")){
 		    	event.preventDefault();
 				return;
 			}
@@ -638,21 +644,14 @@ this.CMEditorMenu = (function(){
 				$(this).parent().parent().find("span").removeClass("ui-icon ui-icon-check");
 				$(this).children("span").addClass("ui-icon ui-icon-check");
 		    }
-		    if (value.indexOf("readOnly") == 0) {
-		    	if (self.cmeditor.getCodeMirror().getOption("readOnly")) {
-		    		$(this).children("span").addClass("ui-icon ui-icon-check");
-		    	} else {
-		    		$(this).children("span").removeClass("ui-icon ui-icon-check");
-		    	}
-		    	self.cmeditor.update();
-		    }
+
 			event.preventDefault();
 		});
 
 		self.rootElem.find(".optionsMenu a").click(function(event) {
 			var value = $(this).attr("value");
 
-			if(typeof value === "undefined"){
+			if(typeof value === "undefined" || $(this).parent().hasClass("ui-state-disabled")){
 		    	event.preventDefault();
 				return;
 			}
@@ -685,7 +684,7 @@ this.CMEditorMenu = (function(){
 		self.rootElem.find(".addonsMenu a").click(function(event) {
 			var value = $(this).attr("value");
 
-			if(typeof value === "undefined"){
+			if(typeof value === "undefined" || $(this).parent().hasClass("ui-state-disabled")){
 		    	event.preventDefault();
 				return;
 			}
@@ -698,6 +697,15 @@ this.CMEditorMenu = (function(){
 		});
 	}
 
+	/*
+	 * Returns true if either this menu's editor or its current document is read-only
+	 */
+	function isEditorOrDocReadOnly(self){
+		return self.cmeditor.isReadOnly()
+			 || (self.cmeditor.getCurDoc && self.cmeditor.getCurDoc().isReadOnly())
+			 || (typeof self.cmeditor.getCurDoc === "undefined" && self.cmeditor.getCodeMirror().getOption("readOnly") === "noCursor");
+	}
+
 	function update(self) {
 		var curMode = self.cmeditor.getCurrentCMEditorMode();
 		var cmMode = CodeMirror.findModeByName(curMode) || CodeMirror.findModeByMIME(curMode);
@@ -706,12 +714,12 @@ this.CMEditorMenu = (function(){
 		if(typeof cmMode !== "undefined")
 			self.rootElem.find(".modesMenu a[value='mode"+cmMode.name+"']").children("span").addClass("ui-icon ui-icon-check");
 
-		if (self.cmeditor.getCodeMirror().getOption("readOnly")) {
-			self.rootElem.find(".view a[value='readOnly'] span").addClass("ui-icon ui-icon-check");
-			self.rootElem.find(".view a[value='addonfullscreen']").parent().addClass("ui-state-disabled");
+		if (isEditorOrDocReadOnly(self)) {
+			self.rootElem.find(".viewMenu a[value='readOnly'] .ui-icon").removeClass("ui-icon-blank").addClass("ui-icon-check");
+			self.rootElem.find(".disabledWhenReadOnly").parent().addClass("ui-state-disabled");
 		} else {
-			self.rootElem.find(".view a[value='readOnly'] span").removeClass("ui-icon ui-icon-check");
-			self.rootElem.find(".view a[value='addonfullscreen']").parent().removeClass("ui-state-disabled");
+			self.rootElem.find(".viewMenu a[value='readOnly'] .ui-icon").removeClass("ui-icon-check").addClass("ui-icon-blank");
+			self.rootElem.find(".disabledWhenReadOnly").parent().removeClass("ui-state-disabled");
 		}
 
 	}
