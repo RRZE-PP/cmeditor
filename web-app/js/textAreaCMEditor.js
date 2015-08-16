@@ -62,6 +62,7 @@ this.textAreaCMEditor = function (){
     clazz.instancesString = {};
     clazz.instances = [];
     clazz.loadedResources = [];
+    clazz.eventHooks = {}
 
     /*
      * Logs to the console. If possible prefixed by class name, instance number. The default logLevel is INFO.
@@ -185,12 +186,31 @@ this.textAreaCMEditor = function (){
         CodeMirror.requireMode(modeName, callback);
     }
 
+    /*
+     * Can be used to register callbacks for events statically (i.e. for all instances)
+     *
+     * Events in textAreaCMEditor which can be set only statically:
+     *
+     *     preMenuInit: Fired before the menu of this textAreaCMEditor is initiated, i.e. before its constructor is called
+     *                  Your callback will be called in the context of the menu's root element
+     *     postMenuInit: Fired after the menu of this textAreaCMEditor is initiated, i.e. after its constructor has been called
+     *                  Your callback will be called in the context of the menu's root element and passed the menu object as first
+     *                  argument
+     *
+     */
+    var staticOn = clazz.on = function(eventName, hook){
+        if(typeof clazz.eventHooks[eventName] === "undefined")
+            clazz.eventHooks[eventName] = [];
+
+        clazz.eventHooks[eventName].push(hook);
+    }
+
     /*************************************************************************
      *                    Begin 'private' methods                            *
      *************************************************************************/
 
     /*
-     * Executes all hooks that were registered using `on` on `eventName`
+     * Executes all hooks that were registered using `on` or `textAreaCMEditor.on` on `eventName`
      *
      * Parameters: eventName String: the event of which all hooks should be called
      *             context Object: the object that `this` should be set to in the hook
@@ -198,8 +218,15 @@ this.textAreaCMEditor = function (){
      */
     function executeHooks(self, eventName, context, args){
         for(var i=0; self.state.eventHooks[eventName] && i<self.state.eventHooks[eventName].length; i++){
-            if(typeof self.state.eventHooks[eventName][i] == "function")
+            if(typeof self.state.eventHooks[eventName][i] === "function")
                 self.state.eventHooks[eventName][i].apply(context, args);
+        }
+
+        for(var i=0; clazz.eventHooks[eventName] && i<clazz.eventHooks[eventName].length; i++){
+            if(typeof clazz.eventHooks[eventName][i] === "function")
+                clazz.eventHooks[eventName][i].apply(context, args);
+            else
+                log(self, "A hook was not executed because it is not a function", "WARNING");
         }
     }
 
@@ -343,17 +370,8 @@ this.textAreaCMEditor = function (){
      *
      * Can be used to register callbacks for events.
      *
-     * Available Events in CMEditor:
-     *
-     *     preMenuInit: Fired before the menu of this CMEditor is initiated, i.e. before its constructor is called
-     *                  This happens in the constructor of the CMEditor, so usually you have to set hooks to this event via
-     *                  the options object
-     *                  Your callback will be called in the context of the menu's root element
-     *     postMenuInit: Fired after the menu of this CMEditor is initiated, i.e. after its constructor has been called
-     *                  This happens in the constructor of the CMEditor, so usually you have to set hooks to this event via
-     *                  the options object
-     *                  Your callback will be called in the context of the menu's root element and passed the menu object as first
-     *                  argument
+     * Currently there are no instance events available in textAreaCMEditor.
+     * You can set some statically via textAreaCMEditor.on, though
      *
      */
     function on(self, eventName, hook){

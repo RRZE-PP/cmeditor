@@ -98,6 +98,7 @@ this.CMEditor = (function(){
 	clazz.instancesString = {};
 	clazz.instances = [];
 	clazz.loadedResources = [];
+	clazz.eventHooks = {};
 
 	/*
 	 * Checks if any files are unsaved in any instance and warns the user
@@ -190,6 +191,25 @@ this.CMEditor = (function(){
 	 */
 	var getInstances = clazz.getInstances = function(){
 	 	return clazz.instances;
+	}
+
+	/*
+	 * Can be used to register callbacks for events statically (i.e. for all instances)
+	 *
+	 * Events in CMEditor which can be set only statically:
+	 *
+	 *     preMenuInit: Fired before the menu of this CMEditor is initiated, i.e. before its constructor is called
+	 *                  Your callback will be called in the context of the menu's root element
+	 *     postMenuInit: Fired after the menu of this CMEditor is initiated, i.e. after its constructor has been called
+	 *                  Your callback will be called in the context of the menu's root element and passed the menu object as first
+	 *                  argument
+	 *
+	 */
+	var staticOn = clazz.on = function(eventName, hook){
+		if(typeof clazz.eventHooks[eventName] === "undefined")
+			clazz.eventHooks[eventName] = [];
+
+		clazz.eventHooks[eventName].push(hook);
 	}
 
 	/*
@@ -661,7 +681,8 @@ this.CMEditor = (function(){
 	}
 
 	/*
-	 * Executes all hooks that were registered using `on` on `eventName`
+	 * Executes all hooks that were registered using `on` on `eventName`, either per-instance or on all
+	 * instances using `CMEditor.on`
 	 *
 	 * Parameters: eventName String: the event of which all hooks should be called
 	 *             context Object: the object that `this` should be set to in the hook
@@ -669,8 +690,15 @@ this.CMEditor = (function(){
 	 */
 	function executeHooks(self, eventName, context, args){
 		for(var i=0; self.state.eventHooks[eventName] && i<self.state.eventHooks[eventName].length; i++){
-			if(typeof self.state.eventHooks[eventName][i] == "function")
+			if(typeof self.state.eventHooks[eventName][i] === "function")
 				self.state.eventHooks[eventName][i].apply(context, args);
+			else
+				log(self, "A hook was not executed because it is not a function", "WARNING");
+		}
+
+		for(var i=0; clazz.eventHooks[eventName] && i<clazz.eventHooks[eventName].length; i++){
+			if(typeof clazz.eventHooks[eventName][i] === "function")
+				clazz.eventHooks[eventName][i].apply(context, args);
 			else
 				log(self, "A hook was not executed because it is not a function", "WARNING");
 		}
@@ -1276,16 +1304,6 @@ this.CMEditor = (function(){
 	 *                      Basically this happens everytime something in the document changes.
 	 *                      Your callback will be called in the context of the editor's root element and it will be passed
 	 *                      the current document as first argument
-	 *
-	 *     preMenuInit: Fired before the menu of this CMEditor is initiated, i.e. before its constructor is called
-	 *                  This happens in the constructor of the CMEditor, so usually you have to set hooks to this event via
-	 *                  the options object
-	 *                  Your callback will be called in the context of the menu's root element
-	 *     postMenuInit: Fired after the menu of this CMEditor is initiated, i.e. after its constructor has been called
-	 *                  This happens in the constructor of the CMEditor, so usually you have to set hooks to this event via
-	 *                  the options object
-	 *                  Your callback will be called in the context of the menu's root element and passed the menu object as first
-	 *                  argument
 	 *
 	 */
 	function on(self, eventName, hook){
