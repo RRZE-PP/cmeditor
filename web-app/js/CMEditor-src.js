@@ -520,6 +520,7 @@ this.CMEditor = (function(){
 				closeButton.off("click");
 				closeButton.on("click", function(e){close(self, newDoc);e.stopPropagation()});
 
+				selectDocument(self, newDoc);
 				updateCurrentDocument(self);
 				markDocumentAsUnchanged(self, newDoc);
 			});
