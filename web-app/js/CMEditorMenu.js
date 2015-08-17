@@ -192,7 +192,7 @@ this.CMEditorMenu = (function(){
 							if (available == true) {
 								s.appendTo(self.dialogs.openDialog);
 								self.dialogs.openDialog.find(".fileSelect").select2({placeholder: self.options.menu.messages.fileselectplaceholder,
-  																			 allowClear: true});
+																			 allowClear: true});
 
 								self.dialogs.openDialog.find(".fileSelectTree").fileTree({script:function(fileTreeData){
 									//this is called each time the user opens a directory (including root)
@@ -291,7 +291,7 @@ this.CMEditorMenu = (function(){
 						newFolder = null;
 						self.cmeditor.displayMessage(self.options.menu.messages.hints.filewillbehidden);
 					}else{
-						newFolder = newFolder.endsWith("/")?newFolder:newFolder+"/"
+						newFolder = newFolder.endsWith("/")?newFolder:newFolder+"/";
 					}
 
 					if(newName !== oldName || newFolder !== oldFolder){
@@ -307,7 +307,6 @@ this.CMEditorMenu = (function(){
 
 					self.dialogs.renameDialog.dialog("close");
 				};
-				
 
 				self.dialogs.renameDialog.dialog("option", "defaultButton", buttons[self.options.menu.messages.buttons.rename]);
 				self.dialogs.renameDialog.dialog("option", "buttons", buttons);
@@ -367,7 +366,7 @@ this.CMEditorMenu = (function(){
 					}
 
 				};
-				
+
 				self.dialogs.importDialog.dialog("option", "defaultButton", [self.options.menu.messages.buttons.import]);
 				self.dialogs.importDialog.dialog("option", "buttons", buttons);
 				self.dialogs.importDialog.dialog("open");

@@ -1,187 +1,187 @@
 
 .CodeMirror {
-    padding-bottom: 20px;
+	padding-bottom: 20px;
 }
 
 .CodeMirror-scroll {
-    overflow-x: hidden !important
+	overflow-x: hidden !important
 }
 
 .CodeMirror-fullscreen {
 	font-size: 11pt;
 }
 .CodeMirror pre {
-    padding: 0 9px;
+	padding: 0 9px;
 }
 .CodeMirror-linenumber {
-    font-size: 80%;
-    padding-top: 2px;
+	font-size: 80%;
+	padding-top: 2px;
 }
 .CodeMirror div.CodeMirror-cursor {
-    border-left: 2px solid #444444;
+	border-left: 2px solid #444444;
 }
 .CodeMirror-hints {
-    font-size: 11pt;
-    z-index: 96;
+	font-size: 11pt;
+	z-index: 96;
 }
 
 div.cmeditor {
 	-moz-border-bottom-colors: none;
-    -moz-border-left-colors: none;
-    -moz-border-right-colors: none;
-    -moz-border-top-colors: none;
-    background: none repeat scroll 0 0 #F3F3F3;
-    border-color: #C0C0C0;
-    border-image: none;
-    border-style: solid;
-    border-radius: 6px;
-    border-width: 1px;
-    color: #777777;
-    cursor: pointer;
-    display: block;
-    font-size: 11pt;
-    margin: 0 2px 0 0;
-    padding: 2px 10px 5px;
-    position: relative;
+	-moz-border-left-colors: none;
+	-moz-border-right-colors: none;
+	-moz-border-top-colors: none;
+	background: none repeat scroll 0 0 #F3F3F3;
+	border-color: #C0C0C0;
+	border-image: none;
+	border-style: solid;
+	border-radius: 6px;
+	border-width: 1px;
+	color: #777777;
+	cursor: pointer;
+	display: block;
+	font-size: 11pt;
+	margin: 0 2px 0 0;
+	padding: 2px 10px 5px;
+	position: relative;
 }
 .cmeditor-tab-message {
 	position: absolute;
 	top: 0;
 	left: 0;
 	right: 0;
-    background: url("../images/skin/information.png") no-repeat scroll 0.5em 50% rgba(0, 0, 0, 0);
-    text-indent: 2.2em;
+	background: url("../images/skin/information.png") no-repeat scroll 0.5em 50% rgba(0, 0, 0, 0);
+	text-indent: 2.2em;
 }
 .cmeditor-tab-errors ul, .cmeditor-tab-message {
-    padding: 0;
+	padding: 0;
 }
 .cmeditor-tab-message {
-    background: none repeat scroll 0 0 #F3F3FF;
-    border: 1px solid #B2D1FF;
-    box-shadow: 0 0 0.25em #B2D1FF;
-    color: #006DBA;
+	background: none repeat scroll 0 0 #F3F3FF;
+	border: 1px solid #B2D1FF;
+	box-shadow: 0 0 0.25em #B2D1FF;
+	color: #006DBA;
 }
 .cmeditor-tab-errors, .cmeditor-tab-message {
-    font-size: 0.8em;
-    line-height: 2;
-    margin: 0 2em;
-    padding: 0.25em;
+	font-size: 0.8em;
+	line-height: 2;
+	margin: 0 2em;
+	padding: 0.25em;
 }
 .cmeditor-tab-message {
-    background: url("../images/skin/information.png") no-repeat scroll 32px 50% #F3F8FC;
-    border-color: #B2D1FF;
-    border-image: none;
-    border-style: solid;
-    border-top-left-radius: 6px;
-    border-top-right-radius: 6px;
-    border-width: 1px;
-    color: #006DBA;
-    font-size: 0.76em;
-    margin: 0;
-    padding: 5px 5px 5px 55px;
+	background: url("../images/skin/information.png") no-repeat scroll 32px 50% #F3F8FC;
+	border-color: #B2D1FF;
+	border-image: none;
+	border-style: solid;
+	border-top-left-radius: 6px;
+	border-top-right-radius: 6px;
+	border-width: 1px;
+	color: #006DBA;
+	font-size: 0.76em;
+	margin: 0;
+	padding: 5px 5px 5px 55px;
 }
 
 
 div.cmeditor-menu {
-    position: relative;
-    left: 0px;
-    top: 34px;
-    width:100%;
-    z-index:5;
+	position: relative;
+	left: 0px;
+	top: 34px;
+	width:100%;
+	z-index:5;
 }
 .cmeditor .cmeditor-settings {
-    font-family: "Ubuntu Mono";
-    font-size: 11pt;
-    max-width: 20em;
-    width:20em;
-    position: absolute;
-    right: 0;
-    top: 0px;
+	font-family: "Ubuntu Mono";
+	font-size: 11pt;
+	max-width: 20em;
+	width:20em;
+	position: absolute;
+	right: 0;
+	top: 0px;
 }
 .cmeditor .cmeditor-main {
-    position: relative;
-    top: 70px;
-    margin-bottom: 70px;
+	position: relative;
+	top: 70px;
+	margin-bottom: 70px;
 }
 .cmeditor .cmeditor-button {
-    max-width: 10em;
-    position: static;
+	max-width: 10em;
+	position: static;
 }
 .cmeditor .cmeditor-commands {
-    position: absolute;
-    left: 0;
-    top: 0;
-    z-index:5;
+	position: absolute;
+	left: 0;
+	top: 0;
+	z-index:5;
 }
 
 .cmeditor-menubar {
-    margin: 0 0 4em 0;
-    overflow:visible;
-    height: 30px; /*set fixed height, jquery's clearfix seems to be broken*/
+	margin: 0 0 4em 0;
+	overflow:visible;
+	height: 30px; /*set fixed height, jquery's clearfix seems to be broken*/
 }
 
 .cmeditor .ui-button-text {
-    font-size: 11pt;
+	font-size: 11pt;
 }
 .cmeditor .ui-menu .ui-menu-item a {
 	font-size: 11pt;
 }
 
 .cmeditor .ui-menu li.ui-state-disabled {
-    margin-top:0px;
-    margin-bottom:0px;
+	margin-top:0px;
+	margin-bottom:0px;
 }
 
 
 .cmeditor ul.tabs {
-    font-family: "Ubuntu Mono";
-    list-style: none outside none;
-    margin: 0 0 -1px;
-    overflow:auto;
-    overflow-y:hidden;
-    padding: 5px 0 0 37px;
+	font-family: "Ubuntu Mono";
+	list-style: none outside none;
+	margin: 0 0 -1px;
+	overflow:auto;
+	overflow-y:hidden;
+	padding: 5px 0 0 37px;
 }
 .cmeditor ul.tabs li {
-    -moz-border-bottom-colors: none;
-    -moz-border-left-colors: none;
-    -moz-border-right-colors: none;
-    -moz-border-top-colors: none;
-    background: none repeat scroll 0 0 #F3F3F3;
-    border-color: #C0C0C0;
-    border-image: none;
-    border-style: solid;
-    border-top-left-radius: 6px;
-    border-top-right-radius: 6px;
-    border-width: 1px 1px 0;
-    color: #777777;
-    cursor: pointer;
-    display: inline-block;
-    font-size: 11pt;
-    margin: 0 2px 0 0;
-    position: relative;
-    z-index: 1;
-    opacity:0.6;
+	-moz-border-bottom-colors: none;
+	-moz-border-left-colors: none;
+	-moz-border-right-colors: none;
+	-moz-border-top-colors: none;
+	background: none repeat scroll 0 0 #F3F3F3;
+	border-color: #C0C0C0;
+	border-image: none;
+	border-style: solid;
+	border-top-left-radius: 6px;
+	border-top-right-radius: 6px;
+	border-width: 1px 1px 0;
+	color: #777777;
+	cursor: pointer;
+	display: inline-block;
+	font-size: 11pt;
+	margin: 0 2px 0 0;
+	position: relative;
+	z-index: 1;
+	opacity:0.6;
 }
 .cmeditor ul.tabs li:hover {
-    color: #444444;
-    opacity:1;
+	color: #444444;
+	opacity:1;
 }
 
 .cmeditor ul.tabs li span.tabName {
-    padding: 2px 20px 5px 5px;
-    display: inline-block;
+	padding: 2px 20px 5px 5px;
+	display: inline-block;
 }
 
 .cmeditor ul.tabs li span.changed::before {
-    content:"*";
+	content:"*";
 }
 
 .cmeditor ul.tabs li.selected {
-    background: none repeat scroll 0 0 #FFFFFF;
-    color: #222222;
-    cursor: default;
-    z-index: 3;
-    opacity:1;
+	background: none repeat scroll 0 0 #FFFFFF;
+	color: #222222;
+	cursor: default;
+	z-index: 3;
+	opacity:1;
 }
 
 .cmeditor ul.tabs .closeButton {
@@ -194,87 +194,87 @@ div.cmeditor-menu {
 }
 
 .cmeditor-completion {
-    padding-left: 22px;
-    position: relative;
+	padding-left: 22px;
+	position: relative;
 }
 
 .cm-errorhighlight {
-        background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAFklEQVQI12NgYGBgkKzc8x9CMDAwAAAmhwSbidEoSQAAAABJRU5ErkJggg==);
-        background-position: bottom;
-        background-repeat: repeat-x;
-      }
+		background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAFklEQVQI12NgYGBgkKzc8x9CMDAwAAAmhwSbidEoSQAAAABJRU5ErkJggg==);
+		background-position: bottom;
+		background-repeat: repeat-x;
+	  }
 
 /*
  * Stuff for plugins
  */
 
 .fileSelectTree {
-    margin-top: 1em;
-    border: 1px solid #aaa;
-    border-radius: 4px;
-    padding: 5px;
-    background-color: white;
+	margin-top: 1em;
+	border: 1px solid #aaa;
+	border-radius: 4px;
+	padding: 5px;
+	background-color: white;
 }
 
 .fileSelectTree ul.jqueryFileTree a:hover {
-    background-color: #5897fb;
-    color:white;
+	background-color: #5897fb;
+	color:white;
 }
 
 .fileSelectTree ul.jqueryFileTree li.selected > a{
-    font-weight: normal;
+	font-weight: normal;
 }
 
 /*
  * Stuff for fullscreen mode
  */
 div.cmeditor.cmeditor-fullscreen {
-    border:none;
-    padding:0;
-    border-radius:initial;
-    overflow-y: scroll;
-    box-sizing: border-box;
-    z-index: 95;
+	border:none;
+	padding:0;
+	border-radius:initial;
+	overflow-y: scroll;
+	box-sizing: border-box;
+	z-index: 95;
 }
 
 div.cmeditor.cmeditor-fullscreen .cmeditor-main {
-    position:static;
+	position:static;
 }
 
 div.cmeditor.cmeditor-fullscreen .cmeditor-menu {
-    z-index:97;
-    top: 20px;
+	z-index:97;
+	top: 20px;
 }
 
 div.cmeditor.cmeditor-fullscreen .CodeMirror {
-    height: calc(100% - 30px);
-    height: -moz-calc(100% - 30px);
-    height: -webkit-calc(100% - 30px);
-    height: -o-calc(100% - 30px);
+	height: calc(100% - 30px);
+	height: -moz-calc(100% - 30px);
+	height: -webkit-calc(100% - 30px);
+	height: -o-calc(100% - 30px);
 
-    padding-bottom: 0px;
+	padding-bottom: 0px;
 }
 
  div.cmeditor.cmeditor-fullscreen .ui-layout-container, .ui-layout-container * {
-    box-sizing: border-box;
+	box-sizing: border-box;
  }
 
  div.cmeditor.cmeditor-fullscreen .ui-layout-pane {
-    background:none;
-    padding:20px;
-    border:none;
+	background:none;
+	padding:20px;
+	border:none;
  }
 
  div.cmeditor.cmeditor-fullscreen .ui-layout-pane-center {
-    background: none;
-    padding: 0px;
+	background: none;
+	padding: 0px;
  }
 
 div.cmeditor.cmeditor-fullscreen .ui-layout-pane-north {
-    overflow:visible;
-    z-index: 95 !important; /*overwrite style-attribute set by jquery-layout; todo: in der doku nachgucken, da gibts scheinbar mechanismen*/
+	overflow:visible;
+	z-index: 95 !important; /*overwrite style-attribute set by jquery-layout; todo: in der doku nachgucken, da gibts scheinbar mechanismen*/
 }
 
 div.cmeditor.cmeditor-fullscreen .ui-layout-pane-north .ui-menu {
-    z-index: 96;
+	z-index: 96;
 }

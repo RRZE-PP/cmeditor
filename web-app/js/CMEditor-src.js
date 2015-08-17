@@ -11,8 +11,8 @@ this.CMEditor = (function(){
 
 		self.state.instanceNo = CMEditor.instanciated++;
 		self.state.instanceName = instanceName !== undefined ? instanceName : "";
-        if(self.state.instanceName == "")
-            log("Warning: No instance name supplied, fullscreen mode will be disabled!");
+		if(self.state.instanceName == "")
+			log("Warning: No instance name supplied, fullscreen mode will be disabled!");
 
 		self.rootElem = $(rootElem);
 		self.options  = options = options !== undefined ? options : {};
@@ -116,7 +116,7 @@ this.CMEditor = (function(){
 		}
 
 		if(hasUnsaved){
-			return clazz.instances[0].options.messages.warnings.confirmLeaving
+			return clazz.instances[0].options.messages.warnings.confirmLeaving;
 		}
 	}
 	$(window).bind("beforeunload", checkForUnsavedFiles);
@@ -251,11 +251,11 @@ this.CMEditor = (function(){
 	 */
 	var loadMode = clazz.loadMode = function(modeName, callback){
 		if(clazz.modeBaseURL === undefined){
-            log("Could not load mode. Please set the modeBaseURL", "WARNING");
+			log("Could not load mode. Please set the modeBaseURL", "WARNING");
 			return;
 		}
 
-		CodeMirror.modeURL = clazz.modeBaseURL+"%N/%N.js"
+		CodeMirror.modeURL = clazz.modeBaseURL+"%N/%N.js";
 		CodeMirror.requireMode(modeName, callback);
 	}
 
@@ -957,7 +957,7 @@ this.CMEditor = (function(){
 			if (data[i] == name)
 				return true;
 
-		return false
+		return false;
 	}
 
 	/*
@@ -1117,14 +1117,14 @@ this.CMEditor = (function(){
 		displayRemainingMessages();
 	}
 
-    /* (Public)
-     *
-     * Exports the current document as a download
-     */
-    function exportDoc(self){
-        var file = new Blob([self.state.curDoc.getContent()], {type: self.state.curDoc.getMode()+";charset=UTF-8"});
-        window.saveAs(file, self.state.curDoc.getName());
-    }
+	/* (Public)
+	 *
+	 * Exports the current document as a download
+	 */
+	function exportDoc(self){
+		var file = new Blob([self.state.curDoc.getContent()], {type: self.state.curDoc.getMode()+";charset=UTF-8"});
+		window.saveAs(file, self.state.curDoc.getName());
+	}
 
 	/* (Public)
 	 *
@@ -1227,7 +1227,7 @@ this.CMEditor = (function(){
 	 * Returns whether the whole editor is read only
 	 */
 	function isReadOnly(self){
-		return self.options.readOnly
+		return self.options.readOnly;
 	}
 
 	/* (Public)
@@ -1405,43 +1405,43 @@ this.CMEditor = (function(){
 	 */
 	function toggleFullscreen(self){
 		if(self.state.instanceName == ""){
-            return;
+			return;
 		}
 
-        if(self.state.cssBeforeFullscreen == undefined){
-            self.state.cssBeforeFullscreen = {"position": self.rootElem.css("position"),
-                                "top":  self.rootElem.css("top"),
-                                "left":  self.rootElem.css("left"),
-                                "height":  self.rootElem.css("height"),
-                                "width":  self.rootElem.css("width")};
-            self.state.oldDocumentOverflow = document.documentElement.style.overflow;
-            document.documentElement.style.overflow = "hidden";
-            self.rootElem.css({"position": "fixed", "top": "0", "left": "0", "height": "100%", "width": "100%"});
-            self.rootElem.addClass("cmeditor-fullscreen");
+		if(self.state.cssBeforeFullscreen == undefined){
+			self.state.cssBeforeFullscreen = {"position": self.rootElem.css("position"),
+			                                  "top":  self.rootElem.css("top"),
+			                                  "left":  self.rootElem.css("left"),
+			                                  "height":  self.rootElem.css("height"),
+			                                  "width":  self.rootElem.css("width")};
+			self.state.oldDocumentOverflow = document.documentElement.style.overflow;
+			document.documentElement.style.overflow = "hidden";
+			self.rootElem.css({"position": "fixed", "top": "0", "left": "0", "height": "100%", "width": "100%"});
+			self.rootElem.addClass("cmeditor-fullscreen");
 
-            self.layout = self.rootElem.layout({
-					east__paneSelector:   "#cmeditor-"+self.state.instanceName+"-easternpane",
-					center__paneSelector: "#cmeditor-"+self.state.instanceName+"-centerpane",
-					north__paneSelector:  "#cmeditor-"+self.state.instanceName+"-northernpane",
-					north__size: 75,
-					north__resizable:false
-					});
+			self.layout = self.rootElem.layout({
+				east__paneSelector:   "#cmeditor-"+self.state.instanceName+"-easternpane",
+				center__paneSelector: "#cmeditor-"+self.state.instanceName+"-centerpane",
+				north__paneSelector:  "#cmeditor-"+self.state.instanceName+"-northernpane",
+				north__size: 75,
+				north__resizable:false
+				});
 
-            self.codeMirror.refresh();
+			self.codeMirror.refresh();
 			syncTabIndent(self);
 
-        }else{
+		}else{
 
-        	self.layout.destroy();
+			self.layout.destroy();
 
-            self.rootElem.removeClass("cmeditor-fullscreen");
-            self.rootElem.css(self.state.cssBeforeFullscreen);
-            document.documentElement.style.overflow = self.state.oldDocumentOverflow;
-            self.state.cssBeforeFullscreen = undefined;
+			self.rootElem.removeClass("cmeditor-fullscreen");
+			self.rootElem.css(self.state.cssBeforeFullscreen);
+			document.documentElement.style.overflow = self.state.oldDocumentOverflow;
+			self.state.cssBeforeFullscreen = undefined;
 
-            self.codeMirror.refresh();
+			self.codeMirror.refresh();
 			syncTabIndent(self);
-        }
+		}
 	}
 
 	/* (Public)
