@@ -116,7 +116,7 @@ this.CMEditor = (function(){
 		}
 
 		if(hasUnsaved){
-			return clazz.instances[0].options.messages.hints.confirmLeaving
+			return clazz.instances[0].options.messages.warnings.confirmLeaving
 		}
 	}
 	$(window).bind("beforeunload", checkForUnsavedFiles);
