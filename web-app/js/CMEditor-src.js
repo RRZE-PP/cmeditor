@@ -108,7 +108,7 @@ this.CMEditor = (function(){
 		for(var i=0; i<clazz.instances.length; i++){
 			var instance = clazz.instances[i];
 			for(var j=0; j<instance.state.docs.length; j++){
-				if(instance.state.docs[j].needsSaving()){
+				if(instance.state.docs[j].isChanged()){
 					hasUnsaved = true;
 					break;
 				}
@@ -475,7 +475,7 @@ this.CMEditor = (function(){
 						newDoc.setCustomDataField(key, data.result[key]!=undefined?data.result[key]:"");
 					});
 
-					newDoc.markUnchanged();
+					newDoc.markStateAsSaved();
 					finishedCallback(newDoc);
 
 					if(data.msg)
@@ -520,9 +520,9 @@ this.CMEditor = (function(){
 				closeButton.off("click");
 				closeButton.on("click", function(e){close(self, newDoc);e.stopPropagation()});
 
+				newDoc.markStateAsSaved();
 				selectDocument(self, newDoc);
 				updateCurrentDocument(self);
-				markDocumentAsUnchanged(self, newDoc);
 			});
 		}
 	}
@@ -581,20 +581,16 @@ this.CMEditor = (function(){
 			// First handle the cases where a custom element corresponds to a mapped value
 			if (key == self.options.mapping.name) {
 				rename(self, getCustomElementValue(self, elem));
-				doUpdate = false;
 
 			} else if (key == self.options.mapping.mode) {
-				old = self.state.curDoc.getMode();
 				self.state.curDoc.setMode(getCustomElementValue(self, elem));
 				if(self.options.menu)
 					self.menu.update();
 
 			} else if (key == self.options.mapping.content) {
-				old = self.state.curDoc.getContent();
 				sef.curDoc.setContent(getCustomElementValue(self, elem));
 
 			} else if (key == self.options.mapping.idField) {
-				old = self.state.curDoc.getID();
 				sef.curDoc.setID(getCustomElementValue(self, elem));
 
 			}
@@ -613,9 +609,7 @@ this.CMEditor = (function(){
 				}
 			}
 
-			if (doUpdate) {
-				updateCurrentDocument(self, {cmeditor_custom_field: true, old:old, new:getCustomElementValue(self, elem)});
-			}
+			update(self);
 		}
 
 		log(self, "The user changed a custom element", "INFO");
@@ -781,6 +775,7 @@ this.CMEditor = (function(){
 			});
 
 			self.state.initialDoc = newDoc;
+			newDoc.markStateAsSaved();
 			insertNewDocument(self, newDoc);
 		}
 	}
@@ -851,7 +846,7 @@ this.CMEditor = (function(){
 	function removeUntitledDocument(self) {
 		if (self.state.docs.length > 1) {
 			var doc = self.state.initialDoc;
-			if (doc !== null && doc.isNew()) {
+			if (doc !== null && !doc.isChanged()) {
 				removeDocument(self, doc);
 			}
 			self.state.initialDoc = null;
@@ -973,20 +968,15 @@ this.CMEditor = (function(){
 	 * Returns:    Boolean whether this document has changed
 	 */
 	function updateCurrentDocument(self, cmChangeObjects) {
-		var docName = "no curDoc";
 		var changed = false;
 
 		if (self.state.curDoc) {
-			docName = self.state.curDoc.getName();
-
 			if (self.state.curDoc.getMode() != self.codeMirror.getOption("mode")) {
 				setMode(self, self.state.curDoc.getMode());
-				changed = true;
 			}
 
 			if (cmChangeObjects && !cmChangeObjects.propertyIsEnumerable("cmeditor_custom_field")) {
 				self.state.curDoc.setContent(self.state.curDoc.getCMDoc().getValue());
-				changed = true;
 			}
 
 			if (self.state.curDoc.isReadOnly() != self.codeMirror.getOption("readOnly")) {
@@ -997,18 +987,10 @@ this.CMEditor = (function(){
 				}
 			}
 
-			if (cmChangeObjects && cmChangeObjects.propertyIsEnumerable("cmeditor_custom_field")) {
-				changed = true;
-			}
-
-			if (changed || cmChangeObjects) {
+			if(self.state.curDoc.isChanged())
 				markDocumentAsChanged(self, self.state.curDoc);
-				if (self.state.curDoc.isNew()) {
-					self.state.curDoc.markUnsaved();
-				} else if (self.state.curDoc.isUnchanged()) {
-					self.state.curDoc.markChanged()
-				}
-			}
+			else
+				markDocumentAsUnchanged(self, self.state.curDoc);
 
 			writeCurrentDocToForm(self);
 		}
@@ -1053,7 +1035,7 @@ this.CMEditor = (function(){
 			}
 		}
 
-		if (closeThis.needsSaving()) {
+		if (closeThis.isChanged()) {
 			var button = {};
 			button[self.options.messages.buttons.close] = function() {
 				removeFolderIfPossible();
@@ -1261,12 +1243,6 @@ this.CMEditor = (function(){
 		if(newFolder === self.state.curDoc.getFolder())
 			return;
 
-		//REFACTOR: document should keep track of this!
-		if(self.state.curDoc.isNew() || self.state.curDoc.isUnsaved())
-			self.state.curDoc.markUnsaved();
-		else
-			self.state.curDoc.markChanged();
-
 		self.state.curDoc.setFolder(newFolder);
 	}
 
@@ -1350,11 +1326,6 @@ this.CMEditor = (function(){
 		self.state.curDoc.setName(newName);
 		markDocumentAsChanged(self, self.state.curDoc);
 
-		if(self.state.curDoc.isRenamed())
-			self.state.curDoc.markUnsaved();
-		else
-			self.state.curDoc.markChanged();
-
 		updateCurrentDocument(self);
 	}
 
@@ -1423,7 +1394,9 @@ this.CMEditor = (function(){
 
 		loadMode(cmMode.mode, function(){
 			log(self, "Setting a mode:", "DEBUG", mode)
-			self.codeMirror.setOption("mode", cmMode.mime); update(self);
+			self.codeMirror.setOption("mode", cmMode.mime);
+			self.state.curDoc.setMode(cmMode.mime);
+			update(self);
 		});
 	}
 
@@ -1486,15 +1459,12 @@ this.CMEditor = (function(){
 				var mode = self.codeMirror.getOption("mode");
 				self.state.curDoc.setMode(mode);
 				setMode(self, mode);
-
-				markDocumentAsChanged(self, self.state.curDoc);
-
-				if (self.state.curDoc.isNew()){
-					self.state.curDoc.markUnsaved();
-				}else if(self.state.curDoc.isUnchanged()){
-					self.state.curDoc.markChanged();
-				}
 			}
+
+			if(self.state.curDoc.isChanged())
+				markDocumentAsChanged(self, self.state.curDoc);
+			else
+				markDocumentAsUnchanged(self, self.state.curDoc);
 
 			updateCurrentDocument(self);
 		}
@@ -1583,12 +1553,14 @@ this.CMEditor = (function(){
 		this.idField = null;
 		this.mode = mode;
 		this.name = name;
-		this.origContent = content;
-		this.origName = name;
 		this.readOnly = readOnly;
-		this.status = "new";
+
 		this.customData = {};
 		this.tabElem = null;
+
+		this.savedState = {
+			customData: {}
+		};
 
 		if(cmDoc === undefined)
 			this.codeMirrorDoc = new CodeMirror.Doc(content, mode);
@@ -1596,13 +1568,31 @@ this.CMEditor = (function(){
 			this.codeMirrorDoc = cmDoc;
 	}
 
-	Doc.status = {NEW: "new",             // the document has never been saved and has not been changed yet
-				  UNSAVED: "unsaved",     // the document has never been saved and has been changed
-				  CHANGED: "changed",     // the document has been saved or opened and has been changed since
-				  UNCHANGED: "unchanged", // the document has been saved or opened and not been changed since
-				 };
-
 	Doc.prototype.constructor = Doc;
+
+	Doc.prototype.markStateAsSaved = function(){
+		this.savedState.folder 	= this.folder;
+		this.savedState.idField = this.idField;
+		this.savedState.mode 	= this.mode;
+		this.savedState.content = this.content;
+
+		for(var key in this.customData){
+			this.savedState.customData[key] = this.customData[key];
+		}
+	}
+
+	Doc.prototype.isChanged = function(){
+		for(var key in this.customData){
+			if(typeof this.savedState.customData[key] === "undefined"
+				|| this.customData[key] !== this.savedState.customData[key])
+				return true;
+		}
+
+		return this.folder !== this.savedState.folder
+				|| this.idField !== this.savedState.idField
+				|| this.mode !== this.savedState.mode
+				|| this.content !== this.savedState.content;
+	}
 
 	//Getter
 	Doc.prototype.getCMDoc    = function(){return this.codeMirrorDoc};
@@ -1613,23 +1603,13 @@ this.CMEditor = (function(){
 	Doc.prototype.getID       = function(){return this.idField};
 	Doc.prototype.getMode     = function(){return this.mode};
 	Doc.prototype.getName     = function(){return this.name};
-	Doc.prototype.getOrigContent = function(){return this.origContent};
+	Doc.prototype.getOrigContent = function(){return this.savedState.content};
 	Doc.prototype.getTabElem  = function(){return this.tabElem};
 	Doc.prototype.hasID       = function(){return this.idField !== undefined};
-	Doc.prototype.isNew       = function(){return this.status == Doc.status.NEW};
-	Doc.prototype.isChanged   = function(){return this.status == Doc.status.CHANGED};
-	Doc.prototype.isUnchanged = function(){return this.status == Doc.status.UNCHANGED};
-	Doc.prototype.isUnsaved   = function(){return this.status == Doc.status.UNSAVED};
-	Doc.prototype.needsSaving = function(){return this.status == Doc.status.UNSAVED || this.status == Doc.status.CHANGED};
 	Doc.prototype.isReadOnly  = function(){return this.readOnly};
-	Doc.prototype.isRenamed   = function(){return this.name != this.origName};
 
 	//Setter
 	Doc.prototype.setCustomDataField = function(key, value){this.customData[key] = value};
-	Doc.prototype.markNew       = function(){this.status = Doc.status.NEW};
-	Doc.prototype.markChanged   = function(){this.status = Doc.status.CHANGED};
-	Doc.prototype.markUnsaved   = function(){this.status = Doc.status.UNSAVED};
-	Doc.prototype.markUnchanged = function(){this.status = Doc.status.UNCHANGED};
 	Doc.prototype.setContent    = function(content){this.content = content};
 	Doc.prototype.setFolder     = function(folder){this.folder = folder};
 	Doc.prototype.setID         = function(id){this.idField = id};
