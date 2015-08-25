@@ -437,7 +437,7 @@ this.CMEditorMenu = (function(){
 				self.dialogs.gotoDialog.dialog("option", "buttons", buttons);
 				self.dialogs.gotoDialog.dialog("open");
 			 },
-			addonfullscreen: function(cm) {
+			fullscreen: function(cm) {
 				self.cmeditor.toggleFullscreen();
 		    }
 		}
@@ -488,7 +488,7 @@ this.CMEditorMenu = (function(){
 
 		self.menus.addonsMenu = {
 			addondonation: function(cm) {
-				 self.rootElem.find(".donationDialog").css("display", "block")
+				self.dialogs.donationDialog.dialog("open");
 			},
 		};
 	}
