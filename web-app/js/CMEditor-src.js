@@ -74,7 +74,8 @@ this.CMEditor = (function(){
 				e.preventDefault();
 			}
 
-			if(e.which == 122 && !self.codeMirror.getOption("readOnly") && (self.rootElem.find("*:focus").size() > 0 || self.codeMirror.hasFocus())){
+			//122 == F11
+			if(e.which == 122 && (self.rootElem.find("*:focus").size() > 0 || self.codeMirror.hasFocus())){
 				toggleFullscreen(self);
 				e.preventDefault();
 			}
