@@ -45,7 +45,7 @@
 				<li><a href="#" value="diff"><span class="ui-icon ui-icon-transferthick-e-w"></span><g:message code="cmeditor.menu.menus.view.diff" /></a></li>
 				<li><a href="#" value="goto"><span class="ui-icon ui-icon-arrowreturnthick-1-e"></span><g:message code="cmeditor.menu.menus.view.goto" /></a></li>
 				<li><a href="#" value="addonfullscreen"><span class="ui-icon ui-icon-arrow-4-diag"></span><g:message code="cmeditor.menu.menus.view.fullscreen" /> (f11)</a></li>
-				<li><a href="#"><span></span><g:message code="cmeditor.menu.menus.view.mode" /> (f11)</a>
+				<li><a href="#"><span></span><g:message code="cmeditor.menu.menus.view.mode" /></a>
 					<ul class="modesMenu ui-menu-icons">
 					</ul>
 				</li>
