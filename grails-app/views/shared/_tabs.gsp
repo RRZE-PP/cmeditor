@@ -21,16 +21,14 @@
 		<div class="cmeditor-settings"></div>
 		</div>
 	<div class="cmeditor-main">
-		<form method="post">
-			<div id="cmeditor-${name}-easternpane">
-				${bodyContent}
-			</div>
-			<div id="cmeditor-${name}-centerpane">
-				<ul class="docs tabs"></ul>
+		<div id="cmeditor-${name}-easternpane" class="customBody">
+			${bodyContent}
+		</div>
+		<div id="cmeditor-${name}-centerpane">
+			<ul class="docs tabs"></ul>
 
-				<textarea class="cmTarget"></textarea>
-			</div>
-		</form>
+			<textarea class="cmTarget"></textarea>
+		</div>
 	</div>
 </div>
 <script type="text/javascript">

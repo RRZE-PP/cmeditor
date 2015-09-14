@@ -381,7 +381,7 @@ this.CMEditor = (function(){
 	 *	Registers event listeners for user interaction
 	 */
 	function initEventListeners(self){
-		var mainForm = self.rootElem.find(".cmeditor-main form");
+		var customBody = self.rootElem.find(".cmeditor-main .customBody");
 
 		//switch tabs
 		self.rootElem.find(".tabs").delegate("li", "click", function(e) {
@@ -393,9 +393,9 @@ this.CMEditor = (function(){
 		});
 
 		//changes in custom inputs
-		mainForm.find(".cmeditor-field").keyup(function() { customElementChanged(self, $(this));});
-		mainForm.find("select.cmeditor-field").change(function() {customElementChanged(self, $(this));});
-		mainForm.find("input[type='checkbox'].cmeditor-field").change(function() { customElementChanged(self, $(this));});
+		customBody.find(".cmeditor-field").keyup(function() { customElementChanged(self, $(this));});
+		customBody.find("select.cmeditor-field").change(function() {customElementChanged(self, $(this));});
+		customBody.find("input[type='checkbox'].cmeditor-field").change(function() { customElementChanged(self, $(this));});
 	}
 
 	/*
@@ -464,8 +464,8 @@ this.CMEditor = (function(){
 					                        readWrite ? false : ((self.options.readOnly || self.options.defaultReadOnly) ? true : false));
 					newDoc.setID(data.result[self.options.mapping.idField]);
 
-					//insert custom data, if it is present in the form
-					self.rootElem.find("form .cmeditor-field").each(function(){
+					//insert custom data, if it is present in the provided data
+					self.rootElem.find(".customBody .cmeditor-field").each(function(){
 						var elem = $(this);
 						var key = elem.attr("name");
 
@@ -775,8 +775,8 @@ this.CMEditor = (function(){
 									(self.options.readOnly||self.options.defaultReadOnly)?true:false);
 
 
-			//insert custom data, if it is present in the form
-			self.rootElem.find("form .cmeditor-field").each(function(){
+			//insert custom data, if it is present in the provided data
+			self.rootElem.find(".customBody .cmeditor-field").each(function(){
 				var elem = $(this);
 				var key = elem.attr("name");
 				newDoc.setCustomDataField(key, elem.attr('value')!=undefined?elem.attr('value'):"");
@@ -1354,7 +1354,7 @@ this.CMEditor = (function(){
 				};
 			diff(self, additionalButtons);
 		} else {
-			self.rootElem.find(".cmeditor-main form").submit();
+			ajax_update(self);
 		}
 
 	}
@@ -1486,7 +1486,7 @@ this.CMEditor = (function(){
 	function writeCurrentDocToForm(self) {
 		executeHooks(self, "preSerializeDoc", self.rootElem, [self.state.curDoc]);
 
-		self.rootElem.find("form .cmeditor-field").each(function(){
+		self.rootElem.find(".customBody .cmeditor-field").each(function(){
 			var elem = $(this);
 			var key = elem.attr("name");
 
