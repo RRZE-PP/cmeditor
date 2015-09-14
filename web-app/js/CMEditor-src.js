@@ -469,11 +469,18 @@ this.CMEditor = (function(){
 						var elem = $(this);
 						var key = elem.attr("name");
 
+						//ignore mapped values
 						if(listContainsElem(self, Object.keys(self.options.mapping), key))
 							return true; //jquery-Each continue
 
-						elem.val(data.result[key]);
-						newDoc.setCustomDataField(key, data.result[key]!=undefined?data.result[key]:"");
+						var value = data.result;
+						var subkeys = key.split(".");
+						for(var i=0; i<subkeys.length; i++){
+							if(value !== null && typeof value !== "undefined")
+								value = value[subkeys[i]];
+						}
+						elem.val(value);
+						newDoc.setCustomDataField(key, value != undefined ? value : "");
 					});
 
 					newDoc.markStateAsSaved();
@@ -573,7 +580,7 @@ this.CMEditor = (function(){
 	 * Triggered, when a custom input was changed
 	 */
 	function customElementChanged(self, elem) {
-		var key = elem.attr("id");
+		var key = elem.attr("name");
 
 		if (self.state.curDoc) {
 			var old = null;
