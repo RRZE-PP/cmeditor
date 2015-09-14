@@ -6,6 +6,7 @@ this.CMEditor = (function(){
 	function CMEditor(rootElem, options, instanceName){
 		//allow the user to omit new
 		if (!(this instanceof CMEditor)) return new CMEditor(rootElem, options, instanceName);
+
 		var self = this;
 		self.state = {};
 
@@ -25,6 +26,8 @@ this.CMEditor = (function(){
 		for(var hookName in options.hooks){
 			on(self, hookName, options["hooks"][hookName]);
 		}
+
+		executeHooks(self, "preInitialization", self, [rootElem, options, instanceName]);
 
 		initDialogs(self);
 		initEventListeners(self);
@@ -87,6 +90,8 @@ this.CMEditor = (function(){
 		}
 
 		registerInstance(self.state.instanceName, self.state.instanceNo, self);
+
+		executeHooks(self, "postInitialization", self, [rootElem, options, instanceName]);
 	}
 
 	/*************************************************************************
@@ -100,6 +105,7 @@ this.CMEditor = (function(){
 	clazz.instances = [];
 	clazz.loadedResources = [];
 	clazz.eventHooks = {};
+	clazz.filteredEventHooks = {};
 
 	/*
 	 * Checks if any files are unsaved in any instance and warns the user
@@ -204,13 +210,33 @@ this.CMEditor = (function(){
 	 *     postMenuInit: Fired after the menu of this CMEditor is initiated, i.e. after its constructor has been called
 	 *                  Your callback will be called in the context of the menu's root element and passed the menu object as first
 	 *                  argument
+	 *     preInitialization: Fired inside the constructor of the CMEditor, after a minimal state of the object was created
+	 *                  Your callback will be called in the context of the CMEditor to be created and it will be passed the same arguments
+	 *                  as the constructor (the rootElement, the options and the instance name)
+	 *     postInitialization: Fired inside the constructor of the CMEditor, after any other instruction was executed (right before return)
+	 *                  Your callback will be called in the context of the CMEditor to be created and it will be passed the same arguments
+	 *                  as the constructor (the rootElement, the options and the instance name)
+	 *
+	 * Parameters: eventName String: the event's name as mentioned above
+	 *             hook Function: the function to call
+	 *             nameFilter String (optional): execute only for instances whose name matches this String
 	 *
 	 */
-	var staticOn = clazz.on = function(eventName, hook){
-		if(typeof clazz.eventHooks[eventName] === "undefined")
-			clazz.eventHooks[eventName] = [];
+	var staticOn = clazz.on = function(eventName, hook, nameFilter){
+		if(typeof nameFilter === "undefined"){
+			if(typeof clazz.eventHooks[eventName] === "undefined")
+				clazz.eventHooks[eventName] = [];
 
-		clazz.eventHooks[eventName].push(hook);
+			clazz.eventHooks[eventName].push(hook);
+		}else{
+			if(typeof clazz.filteredEventHooks[nameFilter] === "undefined")
+				clazz.filteredEventHooks[nameFilter] = {};
+
+			if(typeof clazz.filteredEventHooks[nameFilter][eventName] === "undefined")
+				clazz.filteredEventHooks[nameFilter][eventName] = [];
+
+			clazz.filteredEventHooks[nameFilter][eventName].push(hook);
+		}
 	}
 
 	/*
@@ -692,7 +718,7 @@ this.CMEditor = (function(){
 	 *             args Array: the parameters to pass to the hook as an array
 	 */
 	function executeHooks(self, eventName, context, args){
-		for(var i=0; self.state.eventHooks[eventName] && i<self.state.eventHooks[eventName].length; i++){
+		for(var i=0; self.state && self.state.eventHooks[eventName] && i<self.state.eventHooks[eventName].length; i++){
 			if(typeof self.state.eventHooks[eventName][i] === "function")
 				self.state.eventHooks[eventName][i].apply(context, args);
 			else
@@ -704,6 +730,15 @@ this.CMEditor = (function(){
 				clazz.eventHooks[eventName][i].apply(context, args);
 			else
 				log(self, "A hook was not executed because it is not a function", "WARNING");
+		}
+
+		if(clazz.filteredEventHooks[self.state.instanceName] !== undefined){
+			for(var i=0; clazz.filteredEventHooks[self.state.instanceName][eventName] && i<clazz.filteredEventHooks[self.state.instanceName][eventName].length; i++){
+				if(typeof clazz.filteredEventHooks[self.state.instanceName][eventName][i] === "function")
+					clazz.filteredEventHooks[self.state.instanceName][eventName][i].apply(context, args);
+				else
+					log(self, "A hook was not executed because it is not a function", "WARNING");
+			}
 		}
 	}
 
