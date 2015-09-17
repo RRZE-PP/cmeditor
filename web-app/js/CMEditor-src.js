@@ -683,7 +683,8 @@ this.CMEditor = (function(){
 	function decorateDiffDialog(self) {
 		log(self, "Decorating a diff dialog", "INFO");
 
-		var base    = difflib.stringAsLines(self.state.curDoc.getOrigContent()),
+		var origContent = self.state.curDoc.getOrigContent();
+		var base    = difflib.stringAsLines(typeof origContent !== "undefined"? origContent : ""),
 			newtxt  = difflib.stringAsLines(self.state.curDoc.getContent()),
 			diffoutputdiv = self.dialogs.diffDialog.find(".diffoutput"),
 			contextSize   = self.dialogs.diffDialog.find("input[name=contextSize]").val();
