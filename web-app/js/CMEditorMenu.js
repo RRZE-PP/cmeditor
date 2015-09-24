@@ -258,7 +258,7 @@ this.CMEditorMenu = (function(){
 							self.dialogs.openDialog.dialog("option", "buttons", buttons);
 							self.dialogs.openDialog.dialog("open");
 						} else {
-							self.cmeditor.displayMessage(data.msg);
+							self.cmeditor.displayMessage(data.msg ? data.msg : "An unknown error occured");
 						}
 					}).fail(function(XMLHttpRequest,textStatus,errorThrown){self.cmeditor.displayMessage(self.options.menu.messages.errorIntro+" "+ textStatus +" " + errorThrown);});
 				}

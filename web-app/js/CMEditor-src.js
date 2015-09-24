@@ -515,7 +515,7 @@ this.CMEditor = (function(){
 					if(data.msg)
 						displayMessage(self, data.msg);
 				} else {
-					displayMessage(self, data.msg);
+					displayMessage(self, data.msg ? data.msg : "An unknown error occured");
 				}
 			},
 
