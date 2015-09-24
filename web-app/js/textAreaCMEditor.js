@@ -24,6 +24,8 @@ this.textAreaCMEditor = function (){
 			on(self, hookName, options["hooks"][hookName]);
 		}
 
+		executeHooks(self, "preInitialization", self, [rootElem, options, instanceName]);
+
 		init(self, rootElem, options);
 
 		if(options.menu){
@@ -50,6 +52,8 @@ this.textAreaCMEditor = function (){
 		}
 
 		registerInstance(self.state.instanceName, self.state.instanceNo, self);
+
+		executeHooks(self, "postInitialization", self, [rootElem, options, instanceName]);
 	}
 
 	/*************************************************************************
@@ -62,7 +66,8 @@ this.textAreaCMEditor = function (){
 	clazz.instancesString = {};
 	clazz.instances = [];
 	clazz.loadedResources = [];
-	clazz.eventHooks = {}
+	clazz.eventHooks = {};
+	clazz.filteredEventHooks = {};
 
 	/*
 	 * Logs to the console. If possible prefixed by class name, instance number. The default logLevel is INFO.
@@ -189,20 +194,40 @@ this.textAreaCMEditor = function (){
 	/*
 	 * Can be used to register callbacks for events statically (i.e. for all instances)
 	 *
-	 * Events in textAreaCMEditor which can be set only statically:
+	 * Events in CMEditor which can be set only statically:
 	 *
-	 *     preMenuInit: Fired before the menu of this textAreaCMEditor is initiated, i.e. before its constructor is called
+	 *     preMenuInit: Fired before the menu of this CMEditor is initiated, i.e. before its constructor is called
 	 *                  Your callback will be called in the context of the menu's root element
-	 *     postMenuInit: Fired after the menu of this textAreaCMEditor is initiated, i.e. after its constructor has been called
+	 *     postMenuInit: Fired after the menu of this CMEditor is initiated, i.e. after its constructor has been called
 	 *                  Your callback will be called in the context of the menu's root element and passed the menu object as first
 	 *                  argument
+	 *     preInitialization: Fired inside the constructor of the CMEditor, after a minimal state of the object was created
+	 *                  Your callback will be called in the context of the CMEditor to be created and it will be passed the same arguments
+	 *                  as the constructor (the rootElement, the options and the instance name)
+	 *     postInitialization: Fired inside the constructor of the CMEditor, after any other instruction was executed (right before return)
+	 *                  Your callback will be called in the context of the CMEditor to be created and it will be passed the same arguments
+	 *                  as the constructor (the rootElement, the options and the instance name)
+	 *
+	 * Parameters: eventName String: the event's name as mentioned above
+	 *             hook Function: the function to call
+	 *             nameFilter String (optional): execute only for instances whose name matches this String
 	 *
 	 */
-	var staticOn = clazz.on = function(eventName, hook){
-		if(typeof clazz.eventHooks[eventName] === "undefined")
-			clazz.eventHooks[eventName] = [];
+	var staticOn = clazz.on = function(eventName, hook, nameFilter){
+		if(typeof nameFilter === "undefined"){
+			if(typeof clazz.eventHooks[eventName] === "undefined")
+				clazz.eventHooks[eventName] = [];
 
-		clazz.eventHooks[eventName].push(hook);
+			clazz.eventHooks[eventName].push(hook);
+		}else{
+			if(typeof clazz.filteredEventHooks[nameFilter] === "undefined")
+				clazz.filteredEventHooks[nameFilter] = {};
+
+			if(typeof clazz.filteredEventHooks[nameFilter][eventName] === "undefined")
+				clazz.filteredEventHooks[nameFilter][eventName] = [];
+
+			clazz.filteredEventHooks[nameFilter][eventName].push(hook);
+		}
 	}
 
 	/*************************************************************************
@@ -210,16 +235,19 @@ this.textAreaCMEditor = function (){
 	 *************************************************************************/
 
 	/*
-	 * Executes all hooks that were registered using `on` or `textAreaCMEditor.on` on `eventName`
+	 * Executes all hooks that were registered using `on` on `eventName`, either per-instance or on all
+	 * instances using `textAreaCMEditor.on`
 	 *
 	 * Parameters: eventName String: the event of which all hooks should be called
 	 *             context Object: the object that `this` should be set to in the hook
 	 *             args Array: the parameters to pass to the hook as an array
 	 */
 	function executeHooks(self, eventName, context, args){
-		for(var i=0; self.state.eventHooks[eventName] && i<self.state.eventHooks[eventName].length; i++){
+		for(var i=0; self.state && self.state.eventHooks[eventName] && i<self.state.eventHooks[eventName].length; i++){
 			if(typeof self.state.eventHooks[eventName][i] === "function")
 				self.state.eventHooks[eventName][i].apply(context, args);
+			else
+				log(self, "A hook was not executed because it is not a function", "WARNING");
 		}
 
 		for(var i=0; clazz.eventHooks[eventName] && i<clazz.eventHooks[eventName].length; i++){
@@ -227,6 +255,15 @@ this.textAreaCMEditor = function (){
 				clazz.eventHooks[eventName][i].apply(context, args);
 			else
 				log(self, "A hook was not executed because it is not a function", "WARNING");
+		}
+
+		if(clazz.filteredEventHooks[self.state.instanceName] !== undefined){
+			for(var i=0; clazz.filteredEventHooks[self.state.instanceName][eventName] && i<clazz.filteredEventHooks[self.state.instanceName][eventName].length; i++){
+				if(typeof clazz.filteredEventHooks[self.state.instanceName][eventName][i] === "function")
+					clazz.filteredEventHooks[self.state.instanceName][eventName][i].apply(context, args);
+				else
+					log(self, "A hook was not executed because it is not a function", "WARNING");
+			}
 		}
 	}
 

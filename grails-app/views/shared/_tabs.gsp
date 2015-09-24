@@ -1,37 +1,54 @@
-<div id="${name}" class="cmeditor">
+<div id="${name}" class="cmeditor" style="height:100px; overflow:hidden;position:relative">
+	<div class="loadingSpinner" style="background-color:#555;opacity:0.8; z-index:10000; height:100%;width:100%;position:absolute;top:0;left:0">&nbsp;</div>
 	<style></style>
-	<div class="dialogContainer">
-		<div class="dialog diffDialog" title="${g.message(code:'cmeditor.dialogs.diff')}" style="display: none;">
-			<p class="noChanges"><g:message code="cmeditor.dialogs.diff.noChanges" /></p>
-			<div class="diffoutput"></div>
-			<p><strong><g:message code="cmeditor.dialogs.diff.contextSize" /></strong><input name="contextSize" value="1" type="number" autofocus="autofocus"/></p>
-			<p><input type="radio" value="0" name="_viewType" id="sidebyside" checked="checked"/>
-			<label for="sidebyside"><g:message code="cmeditor.dialogs.diff.sideBySide" /></label>
-			&nbsp; &nbsp; <input type="radio" value="1" name="_viewType" id="inline" />
-			<label for="inline"><g:message code="cmeditor.dialogs.diff.inline" /></label> </p>
-		</div>
-		<div class="dialog warningDialog" title="${g.message(code:'cmeditor.dialogs.warning')}" style="display: none;"></div>
-	</div>
-	<div id="cmeditor-${name}-northernpane">
-		<div class="cmeditor-tab-message" style="display:none;"></div>
 
-		<g:if test="${options.menu}">
-				<g:render template="/shared/menu" plugin="cmeditor" model="[name:name, options:options]"></g:render>
-		</g:if>
-		<div class="cmeditor-settings"></div>
+	<div class="loadingContainer" style="height:0px;overflow:hidden">
+		<div class="dialogContainer">
+			<div class="dialog diffDialog" title="${g.message(code:'cmeditor.dialogs.diff')}" style="display: none;">
+				<p class="noChanges"><g:message code="cmeditor.dialogs.diff.noChanges" /></p>
+				<div class="diffoutput"></div>
+				<p><strong><g:message code="cmeditor.dialogs.diff.contextSize" /></strong><input name="contextSize" value="1" type="number" autofocus="autofocus"/></p>
+				<p><input type="radio" value="0" name="_viewType" id="sidebyside" checked="checked"/>
+				<label for="sidebyside"><g:message code="cmeditor.dialogs.diff.sideBySide" /></label>
+				&nbsp; &nbsp; <input type="radio" value="1" name="_viewType" id="inline" />
+				<label for="inline"><g:message code="cmeditor.dialogs.diff.inline" /></label> </p>
+			</div>
+			<div class="dialog warningDialog" title="${g.message(code:'cmeditor.dialogs.warning')}" style="display: none;"></div>
 		</div>
-	<div class="cmeditor-main">
-		<div id="cmeditor-${name}-easternpane" class="customBody">
-			${bodyContent}
-		</div>
-		<div id="cmeditor-${name}-centerpane">
-			<ul class="docs tabs"></ul>
+		<div id="cmeditor-${name}-northernpane">
+			<div class="cmeditor-tab-message" style="display:none;"></div>
 
-			<textarea class="cmTarget"></textarea>
+			<g:if test="${options.menu}">
+					<g:render template="/shared/menu" plugin="cmeditor" model="[name:name, options:options]"></g:render>
+			</g:if>
+			<div class="cmeditor-settings"></div>
+			</div>
+		<div class="cmeditor-main">
+			<div id="cmeditor-${name}-easternpane" class="customBody">
+				${bodyContent}
+			</div>
+			<div id="cmeditor-${name}-centerpane">
+				<ul class="docs tabs"></ul>
+
+				<textarea class="cmTarget"></textarea>
+			</div>
 		</div>
 	</div>
 </div>
 <script type="text/javascript">
+	(function(){
+		var initializationSpinner = new Spinner({lines: 9, width: 12, length: 0, radius: 18, corners: 0.9,
+		            opacity: 0, trail: 79, shadow: true, className: ""});
+		initializationSpinner.spin($("#${name} .loadingSpinner").get(0));
+		CMEditor.on("postInitialization",
+					function(){
+						$("#${name}").attr('style', '')
+						$("#${name} .loadingContainer").children().appendTo("#${name}")
+						$("#${name} .loadingSpinner").remove();
+						initializationSpinner.stop();
+					},
+				 	"${name}");
+	})();
 
 	<plugin:isAvailable name="resources">
 	CMEditor.themeBaseURL = "${resource(dir: '/static/lib/codemirror-5.3/theme/')}";

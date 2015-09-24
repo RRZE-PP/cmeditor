@@ -1,12 +1,29 @@
-<div id="${name}" class="cmeditor">
+<div id="${name}" class="cmeditor" style="height:100px; overflow:hidden;position:relative">
+	<div class="loadingSpinner" style="background-color:#555;opacity:0.8; z-index:10000; height:100%;width:100%;position:absolute;top:0;left:0">&nbsp;</div>
 	<style></style>
-	<g:if test="${options.menu}"><div  id="cmeditor-${name}-northernpane"><g:render template="/shared/menu" plugin="cmeditor" model="[name:name, options:options]"></g:render></div></g:if>
-	<div class="cmeditor-settings"></div>
-	<div  id="cmeditor-${name}-centerpane" class="cmeditor-main">
-		<g:textArea  name="${name}" value="${value}" />
+
+	<div class="loadingContainer" style="height:0px;overflow:hidden">
+		<g:if test="${options.menu}"><div  id="cmeditor-${name}-northernpane"><g:render template="/shared/menu" plugin="cmeditor" model="[name:name, options:options]"></g:render></div></g:if>
+		<div class="cmeditor-settings"></div>
+		<div  id="cmeditor-${name}-centerpane" class="cmeditor-main">
+			<g:textArea  name="${name}" value="${value}" />
+		</div>
 	</div>
 </div>
 <script type="text/javascript">
+	(function(){
+		var initializationSpinner = new Spinner({lines: 9, width: 12, length: 0, radius: 18, corners: 0.9,
+		            opacity: 0, trail: 79, shadow: true, className: ""});
+		initializationSpinner.spin($("#${name} .loadingSpinner").get(0));
+		textAreaCMEditor.on("postInitialization",
+					function(){
+						$("#${name}").attr('style', '')
+						$("#${name} .loadingContainer").children().appendTo("#${name}")
+						$("#${name} .loadingSpinner").remove();
+						initializationSpinner.stop();
+					},
+					"${name}");
+	})();
 
 	<plugin:isAvailable name="resources">
 	textAreaCMEditor.themeBaseURL = "${resource(dir: '/static/lib/codemirror-5.3/theme/')}";
