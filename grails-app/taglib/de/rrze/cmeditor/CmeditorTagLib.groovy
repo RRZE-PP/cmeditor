@@ -1,5 +1,7 @@
 package de.rrze.cmeditor
 
+import org.apache.commons.lang.RandomStringUtils
+
 class CmeditorTagLib {
 
 	static namespace = "cmeditor"
@@ -74,7 +76,17 @@ class CmeditorTagLib {
 		if(attrs.availableModes)
 			availableModes = attrs.availableModes
 
-		out << render(template:"/shared/textArea", plugin:'cmeditor', model:[name: attrs.name, value: attrs.value, mode:attrs.mode, options:options, mapping:mapping, ajax:ajax, body: body, availableModes: availableModes, availableThemes: availableThemes])
+		out << render(template:"/shared/textArea", plugin:'cmeditor',
+						model:
+							[name: attrs.name ? attrs.name : RandomStringUtils.randomAlphanumeric(125),
+							 value: attrs.value,
+							 mode: attrs.mode,
+							 options: options,
+							 mapping: mapping,
+							 ajax: ajax,
+							 body: body,
+							 availableModes: availableModes,
+							 availableThemes: availableThemes])
 	}
 
 	def tabs = { attrs, body ->
@@ -155,6 +167,16 @@ class CmeditorTagLib {
 			availableModes = attrs.availableModes
 
 		def bodyContent = raw(body())
-		out << render(template:"/shared/tabs", plugin:'cmeditor', model:[name: attrs.name, value: attrs.value, mode:attrs.mode, options:options, mapping:mapping, ajax:ajax, bodyContent: bodyContent, availableModes: availableModes, availableThemes: availableThemes])
+		out << render(template:"/shared/tabs", plugin:'cmeditor',
+						model:
+							[name: attrs.name ? attrs.name : RandomStringUtils.randomAlphanumeric(125),
+							 value: attrs.value,
+							 mode: attrs.mode,
+							 options: options,
+							 mapping: mapping,
+							 ajax: ajax,
+							 bodyContent: bodyContent,
+							 availableModes: availableModes,
+							 availableThemes: availableThemes])
 	}
 }

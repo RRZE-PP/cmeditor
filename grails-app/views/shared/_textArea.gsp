@@ -18,6 +18,10 @@
 	textAreaCMEditor.modeBaseURL = "${assetPath(src: 'codemirror-5.3/mode/')}";
 	</plugin:isAvailable>
 
+	if("${name}".length === 125){
+		console.log("WARNING: It looks like you forgot to specify a name-attribute in the cmeditor:textArea-tag. No worries, I generated one for you. However this might lead to collisions! You have been warned.");
+	}
+
 	$(document).ready(function() {
 		var textAreaCMEditorOptions = {
 			binding: "${options.binding}",                           //String:  the initial key-binding of the codeMirror

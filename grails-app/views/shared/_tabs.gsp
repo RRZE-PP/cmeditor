@@ -43,6 +43,10 @@
 	CMEditor.modeBaseURL = "${assetPath(src: 'codemirror-5.3/mode/')}";
 	</plugin:isAvailable>
 
+	if("${name}".length === 125){
+		console.log("WARNING: It looks like you forgot to specify a name-attribute in the cmeditor:tabs-tag. No worries, I generated one for you. However this might lead to collisions! You have been warned.");
+	}
+
 	$(document).ready(function() {
 		var codeMirrorEditorOptions = {
 			addModes: <g:if test="${options.addModes}">${options.addModes}</g:if><g:else>[]</g:else>,
