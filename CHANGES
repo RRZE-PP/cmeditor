@@ -1,3 +1,13 @@
+Version 2.5.1 (Sep 2015)
+* New: allow nested objects in customData
+* New: permit putting cmeditor inside a form
+* New: global hooks which are filtered for instance name for hooking into constructors
+* New: display a spinner while initializing to prevent accidental clicking
+* Fix: tolerate missing error messages
+* Fix: generate a random name if none is provided
+* Fix: default mode is a valid mime type now
+* Fix: diffing works on a new and unsaved document
+
 Version 2.5.0 (Aug 2015)
 * Add an import/export function
 * Support i18n, translate into German

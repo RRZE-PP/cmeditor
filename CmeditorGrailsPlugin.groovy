@@ -1,5 +1,5 @@
 class CmeditorGrailsPlugin {
-    def version = "2.5.0"
+    def version = "2.5.1"
     def grailsVersion = "2.0 > *"
     def title = "CM Editor Plugin"
     def author = "Frank Tröger"
