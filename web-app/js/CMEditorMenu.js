@@ -30,11 +30,7 @@ this.CMEditorMenu = (function(){
 		initDialogs(self);
 
 
-		self.rootElem.find(".menu").menubar({
-			position: {
-				within: $("#demo-frame").add(window).first()
-			}
-		});
+		self.menuBar = self.rootElem.find(".menu").menubar();
 
 		self.cmeditor.focus();
 
@@ -723,8 +719,75 @@ this.CMEditorMenu = (function(){
 
 	}
 
+	/* (Public)
+	 *
+	 * Appends an entry to the menu bar
+	 *
+	 * Parameters: menuName (String): the new menu's name
+	 *
+	 * Returns: A handle which can be used to add new submenu entries with `addSubMenuEntry`
+	 */
+	function addRootMenuEntry(self, menuName){
+		if(typeof self.menus.userAddedMenus === "undefined")
+			self.menus.userAddedMenus = {};
+
+		if(typeof self.menus.userAddedMenus[menuName] === "undefined"){
+			var menuEntry = $("<li class='userAddedRootMenu'><a href='#'>"+menuName+"</a><ul class='userAddedMenu'></ul></li>");
+			self.rootElem.find(".cmeditor-menubar").append(menuEntry);
+
+			self.menus.userAddedMenus[menuName] = menuEntry;
+
+			menuEntry._cmeditor_menu_isAUserAddedMenu = true;
+		}
+
+		self.menuBar.menubar("destroy");
+		self.menuBar = self.rootElem.find(".menu").menubar();
+
+		return self.menus.userAddedMenus[menuName];
+	}
+
+	/* (Public)
+	 *
+	 * Appends a submenu entry to the menu bar
+	 *
+	 * Parameters: superMenu Object: a handle returned by this method or `addRootMenuEntry`
+	 *             menuName String: the new menu entry's name
+	 *             callbackFunction function (optional): if supplied, this function will be called
+	 *                                                   when the entry is clicked
+	 *
+	 * Returns: A handle which can be used to add new sub-submenu entries with this method
+	 */
+	function addSubMenuEntry(self, superMenu, entryName, callbackFunction){
+		if(typeof superMenu._cmeditor_menu_isAUserAddedMenu === "undefined"){
+			console.log("Warning: superMenu is not a valid menu entry");
+			return null;
+		}
+
+		if(superMenu.children(".userAddedMenu").length === 0)
+			superMenu.append($("<ul class='userAddedMenu'></ul>"));
+
+		var subMenuEntry = $("<li></li>");
+		var subMenuLink = $("<a href='#'><span></span>"+entryName+"</a>");
+
+		if(typeof callbackFunction === "function")
+			subMenuLink.on("click", callbackFunction);
+		else
+			subMenuLink.on("click", function(e){e.preventDefault()});
+
+		superMenu.children(".userAddedMenu").append(subMenuEntry.append(subMenuLink));
+
+		subMenuEntry._cmeditor_menu_isAUserAddedMenu = true;
+
+		self.menuBar.menubar("destroy");
+		self.menuBar = self.rootElem.find(".menu").menubar();
+
+		return subMenuEntry;
+	}
+
 	CMEditorMenu.prototype.constructor = CMEditorMenu;
 	CMEditorMenu.prototype.update = function(){update(this)};
+	CMEditorMenu.prototype.addRootMenuEntry = function(){Array.prototype.unshift.call(arguments, this); return addRootMenuEntry.apply(this, arguments)};
+	CMEditorMenu.prototype.addSubMenuEntry = function(){Array.prototype.unshift.call(arguments, this); return addSubMenuEntry.apply(this, arguments)};
 
 	return CMEditorMenu;
 })();
