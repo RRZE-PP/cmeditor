@@ -1350,6 +1350,7 @@ this.CMEditor = (function(){
 
 		for(var i=0; i<self.state.docs.length; i++){
 			if(self.state.docs[i].getID() == fileId){
+				selectDocument(self, self.state.docs[i]);
 				return;
 			}
 		}
