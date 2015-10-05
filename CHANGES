@@ -1,3 +1,8 @@
+Version 2.5.2 (Sep 2015)
+* New: opening an already opened document selects it
+* New: Easily add new menu items using ...menu.addRootMenuEntry and menu.addSubMenuEntry
+* Fix: treat overlays like real modes
+
 Version 2.5.1 (Sep 2015)
 * New: allow nested objects in customData
 * New: permit putting cmeditor inside a form
