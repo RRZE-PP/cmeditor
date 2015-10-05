@@ -24,7 +24,6 @@ this.CMEditorMenu = (function(){
 		self.options  = options  = options !== undefined ? options : {};
 
 		initMenus(self);
-		addUserDefinedItems(self);
 		registerMenuCallbacks(self);
 		decorateMenuItems(self);
 		initDialogs(self);
@@ -456,6 +455,19 @@ this.CMEditorMenu = (function(){
 			modesMenuElem.append('<li><a href="#" value="mode'+cmMode.name+'"><span></span>'+cmMode.name+'</a></li>');
 		}
 
+		//treat overlays as modes
+		if (typeof self.options.overlayDefinitionsVar !== "undefined") {
+			for(var overlay in self.options.overlayDefinitionsVar) {
+				self.menus.viewMenu["mode"+overlay] = function(overlay) {
+					return function(cm) {
+					 self.cmeditor.setMode(overlay)
+					};
+				}(overlay);
+
+				modesMenuElem.append($("<li><a href=\"#\" value=\"mode"+overlay+"\"><span></span>"+overlay+"</a></li>"));
+			}
+		}
+
 
 		self.menus.optionsMenu = {
 			diffBeforeSave: function(cm) {
@@ -534,21 +546,6 @@ this.CMEditorMenu = (function(){
 
 		// .cmeditor-ui-dialog s have the defaultButton-thingie activated
 		$.each(self.dialogs, function(key, val){val.parent().addClass("cmeditor-ui-dialog")});
-	}
-
-	/*
-	 * Adds items to the menu which the user defined via options
-	 */
-	function addUserDefinedItems(self) {
-		if (typeof self.options.overlayDefinitionsVar !== "undefined") {
-			for(var name in self.options.overlayDefinitionsVar) {
-				var s = $("<li><a href=\"#\" value=\"mode"+name+"\"><span></span>"+name+"</a></li>");
-				s.appendTo(self.rootElem.find(".modesMenu"));
-				self.menus.viewMenu["mode"+name] = function(name) {
-					return function(cm) { cm.setOption("mode", name); };
-				}(name);
-			}
-		}
 	}
 
 	/*

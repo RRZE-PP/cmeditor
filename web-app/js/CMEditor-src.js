@@ -305,9 +305,11 @@ this.CMEditor = (function(){
 		};
 
 		if (typeof options.overlayDefinitionsVar !== "undefined") {
+			self.state.overlays = [];
 			for(var name in options.overlayDefinitionsVar) {
 				cmeditorall_add_overlay_definition(name, options.overlayDefinitionsVar[name]["baseMode"],
 				                                       options.overlayDefinitionsVar[name]["definition"]);
+				self.state.overlays.push(name);
 			}
 			CodeMirror.commands.autocomplete = function(cm, getHints, hintOptions) {
 				//var mergedOptions = $.extend({}, hintOptions, {cmeditorDefinitions: options.overlayDefinitionsVar});
@@ -1429,20 +1431,27 @@ this.CMEditor = (function(){
 	 * Parameters: mode (String): The name of the mode to set
 	 */
 	function setMode(self, mode){
-		var cmMode = CodeMirror.findModeByName(mode) || CodeMirror.findModeByMIME(mode);
+		if(self.state.overlays && typeof self.state.overlays.indexOf(mode) !== -1){
+				log(self, "Setting a custom mode (overlay):", "DEBUG", mode)
+				self.codeMirror.setOption("mode", mode);
+				self.state.curDoc.setMode(mode);
+				update(self);
+				return;
+		}
 
-		if(cmMode === null || cmMode === undefined){
-			log(self, "Could not load this unknown mode: "+mode, "WARNING");
-			displayMessage(self, self.options.messages.hints.noSuchMode);
+		var cmMode = CodeMirror.findModeByName(mode) || CodeMirror.findModeByMIME(mode);
+		if(cmMode !== null && typeof cmMode !== "undefined"){
+			loadMode(cmMode.mode, function(){
+				log(self, "Setting a mode:", "DEBUG", mode)
+				self.codeMirror.setOption("mode", cmMode.mime);
+				self.state.curDoc.setMode(cmMode.mime);
+				update(self);
+			});
 			return;
 		}
 
-		loadMode(cmMode.mode, function(){
-			log(self, "Setting a mode:", "DEBUG", mode)
-			self.codeMirror.setOption("mode", cmMode.mime);
-			self.state.curDoc.setMode(cmMode.mime);
-			update(self);
-		});
+		log(self, "Could not load this unknown mode: "+mode, "WARNING");
+		displayMessage(self, self.options.messages.hints.noSuchMode);
 	}
 
 	/* (Public)
