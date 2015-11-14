@@ -421,9 +421,9 @@ this.CMEditor = (function(){
 		});
 
 		//changes in custom inputs
-		customBody.find(".cmeditor-field").keyup(function() { customElementChanged(self, $(this));});
-		customBody.find("select.cmeditor-field").change(function() {customElementChanged(self, $(this));});
-		customBody.find("input[type='checkbox'].cmeditor-field").change(function() { customElementChanged(self, $(this));});
+		customBody.find(".cmeditor-field").on("change input blur", function() { customElementChanged(self, $(this));});
+		customBody.find("select.cmeditor-field").on("change input blur", function() {customElementChanged(self, $(this));});
+		customBody.find("input[type='checkbox'].cmeditor-field").on("change input blur", function() { customElementChanged(self, $(this));});
 	}
 
 	/*
