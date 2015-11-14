@@ -559,8 +559,10 @@ this.CMEditor = (function(){
 				closeButton.off("click");
 				closeButton.on("click", function(e){close(self, newDoc);e.stopPropagation()});
 
+
 				newDoc.markStateAsSaved();
 				selectDocument(self, newDoc);
+				updateTabText(self);
 				updateCurrentDocument(self);
 
 				self.codeMirror.setCursor(curCursorPos);
@@ -777,14 +779,6 @@ this.CMEditor = (function(){
 		var name = $('<span class="tabName"></span>').text(newDoc.getName());
 		var closeButton = $('<span class="closeButton">&#10005;</span>');
 
-		for(var i=0; i<self.state.docs.length; i++){
-			var otherDoc = self.state.docs[i];
-			if(otherDoc.getName() === newDoc.getName() && otherDoc !== newDoc){
-				otherDoc.getTabElem().find(".tabName").text(otherDoc.getFolder()+otherDoc.getName());
-				name.text(newDoc.getFolder()+newDoc.getName());
-			}
-		}
-
 		docTabs.append(li);
 		li.attr("title", newDoc.getFolder() !== null?newDoc.getFolder()+newDoc.getName():newDoc.getName()+" "+self.options.messages.noFolder);
 		li.append(name);
@@ -793,6 +787,8 @@ this.CMEditor = (function(){
 		closeButton.on("click", function(e){close(self, newDoc); e.stopPropagation();});
 
 		newDoc.setTabElem($(li));
+
+		updateTabText(self);
 
 		if (self.codeMirror.getDoc() == newDoc.getCMDoc()) {
 			markDocumentAsSelected(self, newDoc);
@@ -886,6 +882,8 @@ this.CMEditor = (function(){
 			}
 		}
 		doc.getTabElem().remove();
+
+		updateTabText(self);
 
 		insertNewUntitledDocument(self);
 		selectDocumentByIndex(self, Math.max(0, i - 1));
@@ -1047,6 +1045,24 @@ this.CMEditor = (function(){
 		}
 
 		return changed;
+	}
+
+	/*
+	 * Updates the names of all tabs so that no two tabs show the same name (by appending or removing,
+	 * the document's folder to the tab) and all tabs show their document's name correctly
+	 */
+	function updateTabText(self){
+		for(var i=0; i<self.state.docs.length; i++){
+			var firstDoc = self.state.docs[i];
+			firstDoc.getTabElem().find(".tabName").text(firstDoc.getName());
+			for(var j=0; j<self.state.docs.length; j++){
+				var otherDoc = self.state.docs[j];
+				if(otherDoc.getName() === firstDoc.getName() && otherDoc !== firstDoc){
+					otherDoc.getTabElem().find(".tabName").text((otherDoc.getFolder()!==null?otherDoc.getFolder():"")+otherDoc.getName());
+					firstDoc.getTabElem().find(".tabName").text((firstDoc.getFolder()!==null?firstDoc.getFolder():"")+firstDoc.getName());
+				}
+			}
+		}
 	}
 
 
@@ -1295,6 +1311,7 @@ this.CMEditor = (function(){
 			return;
 
 		self.state.curDoc.setFolder(newFolder);
+		updateTabText(self);
 	}
 
 	/* (Public)
@@ -1375,9 +1392,14 @@ this.CMEditor = (function(){
 			return;
 		}
 
-		self.state.curDoc.setName(newName);
+		var curDoc = self.state.curDoc;
+		var li = curDoc.tabElem;
+		curDoc.setName(newName);
+		li.attr("title", curDoc.getFolder() !== null?curDoc.getFolder()+curDoc.getName():curDoc.getName()+" "+self.options.messages.noFolder);
+		li.children(".tabName").text(curDoc.getName());
 		markDocumentAsChanged(self, self.state.curDoc);
 
+		updateTabText(self);
 		updateCurrentDocument(self);
 	}
 
@@ -1634,6 +1656,7 @@ this.CMEditor = (function(){
 		this.savedState.idField = this.idField;
 		this.savedState.mode 	= this.mode;
 		this.savedState.content = this.content;
+		this.savedState.name    = this.name;
 
 		for(var key in this.customData){
 			this.savedState.customData[key] = this.customData[key];
@@ -1650,7 +1673,8 @@ this.CMEditor = (function(){
 		return this.folder !== this.savedState.folder
 				|| this.idField !== this.savedState.idField
 				|| this.mode !== this.savedState.mode
-				|| this.content !== this.savedState.content;
+				|| this.content !== this.savedState.content
+				|| this.name !== this.savedState.name;
 	}
 
 	//Getter
