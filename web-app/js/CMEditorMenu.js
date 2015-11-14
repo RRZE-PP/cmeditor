@@ -492,13 +492,6 @@ this.CMEditorMenu = (function(){
 			self.menus.optionsMenu["theme"+theme] = getThemeCallback(self, theme);
 			themesMenuElem.append('<li><a href="#" value="theme'+theme+'"><span></span>'+theme+'</a></li>');
 		}
-
-
-		self.menus.addonsMenu = {
-			addondonation: function(cm) {
-				self.dialogs.donationDialog.dialog("open");
-			},
-		};
 	}
 
 	/*

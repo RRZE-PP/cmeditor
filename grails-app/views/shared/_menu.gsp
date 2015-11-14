@@ -1,8 +1,4 @@
 <div id="cmEditorMenu_${name}" class="cmeditor-menu">
-	<div class="dialog donationDialog" title="${g.message(code:'cmeditor.addons.incredible')}" style="display: none;">
-		<p><g:message code="cmeditor.addons.incredible.question1" /></p>
-		<p><g:message code="cmeditor.addons.incredible.question2" /></p>
-	</div>
 	<div class="dialog openMenu" title="${g.message(code:'cmeditor.menu.dialogs.open')}" style="display: none;">
 		<p class="noFiles" name="cmeditor-menu-open-no-files"><g:message code="cmeditor.menu.dialogs.open.nofile" /></p>
 	</div>
@@ -66,11 +62,6 @@
 					<ul class="themesMenu" id="cmeditor-menu-${name}-themes">
 					</ul>
 				</li>
-			</ul>
-		</li>
-		<li><a href="#"><span></span><g:message code="cmeditor.menu.menus.addons" /></a>
-			<ul class="addonsMenu">
-				<li><a href="#" value="addondonation"><span class="ui-icon ui-icon-blank"></span><g:message code="cmeditor.menu.menus.addons.incredible" /></a></li>
 			</ul>
 		</li>
 	</ul>
