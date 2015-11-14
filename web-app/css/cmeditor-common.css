@@ -1,15 +1,13 @@
 
 .CodeMirror {
 	padding-bottom: 20px;
+	font-size:11pt;
 }
 
 .CodeMirror-scroll {
 	overflow-x: hidden !important
 }
 
-.CodeMirror-fullscreen {
-	font-size: 11pt;
-}
 .CodeMirror pre {
 	padding: 0 9px;
 }
@@ -23,6 +21,10 @@
 .CodeMirror-hints {
 	font-size: 11pt;
 	z-index: 96;
+}
+
+.CodeMirror-code div pre span span[cm-text] {
+	font-size: 0px;
 }
 
 div.cmeditor {
@@ -39,7 +41,6 @@ div.cmeditor {
 	color: #777777;
 	cursor: pointer;
 	display: block;
-	font-size: 11pt;
 	margin: 0 2px 0 0;
 	padding: 2px 10px 5px;
 	position: relative;
