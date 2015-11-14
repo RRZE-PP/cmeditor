@@ -301,7 +301,7 @@ this.CMEditor = (function(){
 			"Alt-Up":     function(cm) { cmeditorbase_moveUp(cm); },
 			"Alt-Down":   function(cm) { cmeditorbase_moveDown(cm); },
 			"Ctrl-7":     function(cm) { cmeditorbase_comment(cm); },
-			"Ctrl-L":     function(cm) { goto(self); },
+			"Ctrl-L":     function(cm) { if(options.menu) self.menu.menus.viewMenu.goto(); },
 		};
 
 		if (typeof options.overlayDefinitionsVar !== "undefined") {
