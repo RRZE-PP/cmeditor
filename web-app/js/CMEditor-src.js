@@ -544,9 +544,12 @@ this.CMEditor = (function(){
 
 			ajax_load(self, newId, true, function(newDoc){
 				//this duplicates a lot of code from insertNewDocument, maybe refactor this?
+				var curCursorPos = self.codeMirror.getCursor();
+
 				newDoc.setTabElem(self.state.curDoc.getTabElem());
 				self.state.docs[curDocIdx] = newDoc;
 				self.state.curDoc = newDoc;
+
 
 				newDoc.getTabElem().attr("title", newDoc.getFolder() !== null
 					? newDoc.getFolder()+newDoc.getName()
@@ -559,6 +562,8 @@ this.CMEditor = (function(){
 				newDoc.markStateAsSaved();
 				selectDocument(self, newDoc);
 				updateCurrentDocument(self);
+
+				self.codeMirror.setCursor(curCursorPos);
 			});
 		}
 	}
