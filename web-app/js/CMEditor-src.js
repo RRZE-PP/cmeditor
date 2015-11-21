@@ -1458,12 +1458,22 @@ this.CMEditor = (function(){
 	 * Parameters: mode (String): The name of the mode to set
 	 */
 	function setMode(self, mode){
-		if(self.state.overlays && typeof self.state.overlays.indexOf(mode) !== -1){
+		if(self.state.overlays && self.state.overlays.indexOf(mode) !== -1){
+			var baseMode = self.options.overlayDefinitionsVar[mode]["baseMode"];
+			var cmMode = CodeMirror.findModeByName(baseMode) || CodeMirror.findModeByMIME(baseMode);
+			if(cmMode !== null && typeof cmMode !== "undefined"){
+				loadMode(cmMode.mode, setOverlayMode);
+			}else{
+				setOverlayMode();
+			}
+
+			function setOverlayMode(){
 				log(self, "Setting a custom mode (overlay):", "DEBUG", mode)
 				self.codeMirror.setOption("mode", mode);
 				self.state.curDoc.setMode(mode);
 				update(self);
-				return;
+			}
+			return;
 		}
 
 		var cmMode = CodeMirror.findModeByName(mode) || CodeMirror.findModeByMIME(mode);
