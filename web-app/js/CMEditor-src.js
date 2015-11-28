@@ -1219,7 +1219,6 @@ this.CMEditor = (function(){
 	 * Sets focus to the text editor
 	 */
 	function focus(self){
-		//FIXME: warum funktioniert das nicht sofort?
 		self.codeMirror.focus();
 	}
 
