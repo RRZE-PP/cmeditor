@@ -430,6 +430,8 @@ this.CMEditor = (function(){
 	 * Performs the actual deletion
 	 */
 	function ajax_delete(self) {
+		executeHooks(self, "prePerformDeleteDoc", self, []);
+
 		if(isReadOnly(self) || self.state.curDoc.isReadOnly()){
 			displayMessage(self, self.options.messages.hints.noDeleteReadOnly);
 			return;
@@ -444,17 +446,19 @@ this.CMEditor = (function(){
 				type:"GET",
 				data: data,
 				url: self.options.ajax.deleteURL,
-				success:function(data, textStatus){
-					if (data.status == "success") {
+				success:function(response, textStatus){
+					if (response.status == "success") {
 						removeDocument(self, self.state.curDoc);
 						log(self, "Deleted a document from the server", "INFO");
 					}else{
-						log(self, "Could not delete this file from the server", "WARNING", data);
-						log(self, "Message was:" + data.msg, "DEBUG");
+						log(self, "Could not delete this file from the server", "WARNING", response);
+						log(self, "Message was:" + response.msg, "DEBUG");
 					}
-					if(data.msg)
-						displayMessage(self, data.msg, textStatus);
+					if(response.msg)
+						displayMessage(self, response.msg, textStatus);
 					log(self, "Currently serving these documents locally:", "DEBUG", self.state.docs)
+
+					executeHooks(self, "postPerformDeleteDoc", self, [data, response]);
 				},
 				error:function(XMLHttpRequest,textStatus,errorThrown){
 					displayMessage(self, self.options.messages.errorIntro +" "+ textStatus +" " + errorThrown);
@@ -479,18 +483,20 @@ this.CMEditor = (function(){
 		var data = {};
 		data[self.options.mapping.idField] = fileId;
 
+		executeHooks(self, "prePerformLoadDoc", self, [data]);
+
 		$.ajax({
 			type:"GET",
 			data: data,
 			url: self.options.ajax.getURL,
-			success: function(data){
-				if (data.status == "success" && data.result) {
-					var newDoc = new Doc(data.result[self.options.mapping.name],
-					                        data.result[self.options.mapping.folder] || null,
-					                        data.result[self.options.mapping.mode] || self.options.defaultMode,
-					                        data.result[self.options.mapping.content],
+			success: function(response){
+				if (response.status == "success" && response.result) {
+					var newDoc = new Doc(response.result[self.options.mapping.name],
+					                        response.result[self.options.mapping.folder] || null,
+					                        response.result[self.options.mapping.mode] || self.options.defaultMode,
+					                        response.result[self.options.mapping.content],
 					                        readWrite ? false : ((self.options.readOnly || self.options.defaultReadOnly) ? true : false));
-					newDoc.setID(data.result[self.options.mapping.idField]);
+					newDoc.setID(response.result[self.options.mapping.idField]);
 
 					//insert custom data, if it is present in the provided data
 					self.rootElem.find(".customBody .cmeditor-field").each(function(){
@@ -501,7 +507,7 @@ this.CMEditor = (function(){
 						if(listContainsElem(self, Object.keys(self.options.mapping), key))
 							return true; //jquery-Each continue
 
-						var value = data.result;
+						var value = response.result;
 						var subkeys = key.split(".");
 						for(var i=0; i<subkeys.length; i++){
 							if(value !== null && typeof value !== "undefined")
@@ -514,11 +520,12 @@ this.CMEditor = (function(){
 					newDoc.markStateAsSaved();
 					finishedCallback(newDoc);
 
-					if(data.msg)
-						displayMessage(self, data.msg);
+					if(response.msg)
+						displayMessage(self, response.msg);
 				} else {
-					displayMessage(self, data.msg ? data.msg : "An unknown error occured");
+					displayMessage(self, response.msg ? response.msg : "An unknown error occured");
 				}
+				executeHooks(self, "postPerformLoadDoc", self, [data, response]);
 			},
 
 		error:function(XMLHttpRequest,textStatus,errorThrown){displayMessage(self, self.options.messages.errorIntro +" "+ textStatus +" " + errorThrown);},
@@ -584,23 +591,27 @@ this.CMEditor = (function(){
 			data[self.options.mapping.name] = self.state.curDoc.getName();
 			data[self.options.mapping.content] = self.state.curDoc.getContent();
 
+			executeHooks(self, "prePerformSaveDoc", self, [data]);
+
 			$.ajax({
 				type: "POST",
 				data: data,
 				url: self.options.ajax.updateURL,
-				success: function(data,textStatus){
-					if (data.status == "success") {
-						if (data.newId) {
-							ajax_reload(self, data.newId);
+				success: function(response,textStatus){
+					if (response.status == "success") {
+						if (response.newId) {
+							ajax_reload(self, response.newId);
 						}else{
 							ajax_reload(self);
 						}
 						log(self, "Saved a document to the server", "INFO");
 					}else{
-						log(self, "Could not save this document to the server.", "WARNING", data);
+						log(self, "Could not save this document to the server.", "WARNING", response);
 					}
-					if(data.msg)
-						displayMessage(self, data.msg, textStatus);
+					if(response.msg)
+						displayMessage(self, response.msg, textStatus);
+
+					executeHooks(self, "postPerformSaveDoc", self, [data, response]);
 				},
 				error:function(XMLHttpRequest,textStatus,errorThrown){
 					displayMessage(self, self.options.messages.errorIntro + " " + textStatus +" " + errorThrown);
@@ -875,6 +886,8 @@ this.CMEditor = (function(){
 	 * Parameters: doc CMEditor.Doc: The document to remove
 	 */
 	function removeDocument(self, doc) {
+		executeHooks(self, "prePerformCloseDoc", self, [doc]);
+
 		for (var i=0; i < self.state.docs.length; ++i) {
 			if(self.state.docs[i] === doc){
 				self.state.docs.splice(i, 1);
@@ -887,6 +900,8 @@ this.CMEditor = (function(){
 
 		insertNewUntitledDocument(self);
 		selectDocumentByIndex(self, Math.max(0, i - 1));
+
+		executeHooks(self, "postPerformCloseDoc", self, [doc]);
 	}
 
 	/*
@@ -1101,6 +1116,7 @@ this.CMEditor = (function(){
 				}
 			}
 		}
+		executeHooks(self, "preCloseDoc", self, [doc]);
 
 		if (closeThis.isChanged()) {
 			var button = {};
@@ -1114,6 +1130,8 @@ this.CMEditor = (function(){
 			removeFolderIfPossible();
 			removeDocument(self, closeThis);
 		}
+
+		executeHooks(self, "postCloseDoc", self, [doc]);
 	}
 
 
@@ -1121,10 +1139,13 @@ this.CMEditor = (function(){
 	 *	Deletes the currently opened document, asks for confirmation first
 	 */
 	function deleteDoc(self) {
+		executeHooks(self, "preDeleteDoc", self, []);
+
 		var button = {};
 		button[self.options.messages.buttons.delete] = function() {
 			ajax_delete(self);
 			$(this).dialog("close");
+			executeHooks(self, "postDeleteDoc", self, []);
 		};
 		showWarning(self, self.options.messages.warnings.deleteFile, button);
 	}
@@ -1340,15 +1361,47 @@ this.CMEditor = (function(){
 	 * Can be used to register callbacks for events.
 	 *
 	 * Available Events in CMEditor:
+	 *    Where not noted otherwise the Callbacks are executed in the context of the CMEditor (i.e. 'this' points to the CMEditor instance).
+	 *    The post-Hooks might not be called if an error occurs (e.g. server is unreachable)
 	 *
 	 *     preSerializeDoc: Fired before the content of the current document is serialized to the form used to send the data to server.
 	 *                      Basically this happens everytime something in the document changes.
-	 *                      Your callback will be called in the context of the editor's root element and it will be passed
-	 *                      the current document as first argument
+	 *                      Arguments: <The current document>
 	 *     postSerializeDoc: Fired after the content of the current document is serialized to the form used to send the data to server.
 	 *                      Basically this happens everytime something in the document changes.
-	 *                      Your callback will be called in the context of the editor's root element and it will be passed
-	 *                      the current document as first argument
+	 *                      Arguments: <The current document>
+	 *
+	 *      preDeleteDoc: 	Fired when the user requests deleting the current document (this.state.curDoc).
+	 *     postDeleteDoc: 	Fired when the user requests document deletion, after all user interaction has been performed and the deletion
+	 *                      was triggered (i.e. `prePerformDeleteDoc` was fired)
+	 *      prePerformDeleteDoc: Fired before the request to delete a document is sent to the server.
+	 *     postPerformDeleteDoc: Fired after the request to delete a document was executed by the server (successfully or unsuccessfully).
+	 *                           Arguments: <The data sent to the server>, <The server's response>
+	 *
+	 *      preCloseDoc: 	Fired when the user requests closing a document. Arguments: <The document to close>
+	 *     postCloseDoc: 	Fired when the user requests closing a document, after all user interaction was performed and the document was closed
+	 *                      Arguments: <The document which was closed>
+	 *
+	 *      preSaveDoc: 	Fired when the user requests saving the current document (this.state.curDoc)
+	 *     postSaveDoc: 	Fired when the user requests document saving, after all user interaction has been performed and the saving was
+	 *                      triggered (i.e. `prePerformSaveDoc` was fired).
+	 *      prePerformSaveDoc: Fired before the request to save a document is sent to the server. Arguments: <The data to send>
+	 *     postPerformSaveDoc: Fired after the request to save a document was executed by the server (successfully or unsuccessfully).
+	 *                         Arguments: <The data sent to the server>, <The server's response>
+	 *
+	 *      preOpenDoc: 	Fired when the user requests opening a document. Arguments: <The fileId to open>
+	 *     postOpenDoc: 	Fired after a document was opened. Arguments: <The document which was opened>
+	 *
+	 *      prePerformLoadDoc: Fired before a document is (re-)loaded from the server. This happens on opening or saving a document.
+	 *                      Arguments: <The data to send to the server>
+	 *     postPerformLoadDoc: Fired after a document was (re-)loaded from the server. This happens on opening or saving a document.
+	 *                      Arguments: <The data to sent to the server>, <The server's response>
+	 *
+	 *      preEnterFullscreen: Fired before entering fullscreen mode, before any layout changes occur.
+	 *     postEnterFullscreen: Fired after the layout was reset for fullscreen mode.
+	 *      preLeaveFullscreen: Fired before leaving fullscreen mode, before any layout changes occur.
+	 *     postLeaveFullscreen: Fired after the layout was reset for non-fullscreen mode.
+	 *
 	 *
 	 */
 	function on(self, eventName, hook){
@@ -1367,6 +1420,7 @@ this.CMEditor = (function(){
 	 *                                if options.readOnly or options.defaultReadOnly is set to true
 	 */
 	function open(self, fileId, readWrite) {
+		executeHooks(self, "preOpenDoc", self, [fileId]);
 		if(isReadOnly(self)){
 			displayMessage(self, self.options.messages.hints.editorIsReadOnly);
 			return;
@@ -1378,7 +1432,10 @@ this.CMEditor = (function(){
 				return;
 			}
 		}
-		ajax_load(self, fileId, readWrite, function(newDoc){insertNewDocument(self, newDoc)});
+		ajax_load(self, fileId, readWrite, function(newDoc){
+												insertNewDocument(self, newDoc);
+												executeHooks(self, "postOpenDoc", self, [newDoc]);
+		});
 	}
 
 	/* (Public)
@@ -1407,6 +1464,8 @@ this.CMEditor = (function(){
 	 * Saves the currently opened document. If it is opened read-only only displays a dialog.
 	 */
 	function save(self) {
+		executeHooks(self, "preSaveDoc", self, []);
+
 		if(isReadOnly(self) || self.state.curDoc.isReadOnly()){
 			displayMessage(self, self.options.messages.hints.noSaveReadOnly);
 			return;
@@ -1416,11 +1475,12 @@ this.CMEditor = (function(){
 
 		if (self.state.doDiffBeforeSaving) {
 			var additionalButtons = {
-					Save: function() { ajax_update(self); $(this).dialog("close"); },
+					Save: function() { ajax_update(self); executeHooks(self, "postSaveDoc", self, []); $(this).dialog("close"); },
 				};
 			diff(self, additionalButtons);
 		} else {
 			ajax_update(self);
+			executeHooks(self, "postSaveDoc", self, []);
 		}
 
 	}
@@ -1500,6 +1560,8 @@ this.CMEditor = (function(){
 		}
 
 		if(self.state.cssBeforeFullscreen == undefined){
+			executeHooks(self, "preEnterFullscreen", self, []);
+
 			self.state.cssBeforeFullscreen = {"position": self.rootElem.css("position"),
 			                                  "top":  self.rootElem.css("top"),
 			                                  "left":  self.rootElem.css("left"),
@@ -1521,7 +1583,9 @@ this.CMEditor = (function(){
 			self.codeMirror.refresh();
 			syncTabIndent(self);
 
+			executeHooks(self, "postEnterFullscreen", self, []);
 		}else{
+			executeHooks(self, "preLeaveFullscreen", self, []);
 
 			self.layout.destroy();
 
@@ -1532,6 +1596,8 @@ this.CMEditor = (function(){
 
 			self.codeMirror.refresh();
 			syncTabIndent(self);
+
+			executeHooks(self, "postLeaverFullscreen", self, []);
 		}
 	}
 
