@@ -1096,39 +1096,19 @@ this.CMEditor = (function(){
 	function close(self, doc) {
 		var closeThis = typeof doc === "undefined" ? self.state.curDoc : doc;
 
-		function removeFolderIfPossible(){
-			for(var i=0; i<self.state.docs.length; i++){
-				var otherDoc = self.state.docs[i];
-				if(otherDoc.getName() === doc.getName() && otherDoc !== doc){
-
-					var canBeRemoved = true;
-					for(var j=0; j<self.state.docs.length; j++){
-						var otherOtherDoc = self.state.docs[j];
-
-						if(otherDoc.getName() === otherOtherDoc.getName()
-							&& otherOtherDoc !== otherDoc && otherOtherDoc !== doc){
-							canBeRemoved = false;
-						}
-					}
-				}
-				if(canBeRemoved){
-					otherDoc.getTabElem().find(".tabName").text(otherDoc.getName());
-				}
-			}
-		}
 		executeHooks(self, "preCloseDoc", self, [doc]);
 
 		if (closeThis.isChanged()) {
 			var button = {};
 			button[self.options.messages.buttons.close] = function() {
-				removeFolderIfPossible();
 				removeDocument(self, closeThis);
+				updateTabText(self);
 				$(this).dialog("close");
 			};
 			showWarning(self, self.options.messages.warnings.changesWillBeLost, button);
 		} else {
-			removeFolderIfPossible();
 			removeDocument(self, closeThis);
+			updateTabText(self);
 		}
 
 		executeHooks(self, "postCloseDoc", self, [doc]);
