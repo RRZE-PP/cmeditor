@@ -107,7 +107,7 @@ class CmeditorTagLib {
 		]
 		def ajax = [
 			listURL:'ajaxList',
-			getURL:'ajaxGet?label=',
+			getURL:'ajaxGet',
 			updateURL:'ajaxUpdate',
 			deleteURL:'ajaxDelete',
 		]
