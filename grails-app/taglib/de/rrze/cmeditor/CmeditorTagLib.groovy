@@ -96,7 +96,6 @@ class CmeditorTagLib {
 			menuView: true,
 			useSession: true,
 			readOnly: false,
-			mode: 'application/x-ejs',
 			binding: 'default',
 			theme: 'default',
 			defaultContent: '',
@@ -127,9 +126,6 @@ class CmeditorTagLib {
 		}
 		if (attrs.mapping) {
 			mapping.putAll(attrs.mapping)
-		}
-		if (attrs.mode) {
-			options.mode = attrs.mode
 		}
 		if (attrs.theme) {
 			options.theme = attrs.theme
