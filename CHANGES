@@ -1,3 +1,16 @@
+Version 2.5.3 (Dec 2015)
+* New: Add a number of events
+* Imp: Remove obsolete Addon menu entry
+* Imp: Clarify some methods
+* Imp: Respect base mode of overlays
+* Imp: Update additional data when autocompleted, too
+* Imp: Update Documentation, move it to wiki (http://github.com/RRZE-PP/grails-cmeditor/wiki)
+* Fix: Cursor did jump after saving
+* Fix: Syntax highlighting from overlays
+* Fix: Bring back goto Hotkey
+* Fix: Empty lines in FF were higher
+* Fix: Renaming a document marks it as changed until saved
+
 Version 2.5.2 (Sep 2015)
 * New: opening an already opened document selects it
 * New: Easily add new menu items using ...menu.addRootMenuEntry and menu.addSubMenuEntry
