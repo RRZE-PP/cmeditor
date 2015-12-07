@@ -23,7 +23,7 @@
 	z-index: 96;
 }
 
-.CodeMirror-code div pre span span[cm-text] {
+.CodeMirror-code div pre span span[cm-text=''] {
 	font-size: 0px;
 }
 
