@@ -700,7 +700,7 @@ this.CMEditorMenu = (function(){
 
 	function update(self) {
 		var curMode = self.cmeditor.getCurrentCMEditorMode();
-		var cmMode = CodeMirror.findModeByName(curMode) || CodeMirror.findModeByMIME(curMode);
+		var cmMode = CodeMirror.findModeByName(curMode) || CodeMirror.findModeByMIME(curMode) || {name: curMode};
 
 		self.rootElem.find(".modesMenu").find("span").removeClass("ui-icon ui-icon-check");
 		if(typeof cmMode !== "undefined")
