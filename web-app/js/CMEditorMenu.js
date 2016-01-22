@@ -204,15 +204,18 @@ this.CMEditorMenu = (function(){
 											absPath = absPath.endsWith("/") ? absPath : absPath+"/";
 
 											if (absPath === fileTreeData.dir) {
+												//this file is in the current folder
 												var fileName = data.result[i][self.options.mapping["name"]];
 												var fileId = data.result[i][self.options.mapping["idField"]];
 												val.append($('<li class="file ext_'+fileName+'"><a href="#" rel='+fileId+'>'+fileName+'</a></li>'));
 											}else{
-												//save each folder once for later adding
 												var pathElems = absPath.split("/");
 
-												if (absPath.startsWith(fileTreeData.dir) && pathElems.length - 1 == curPathElems.length){
-													folders[absPath] = pathElems[pathElems.length-2];
+												if (absPath.startsWith(fileTreeData.dir) && pathElems.length > curPathElems.length){
+													//this file is in a subfolder. save it and append it later on, each folder only once
+													var curPathDepth = curPathElems.length-1;
+													var subfolderPath = (pathElems.slice(0, curPathDepth+1).join("/"))+"/";
+													folders[subfolderPath] = pathElems[curPathDepth];
 												}
 											}
 										}
