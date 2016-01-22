@@ -252,6 +252,10 @@ this.CMEditorMenu = (function(){
 							self.dialogs.openDialog.dialog("option", "defaultButton", buttons[self.options.menu.messages.buttons.open]);
 							self.dialogs.openDialog.dialog("option", "buttons", buttons);
 							self.dialogs.openDialog.dialog("open");
+
+							//there is no focus method, so open and close once to set focus
+							self.dialogs.openDialog.find(".fileSelect").select2("open");
+							self.dialogs.openDialog.find(".fileSelect").select2("close");
 						} else {
 							self.cmeditor.displayMessage(data.msg ? data.msg : "An unknown error occured");
 						}
