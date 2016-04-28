@@ -1,4 +1,4 @@
-//= require jquery
+//= require jquery-1.12.3/jquery-1.12.3.min
 //= require jquery-ui
 //= require codemirror-5.3/lib/codemirror
 
