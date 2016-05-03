@@ -1,6 +1,3 @@
-//= require jquery
-//= require jquery-ui
-
 //= require jquery/jquery.ui.menubar
 //= require select2-4.0.0/dist/js/select2.min.js
 

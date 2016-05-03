@@ -1,1 +1,2 @@
-//= require_tree jsdifflib
+//= require jsdifflib/difflib
+//= require jsdifflib/diffview

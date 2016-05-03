@@ -10,3 +10,5 @@ target-eclipse
 # these files have been migrated from svn
 /*.zip
 /*.sha1
+
+/build
