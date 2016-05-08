@@ -5,28 +5,26 @@ For example managing your library could be done by mapping filename to "$author 
 
 Check out our [demo grails project](https://github.com/RRZE-PP/grails-cmeditor-demo).
 
-## Cloning and checking out
-After cloning this repo you'll have to run `grails upgrade` to regenerate some files in the web-app/WEB-INF folder.
-
 ## Usage
-Add cmeditor as a plugin to your grails project's conf/BuildConfig.groovy:
+You currently have the Grails 3 branch checked out. If you wish to use the plugin with Grails 2, checkout the branch 'grails-2.x' and follow the instruction in its README.md.
+
+Add cmeditor as a plugin to your grails project's build.gradle
 ```
     plugins {
-        compile 'cmeditor:latest.release'
+        compile 'de.rrze:grails-cmeditor:latest.release'
     }
 ```
 
-Include the plugin's resources using either the resources or assets plugin:
-```
-
-	<r:require modules="cmeditor" />
-	<!-- or -->
-	<asset:javascript src="cmeditor.js"/>
-	<asset:stylesheet href="cmeditor.css"/>
+The plugin depends on jQuery, but does not require it via the assets plugin, because this might overwrite jQuery instances (and registered in jQuery plugins) from other grails plugins. Please ensure that jQuery is loaded before the CMEditor's assets. And that no other jQuery instance is loaded thereafter (e.g. by your layout).
+```gsp
+  <asset:javascript src="path/to/your/jQuery.js"/>
+  <asset:javascript src="cmeditor.js"/>
+  <asset:stylesheet href="cmeditor.css"/>
 
 ```
 
 When adding a textarea or tabbed editor you have to supply a `name`-attribute. After document initialization you can access the corresponding javascript CMEditor-object by calling `CMEditor.getInstance("<nameAttributeValue>)"`. For an API of the class see the CMEditor.js file in grails-app/js/web-app/js/.
+
 
 ### Tabbed Editor
 The tabbed editor is useful to edit more than one file at once. They are loaded and stored seamlessly using ajax to a controller of your choice.

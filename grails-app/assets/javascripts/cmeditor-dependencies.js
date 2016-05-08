@@ -4,7 +4,6 @@
 
 //= require_full_tree FileSaver-1.1.20150716
 
-//= require jquery-1.12.3/jquery-1.12.3.min
 //= require jquery-ui-1.10.4.custom/js/jquery-ui-1.10.4.custom.min
 
 //= require_full_tree jquery-layout-1.4.0
