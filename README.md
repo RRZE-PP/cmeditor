@@ -42,8 +42,8 @@ A simple example would look like this:
       <g:textField name="author" class="cmeditor-field" /> <br />
 
       <label for="title"><g:message code="myLibrary.title.label" default="Title" /></label>
-      <g:textField name="title" class="cmeditor-field" /
->  </cmeditor:tabs>
+      <g:textField name="title" class="cmeditor-field" />
+    </cmeditor:tabs>
 ```
 
 The resulting CMEditor would be similar to this:
