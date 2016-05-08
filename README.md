@@ -11,7 +11,7 @@ You currently have the Grails 3 branch checked out. If you wish to use the plugi
 Add cmeditor as a plugin to your grails project's build.gradle
 ```
     plugins {
-        compile 'de.rrze:grails-cmeditor:latest.release'
+        compile 'de.rrze:cmeditor:+'
     }
 ```
 

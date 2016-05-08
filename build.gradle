@@ -61,16 +61,17 @@ task wrapper(type: Wrapper) {
     gradleVersion = gradleWrapperVersion
 }
 grailsPublish {
-    // TODO: Provide values here
-    user = 'user'
-    key = 'key'
-    githubSlug = 'foo/bar'
+    userOrg = "de.rrze"
+    githubSlug = 'RRZE-PP/grails-cmeditor'
     license {
         name = 'Apache-2.0'
     }
-    title = "My Plugin"
-    desc = "Full plugin description"
-    developers = [johndoe:"John Doe"]
+    title = "CMEditor"
+    desc = "CMEditor is a simple way to use the popular CodeMirror web editor in grails applications. You can use it to edit pretty much anything that can be mapped to a file-like object. I.e. something with a filename and text-content. If your model requires additional fields this is supported, too. \
+    For example managing your library could be done by mapping filename to \"$author - $title\". The tabbed editor then could manage everything: Author, title, publication year and - of course - the books content in a nice-to-use CodeMirror editor. You could even edit multiple books simultaneously. \
+    Check out our demo grails project at https://github.com/RRZE-PP/grails-cmeditor-demo. \
+    "
+    developers = ["t-animal":"Tilman Adler", frnktrgr:"Frank Tröger"]
     portalUser = ""
     portalPassword = ""
 }
