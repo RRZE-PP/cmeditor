@@ -11,6 +11,9 @@ buildscript {
     }
 }
 
+project.ext.bintrayUser = bintray_user
+project.ext.bintrayKey = bintray_api_key
+
 version "2.6.0"
 group "org.grails.plugins"
 
@@ -61,7 +64,7 @@ task wrapper(type: Wrapper) {
     gradleVersion = gradleWrapperVersion
 }
 grailsPublish {
-    userOrg = "de.rrze"
+    userOrg = "frnktrgr"
     githubSlug = 'RRZE-PP/grails-cmeditor'
     license {
         name = 'Apache-2.0'
