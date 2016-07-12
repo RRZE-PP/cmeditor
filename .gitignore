@@ -1,14 +1,17 @@
-
-# these files should be ignored according to grails.org/wiki
-web-app/WEB-INF
-target
+/.idea
+*.iml
+*.iws
+/.settings
+/target
+/target-eclipse
+/web-app/WEB-INF
+plugin.xml
+.DS_Store
+*.log
 .classpath
 .project
-.settings
-target-eclipse
-
-# these files have been migrated from svn
+*.class
+.gradle/
+build/
 /*.zip
 /*.sha1
-
-/build
