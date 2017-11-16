@@ -50,6 +50,7 @@
 //= require codemirror-5.3/addon/display/panel
 //= require codemirror-5.3/addon/display/placeholder
 //= require codemirror-5.3/addon/display/rulers
+//= require codemirror-5.3/addon/scroll/annotatescrollbar
 
 //= require codemirror-5.3/mode/meta.js
 //= require codemirror-5.3/addon/mode/overlay
