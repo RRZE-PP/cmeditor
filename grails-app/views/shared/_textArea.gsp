@@ -26,13 +26,13 @@
 	})();
 
 	<plugin:isAvailable name="resources">
-	textAreaCMEditor.themeBaseURL = "${resource(dir: '/static/lib/codemirror-5.3/theme/')}";
-	textAreaCMEditor.modeBaseURL = "${resource(dir: '/static/lib/codemirror-5.3/mode/')}";
+	textAreaCMEditor.themeBaseURL = "${resource(dir: '/static/lib/codemirror/theme/')}";
+	textAreaCMEditor.modeBaseURL = "${resource(dir: '/static/lib/codemirror/mode/')}";
 	</plugin:isAvailable>
 
 	<plugin:isAvailable name="asset-pipeline">
-	textAreaCMEditor.themeBaseURL = "${assetPath(src: 'codemirror-5.3/theme/')}";
-	textAreaCMEditor.modeBaseURL = "${assetPath(src: 'codemirror-5.3/mode/')}";
+	textAreaCMEditor.themeBaseURL = "${assetPath(src: 'codemirror/theme/')}";
+	textAreaCMEditor.modeBaseURL = "${assetPath(src: 'codemirror/mode/')}";
 	</plugin:isAvailable>
 
 	if("${name}".length === 125){

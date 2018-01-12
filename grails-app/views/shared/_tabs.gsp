@@ -51,13 +51,13 @@
 	})();
 
 	<plugin:isAvailable name="resources">
-	CMEditor.themeBaseURL = "${resource(dir: '/static/lib/codemirror-5.3/theme/')}";
-	CMEditor.modeBaseURL = "${resource(dir: '/static/lib/codemirror-5.3/mode/')}";
+	CMEditor.themeBaseURL = "${resource(dir: '/static/lib/codemirror/theme/')}";
+	CMEditor.modeBaseURL = "${resource(dir: '/static/lib/codemirror/mode/')}";
 	</plugin:isAvailable>
 
 	<plugin:isAvailable name="asset-pipeline">
-	CMEditor.themeBaseURL = "${assetPath(src: 'codemirror-5.3/theme/')}";
-	CMEditor.modeBaseURL = "${assetPath(src: 'codemirror-5.3/mode/')}";
+	CMEditor.themeBaseURL = "${assetPath(src: 'codemirror/theme/')}";
+	CMEditor.modeBaseURL = "${assetPath(src: 'codemirror/mode/')}";
 	</plugin:isAvailable>
 
 	if("${name}".length === 125){
