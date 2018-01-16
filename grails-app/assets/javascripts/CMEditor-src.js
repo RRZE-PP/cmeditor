@@ -1051,7 +1051,9 @@ this.CMEditor = (function(){
 				}
 			}
 
-			if(self.state.curDoc.isChanged())
+			changed = self.state.curDoc.isChanged();
+
+			if(changed)
 				markDocumentAsChanged(self, self.state.curDoc);
 			else
 				markDocumentAsUnchanged(self, self.state.curDoc);
