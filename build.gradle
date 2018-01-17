@@ -11,8 +11,8 @@ buildscript {
     }
 }
 
-//project.ext.bintrayUser = bintray_user
-//project.ext.bintrayKey = bintray_api_key
+project.ext.bintrayUser = bintray_user
+project.ext.bintrayKey = bintray_api_key
 
 version "2.6.3"
 group "org.grails.plugins"
@@ -58,8 +58,6 @@ dependencies {
     testCompile "org.grails.plugins:geb"
     testRuntime "org.seleniumhq.selenium:selenium-htmlunit-driver:2.47.1"
     testRuntime "net.sourceforge.htmlunit:htmlunit:2.18"
-
-    compile 'com.bertramlabs.plugins:sass-asset-pipeline:2.14.2'
 }
 
 task wrapper(type: Wrapper) {
