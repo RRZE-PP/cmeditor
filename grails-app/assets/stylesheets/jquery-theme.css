@@ -2,3 +2,15 @@
 *= require jquery-ui-1.10.4.custom/css/ui-lightness/jquery-ui-1.10.4.custom.min
 *= require jquery-ui-1.10.4.custom/css/cmeditor/jquery-ui-1.10.4.custom.min
 */
+
+.cmeditor-ui-dialog .ui-button-icon-only {
+    text-indent: -999999px;
+}
+
+.cmeditor-ui-dialog .ui-button .ui-button-icon {
+    background-image: url(ui-icons_222222_256x240.png);
+}
+
+.cmeditor-ui-dialog .select2-container {
+    width: 100% !important;
+}

@@ -516,7 +516,7 @@ this.CMEditorMenu = (function(){
 		self.dialogs.openDialog = self.rootElem.find(".openMenu").dialog({
 					autoOpen: false,
 					height: 500,
-					width: 300
+					width: 500
 				});
 
 		self.dialogs.renameDialog = self.rootElem.find(".renameDialog").dialog({
