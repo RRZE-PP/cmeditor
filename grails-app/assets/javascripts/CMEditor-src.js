@@ -73,12 +73,12 @@ this.CMEditor = (function(){
 
 		$(document).bind("keydown", function(e){
 			//disable some browser featues when the codeMirror has focus
-			if(e.ctrlKey && self.rootElem.find("CodeMirror-focused").size() !== 0){
+			if(e.ctrlKey && self.rootElem.find("CodeMirror-focused").length !== 0){
 				e.preventDefault();
 			}
 
 			//122 == F11
-			if(e.which == 122 && (self.rootElem.find("*:focus").size() > 0 || self.codeMirror.hasFocus())){
+			if(e.which == 122 && (self.rootElem.find("*:focus").length > 0 || self.codeMirror.hasFocus())){
 				toggleFullscreen(self);
 				e.preventDefault();
 			}
