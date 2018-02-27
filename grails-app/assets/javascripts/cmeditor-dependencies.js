@@ -1,11 +1,13 @@
-//= require jquery-ui
+//= require jquery-ui.min
 
 //= require jsdifflib
 
 //= require spin-2.3.2/spin.min
 
 //= require FileSaver-1.1.20150716/FileSaver.min
-
+(function ($){
+    $.fn.selector = { split: function() { return ""; }};
+})(jQuery);
 //= require jquery-layout-1.4.0/jquery.layout-latest
 
 // after our pull request was merged upstream, this can be changed to dist/...min.js
