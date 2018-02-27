@@ -1,10 +1,10 @@
+//= require jquery-ui
+
 //= require jsdifflib
 
 //= require spin-2.3.2/spin.min
 
 //= require FileSaver-1.1.20150716/FileSaver.min
-
-//= require jquery-ui-1.10.4.custom/js/jquery-ui-1.10.4.custom.min
 
 //= require jquery-layout-1.4.0/jquery.layout-latest
 
