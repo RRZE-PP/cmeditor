@@ -477,7 +477,7 @@ this.CMEditorMenu = (function(){
 		for(var i=0; i < self.options.availableThemes.length; i++){
 			var theme = self.options.availableThemes[i];
 			self.menus.optionsMenu["theme"+theme] = getThemeCallback(self, theme);
-			themesMenuElem.append('<li><a href="#" value="theme'+theme+'"><span></span>'+theme+'</a></li>');
+			themesMenuElem.after('<a class="dropdown-item" href="#" value="theme'+theme+'"><span></span>'+theme+'</a>');
 		}
 	}
 
@@ -702,8 +702,11 @@ this.CMEditorMenu = (function(){
 			self.menus.userAddedMenus = {};
 
 		if(typeof self.menus.userAddedMenus[menuName] === "undefined"){
-			var menuEntry = $("<li class='userAddedRootMenu'><a href='#'>"+menuName+"</a><ul class='userAddedMenu'></ul></li>");
-			self.rootElem.find(".cmeditor-menubar").append(menuEntry);
+			var menuEntry = $("<li class='nav-item dropdown'>" +
+				"<a class='dropdown-toggle nav-link userAddedRootMenu' href='#' id='UserAddedMenu_"+menuName+"' role='button' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>"+menuName+"</a>" +
+				"<div class='dropdown-menu userAddedMenu' aria-labelledby='UserAddedMenu_'"+menuName+"'></div>" +
+				"</li>");
+			self.rootElem.find(".cmeditor-menubar").find('ul.navbar-nav').append(menuEntry);
 
 			self.menus.userAddedMenus[menuName] = menuEntry;
 
@@ -733,18 +736,17 @@ this.CMEditorMenu = (function(){
 			return null;
 		}
 
-		if(superMenu.children(".userAddedMenu").length === 0)
-			superMenu.append($("<ul class='userAddedMenu'></ul>"));
+		// if(superMenu.children(".userAddedMenu").length === 0)
+		// 	superMenu.append($("<ul class='userAddedMenu'></ul>"));
 
-		var subMenuEntry = $("<li></li>");
-		var subMenuLink = $("<a href='#'><span></span>"+entryName+"</a>");
+		var subMenuEntry = $("<a class='dropdown-item' href='#'><span></span>"+entryName+"</a>");
 
 		if(typeof callbackFunction === "function")
-			subMenuLink.on("click", callbackFunction);
+            subMenuEntry.on("click", callbackFunction);
 		else
-			subMenuLink.on("click", function(e){e.preventDefault()});
+            subMenuEntry.on("click", function(e){e.preventDefault()});
 
-		superMenu.children(".userAddedMenu").append(subMenuEntry.append(subMenuLink));
+		superMenu.children(".userAddedMenu").append(subMenuEntry);
 
 		subMenuEntry._cmeditor_menu_isAUserAddedMenu = true;
 
