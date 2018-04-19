@@ -1,22 +1,14 @@
+<div id="dialogContainerElement">
+	<g:render template="openDialog" contextPath="/shared/" />
+	<g:render template="newFileDialog" contextPath="/shared/" />
+	<g:render template="gotoDialog" contextPath="/shared/" />
+	<g:render template="renameDialog" contextPath="/shared/" />
+	<g:render template="importDialog" contextPath="/shared/" />
+</div>
+
 <div id="cmEditorMenu_${name}" class="cmeditor-menu">
-	<div class="dialog openMenu" title="${g.message(code:'cmeditor.menu.dialogs.open')}" style="display: none;">
-		<p class="noFiles" name="cmeditor-menu-open-no-files"><g:message code="cmeditor.menu.dialogs.open.nofile" /></p>
-	</div>
-	<div class="dialog renameDialog" title="${g.message(code:'cmeditor.menu.dialogs.rename')}" style="display: none;">
-		<g:message code="cmeditor.menu.dialogs.rename.newname" /><input type="text" name="newName"  autofocus="autofocus" /> <br />
-		<g:message code="cmeditor.menu.dialogs.rename.newfolder" /> <input type="text" name="newFolder" /> (<g:message code="cmeditor.menu.dialogs.rename.emptytohide" />)
-	</div>
-	<div class="dialog newFileDialog" title="${g.message(code:'cmeditor.menu.dialogs.new')}" style="display: none;">
-		<g:message code="cmeditor.menu.dialogs.new.name" /> <input type="text" name="name"  autofocus="autofocus" /> <br />
-		<g:message code="cmeditor.menu.dialogs.new.folder" /> <input type="text" name="folder" /> (<g:message code="cmeditor.menu.dialogs.new.emptytohide" />)
-	</div>
-	<div class="dialog gotoDialog" title="${g.message(code:'cmeditor.menu.dialogs.goto')}" style="display: none;">
-		<g:message code="cmeditor.menu.dialogs.goto.prompt" /><p class="gotoLabel"></p><input type="number" autofocus="autofocus"/><p class="gotoError">&nbsp;</p>
-	</div>
-	<div class="dialog importDialog" title="${g.message(code:'cmeditor.menu.dialogs.import')}" style="display: none;">
-		<g:message code="cmeditor.menu.dialogs.import.file" /> <input type="file" autofocus="autofocus" multiple="multiple"/>
-		<div class="cmeditor-spinner" style=""></div>
-	</div>
+
+
 	<ul class="cmeditor-menubar menu">
 		<li><a href="#"><g:message code="cmeditor.menu.menus.file" /></a>
 			<ul class="fileMenu">

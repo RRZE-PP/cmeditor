@@ -133,11 +133,7 @@ this.CMEditorMenu = (function(){
 				nameElem.val("");
 				folderElem.val("/");
 
-				var buttons = {};
-				buttons[self.options.menu.messages.buttons.cancel] = function(){
-					self.dialogs.newFileDialog.dialog("close");
-				};
-				buttons[self.options.menu.messages.buttons.create] = function(){
+                self.dialogs.newFileDialog.find("button.mainButton").click(function() {
 					var name = nameElem.val().trim();
 					var folder = folderElem.val().trim();
 
@@ -158,17 +154,17 @@ this.CMEditorMenu = (function(){
 					}
 
 					self.cmeditor.newDoc(unambigousName, folder);
-					self.dialogs.newFileDialog.dialog("close");
-				};
+					self.dialogs.newFileDialog.modal("hide");
+				});
 
-				self.dialogs.newFileDialog.dialog("option", "defaultButton", buttons[self.options.menu.messages.buttons.create]);
-				self.dialogs.newFileDialog.dialog("option", "buttons", buttons);
-				self.dialogs.newFileDialog.dialog("open");
+				self.dialogs.newFileDialog.modal('show');
 			},
 			open: function(cm) {
 
 				var errorMsg = self.dialogs.openDialog.find(".noFiles");
 				errorMsg.hide(0).siblings().remove();
+
+				var dialogContent = self.dialogs.openDialog.find('.modal-body');
 
 				var s = $("<select class=\"fileSelect\" name=\"cmeditor-menu-open-select\" multiple=\"multiple\" style=\"width:100%\"/><div class=\"fileSelectTree\" />");
 
@@ -182,7 +178,7 @@ this.CMEditorMenu = (function(){
 								available = true;
 							}
 							if (available == true) {
-								s.appendTo(self.dialogs.openDialog);
+								s.appendTo(dialogContent);
 								self.dialogs.openDialog.find(".fileSelect").select2({placeholder: self.options.menu.messages.fileselectplaceholder,
 																			 allowClear: true});
 
@@ -232,16 +228,14 @@ this.CMEditorMenu = (function(){
 								//workaround a width calculation bug in select2
 								self.dialogs.openDialog.find(".select2-search__field").css("width", "auto");
 
-								buttons[self.options.menu.messages.buttons.cancel] = function() {
-									 self.dialogs.openDialog.dialog( "close" );
-								};
-								buttons[self.options.menu.messages.buttons.open] = function() {
-									var vals = self.dialogs.openDialog.find(".fileSelect").val();
-									for (var i in vals) {
-										self.cmeditor.open(vals[i]);
-									}
-									self.dialogs.openDialog.dialog( "close" );
-								};
+                                self.dialogs.openDialog.find("button.mainButton").click(function() {
+                                    var vals = self.dialogs.openDialog.find(".fileSelect").val();
+                                    for (var i in vals) {
+                                        self.cmeditor.open(vals[i]);
+                                    }
+                                    self.dialogs.openDialog.modal('hide');
+                                });
+
 							} else {
 								buttons[self.options.menu.messages.buttons.cancel] = function() {
 									 self.dialogs.openDialog.dialog( "close" );
@@ -249,9 +243,12 @@ this.CMEditorMenu = (function(){
 								errorMsg.show(0)
 							}
 
-							self.dialogs.openDialog.dialog("option", "defaultButton", buttons[self.options.menu.messages.buttons.open]);
-							self.dialogs.openDialog.dialog("option", "buttons", buttons);
-							self.dialogs.openDialog.dialog("open");
+							console.log("SMMF wtf");
+
+							//self.dialogs.openDialog.dialog("option", "defaultButton", buttons[self.options.menu.messages.buttons.open]);
+							//self.dialogs.openDialog.dialog("option", "buttons", buttons);
+							//self.dialogs.openDialog.dialog("open");
+							self.dialogs.openDialog.modal('show');
 
 							//there is no focus method, so open and close once to set focus
 							self.dialogs.openDialog.find(".fileSelect").select2("open");
@@ -275,10 +272,7 @@ this.CMEditorMenu = (function(){
 				newFolderElem.val(oldFolder);
 
 				var buttons = {};
-				buttons[self.options.menu.messages.buttons.cancel] = function() {
-					self.dialogs.renameDialog.dialog("close");
-				};
-				buttons[self.options.menu.messages.buttons.rename] = function() {
+                self.dialogs.renameDialog.find("button.mainButton").click(function() {
 					var newName = newNameElem.val().trim();
 					var newFolder = newFolderElem.val().trim();
 
@@ -304,12 +298,10 @@ this.CMEditorMenu = (function(){
 						}
 					}
 
-					self.dialogs.renameDialog.dialog("close");
-				};
+					self.dialogs.renameDialog.modal("hide");
+				});
 
-				self.dialogs.renameDialog.dialog("option", "defaultButton", buttons[self.options.menu.messages.buttons.rename]);
-				self.dialogs.renameDialog.dialog("option", "buttons", buttons);
-				self.dialogs.renameDialog.dialog("open");
+				self.dialogs.renameDialog.modal("show");
 			},
 			delete: function(cm) { self.cmeditor.deleteDoc(); },
 			import: function(){
@@ -330,10 +322,7 @@ this.CMEditorMenu = (function(){
 				self.dialogs.importDialog.spinner.stop();
 
 				var buttons = {};
-				buttons[self.options.menu.messages.buttons.cancel] = function(){
-						self.dialogs.importDialog.dialog("close");
-				};
-				buttons[self.options.menu.messages.buttons.import] = function(){
+                self.dialogs.importDialog.find("button.mainButton").click(function() {
 					if(fileList === null || fileList.length === 0){
 						alert(self.options.menu.messages.errors.selectafile);
 						return;
@@ -356,7 +345,7 @@ this.CMEditorMenu = (function(){
 
 									filesToLoad--;
 									if(filesToLoad == 0){
-										self.dialogs.importDialog.dialog("close");
+										self.dialogs.importDialog.modal("hide");
 									}
 							}
 						}(fileList[i]);
@@ -364,11 +353,9 @@ this.CMEditorMenu = (function(){
 						fileReader.readAsText(fileList[i]);
 					}
 
-				};
+				});
 
-				self.dialogs.importDialog.dialog("option", "defaultButton", [self.options.menu.messages.buttons.import]);
-				self.dialogs.importDialog.dialog("option", "buttons", buttons);
-				self.dialogs.importDialog.dialog("open");
+				self.dialogs.importDialog.modal("show");
 			},
 			export: function(){
 				self.cmeditor.exportDoc();
@@ -417,10 +404,8 @@ this.CMEditorMenu = (function(){
 				self.dialogs.gotoDialog.find(".gotoLabel").text(" ("+first+".."+last+"):");
 
 				var buttons = {};
-				buttons[self.options.menu.messages.buttons.cancel] = function(){
-					self.dialogs.gotoDialog.dialog("close");
-				};
-				buttons[self.options.menu.messages.buttons.goto] = function(){
+
+                self.dialogs.gotoDialog.find("button.mainButton").click(function() {
 					var line = parseInt(input.val());
 
 					if(isNaN(line) || line < first || line > last){
@@ -428,13 +413,11 @@ this.CMEditorMenu = (function(){
 						return;
 					}
 
-					self.dialogs.gotoDialog.dialog("close");
+					self.dialogs.gotoDialog.modal("hide");
 					self.cmeditor.codeMirror.setCursor(line-1, 0);
-				}
+				});
 
-				self.dialogs.gotoDialog.dialog("option", "defaultButton", buttons[self.options.menu.messages.buttons.goto]);
-				self.dialogs.gotoDialog.dialog("option", "buttons", buttons);
-				self.dialogs.gotoDialog.dialog("open");
+				self.dialogs.gotoDialog.modal("show");
 			 },
 			fullscreen: function(cm) {
 				self.cmeditor.toggleFullscreen();
@@ -502,43 +485,36 @@ this.CMEditorMenu = (function(){
 	 * Initialises the modal dialogs
 	 */
 	function initDialogs(self){
+		var container = $('#dialogContainerElement');
+
 		self.dialogs = {};
 
-		self.dialogs.donationDialog = self.rootElem.find(".donationDialog").dialog({
-					autoOpen: false,
-					height: 300,
+		self.dialogs.donationDialog = container.find(".donationDialog").modal({
+					show: false,
 					buttons: {
 						Yes: function() { $( this ).dialog( "close" ); },
 						No: function() { $( this ).dialog( "close" ); },
 					}
 				});
 
-		self.dialogs.openDialog = self.rootElem.find(".openMenu").dialog({
-					autoOpen: false,
-					height: 500,
-					width: 500
+		self.dialogs.openDialog = container.find(".openMenu").modal({
+					show: false
 				});
 
-		self.dialogs.renameDialog = self.rootElem.find(".renameDialog").dialog({
-					autoOpen: false,
-					height: 300,
-					width: 500
+		self.dialogs.renameDialog = container.find(".renameDialog").modal({
+					show: false
 				});
 
-		self.dialogs.newFileDialog = self.rootElem.find(".newFileDialog").dialog({
-					autoOpen: false,
-					height: 300,
-					width: 500
+		self.dialogs.newFileDialog = container.find(".newFileDialog").modal({
+					show: false
 				});
 
-		self.dialogs.gotoDialog = self.rootElem.find(".gotoDialog").dialog({
-				autoOpen: false
+		self.dialogs.gotoDialog = container.find(".gotoDialog").modal({
+				show: false
 		});
 
-		self.dialogs.importDialog = self.rootElem.find(".importDialog").dialog({
-				autoOpen: false,
-				height: 300,
-				width: 500
+		self.dialogs.importDialog = container.find(".importDialog").modal({
+				show: false
 		});
 
 		// .cmeditor-ui-dialog s have the defaultButton-thingie activated
