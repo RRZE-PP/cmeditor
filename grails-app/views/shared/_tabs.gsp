@@ -4,16 +4,8 @@
 
 	<div class="loadingContainer" style="height:0px;overflow:hidden">
 		<div class="dialogContainer">
-			<div class="dialog diffDialog" title="${g.message(code:'cmeditor.dialogs.diff')}" style="display: none;">
-				<p class="noChanges"><g:message code="cmeditor.dialogs.diff.noChanges" /></p>
-				<div class="diffoutput"></div>
-				<p><strong><g:message code="cmeditor.dialogs.diff.contextSize" /></strong><input name="contextSize" value="1" type="number" autofocus="autofocus"/></p>
-				<p><input type="radio" value="0" name="_viewType" id="sidebyside" checked="checked"/>
-				<label for="sidebyside"><g:message code="cmeditor.dialogs.diff.sideBySide" /></label>
-				&nbsp; &nbsp; <input type="radio" value="1" name="_viewType" id="inline" />
-				<label for="inline"><g:message code="cmeditor.dialogs.diff.inline" /></label> </p>
-			</div>
-			<div class="dialog warningDialog" title="${g.message(code:'cmeditor.dialogs.warning')}" style="display: none;"></div>
+			<g:render template="diffDialog" contextPath="/shared/" />
+			<g:render template="warningDialog" contextPath="/shared/" />
 		</div>
 		<div id="cmeditor-${name}-northernpane">
 			<div class="cmeditor-tab-message" style="display:none;"></div>
@@ -27,7 +19,7 @@
 			<div id="cmeditor-${name}-easternpane" class="customBody">
 				${bodyContent}
 			</div>
-			<div id="cmeditor-${name}-centerpane">
+			<div id="cmeditor-${name}-centerpane" class="cmeditor-main-center">
 				<ul class="docs tabs"></ul>
 
 				<textarea class="cmTarget"></textarea>

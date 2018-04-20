@@ -51,6 +51,7 @@ div.cmeditor {
 	right: 0;
 	background: url("../images/skin/information.png") no-repeat scroll 0.5em 50% rgba(0, 0, 0, 0);
 	text-indent: 2.2em;
+	z-index: 1060;
 }
 .cmeditor-tab-errors ul, .cmeditor-tab-message {
 	padding: 0;
@@ -85,7 +86,7 @@ div.cmeditor {
 div.cmeditor-menu {
 	position: relative;
 	left: 0px;
-	top: 34px;
+	/*top: 34px;*/ /* save space, and the warning message disappears automagically */
 	width:100%;
 	z-index:5;
 }
@@ -100,8 +101,6 @@ div.cmeditor-menu {
 }
 .cmeditor .cmeditor-main {
 	position: relative;
-	top: 70px;
-	margin-bottom: 70px;
 }
 .cmeditor .cmeditor-button {
 	max-width: 10em;
@@ -115,7 +114,7 @@ div.cmeditor-menu {
 }
 
 .cmeditor-menubar {
-	margin: 0 0 4em 0;
+	margin: 0 0 0.4em 0;
 	overflow:visible;
 	height: 30px; /*set fixed height, jquery's clearfix seems to be broken*/
 }
@@ -232,18 +231,24 @@ div.cmeditor.cmeditor-fullscreen {
 	border:none;
 	padding:0;
 	border-radius:initial;
-	overflow-y: scroll;
+	overflow-y: hidden;
 	box-sizing: border-box;
 	z-index: 95;
 }
 
 div.cmeditor.cmeditor-fullscreen .cmeditor-main {
 	position:static;
+	height: calc(100% - 40px);
+}
+
+div.cmeditor.cmeditor-fullscreen .cmeditor-main .cmeditor-main-center {
+	position:static;
+	height: 100%;
 }
 
 div.cmeditor.cmeditor-fullscreen .cmeditor-menu {
 	z-index:97;
-	top: 20px;
+	/*top: 20px;*/
 }
 
 div.cmeditor.cmeditor-fullscreen .CodeMirror {
@@ -253,6 +258,10 @@ div.cmeditor.cmeditor-fullscreen .CodeMirror {
 	height: -o-calc(100% - 30px);
 
 	padding-bottom: 0px;
+}
+
+div.cmeditor.cmeditor-fullscreen .CodeMirror-scroll {
+	padding-bottom: 0; /* fucking hides stuff */
 }
 
  div.cmeditor.cmeditor-fullscreen .ui-layout-container, .ui-layout-container * {

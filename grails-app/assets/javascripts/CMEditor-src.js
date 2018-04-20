@@ -40,34 +40,6 @@ this.CMEditor = (function(){
 			executeHooks(self, "postMenuInit", menuRootElem, [self.menu]);
 		}
 
-		self.rootElem.find(".docs").sortable({containment: "parent", tolerance: "pointer", distance: 8, appendTo: self.rootElem,
-			sort: function (event, ui) {
-				var self = $(this),
-				width = ui.helper.outerWidth(),
-				top = ui.helper.position().top;
-
-				self.children().each(function () {
-					if($(this).hasClass('ui-sortable-placeholder')){
-						$(this).css("height", "");
-					}
-					if ($(this).hasClass('ui-sortable-helper') || $(this).hasClass('ui-sortable-placeholder')) {
-						return true;
-					}
-					// If overlap is more than half of the dragged item
-					var distance = Math.abs(ui.position.left - $(this).position().left),
-					before = ui.position.left > $(this).position().left;
-
-					if ((width - distance) > (width / 2) && (distance < width) && $(this).position().top === top) {
-						if (before) {
-							$('.ui-sortable-placeholder', self).insertBefore($(this));
-						} else {
-							$('.ui-sortable-placeholder', self).insertAfter($(this));
-						}
-						return false;
-					}
-				});
-			}
-		});
 		insertNewUntitledDocument(self);
 		syncTabIndent(self);
 
@@ -384,22 +356,10 @@ this.CMEditor = (function(){
 		diff.find("input[name=contextSize]").on("keyup", function(){decorateDiffDialog(self)});
 		diff.find("input[name=_viewType]").on("click",   function(){decorateDiffDialog(self)});
 
-		diff.dialog({
-			autoOpen: false,
-			resize:"auto",
-			width: "auto",
-			height: "auto",
-		});
-
+		diff.modal({ show: false, backdrop: false });
 
 		var warn = self.dialogs.warningDialog = self.rootElem.find(".warningDialog")
-		warn.dialog({
-			autoOpen: false,
-			resize:"auto",
-			width: "auto",
-			height: "auto",
-		});
-
+		warn.modal({ show: false, backdrop: false });
 
 		// .cmeditor-ui-dialog s have the defaultButton-thingie activated
 		$.each(self.dialogs, function(key, val){val.parent().addClass("cmeditor-ui-dialog")});
@@ -808,7 +768,6 @@ this.CMEditor = (function(){
 
 		selectDocument(self, newDoc);
 		removeUntitledDocument(self);
-		docTabs.sortable( "refreshPositions" );
 
 		log(self, "Inserted a new document", "INFO");
 		log(self, "This document was inserted", "DEBUG", newDoc);
@@ -1140,24 +1099,15 @@ this.CMEditor = (function(){
 	 *             defaultButton function (optional): if supplied, this function will be called when
 	 *                                                the user hits enter while the dialog has focus
 	 */
-	function diff(self, additionalButtons, defaultButton) {
-		var buttons = {};
-		buttons[self.options.messages.buttons.close] = function() {
-			self.dialogs.diffDialog.dialog("close");
-		};
-
-		if (additionalButtons) {
-			for (var name in additionalButtons) {
-				buttons[name] = additionalButtons[name];
-			}
-		}
+	function diff(self) {
+        self.dialogs.diffDialog.find("button.mainButton").click(function() {
+            ajax_update(self);
+            executeHooks(self, "postSaveDoc", self, []);
+            self.dialogs.diffDialog.modal('hide');
+        });
 
 		decorateDiffDialog(self);
-
-		self.dialogs.diffDialog.dialog("option", "defaultButton",
-			typeof defaultButton === "undefined" ? buttons[self.options.messages.buttons.close] : defaultButton);
-		self.dialogs.diffDialog.dialog("option", "buttons", buttons);
-		self.dialogs.diffDialog.dialog("open");
+		self.dialogs.diffDialog.modal("show");
 	}
 
 	/* (Public)
@@ -1455,10 +1405,7 @@ this.CMEditor = (function(){
 		updateCurrentDocument(self);
 
 		if (self.state.doDiffBeforeSaving) {
-			var additionalButtons = {
-					Save: function() { ajax_update(self); executeHooks(self, "postSaveDoc", self, []); $(this).dialog("close"); },
-				};
-			diff(self, additionalButtons);
+			diff(self);
 		} else {
 			ajax_update(self);
 			executeHooks(self, "postSaveDoc", self, []);
@@ -1553,13 +1500,8 @@ this.CMEditor = (function(){
 			self.rootElem.css({"position": "fixed", "top": "0", "left": "0", "height": "100%", "width": "100%"});
 			self.rootElem.addClass("cmeditor-fullscreen");
 
-			self.layout = self.rootElem.layout({
-				east__paneSelector:   "#cmeditor-"+self.state.instanceName+"-easternpane",
-				center__paneSelector: "#cmeditor-"+self.state.instanceName+"-centerpane",
-				north__paneSelector:  "#cmeditor-"+self.state.instanceName+"-northernpane",
-				north__size: 75,
-				north__resizable:false
-				});
+			// hide the settings pane (for now)
+			self.rootElem.find('#cmeditor-script-easternpane').hide();
 
 			self.codeMirror.refresh();
 			syncTabIndent(self);
@@ -1568,12 +1510,13 @@ this.CMEditor = (function(){
 		}else{
 			executeHooks(self, "preLeaveFullscreen", self, []);
 
-			self.layout.destroy();
-
 			self.rootElem.removeClass("cmeditor-fullscreen");
 			self.rootElem.css(self.state.cssBeforeFullscreen);
 			document.documentElement.style.overflow = self.state.oldDocumentOverflow;
 			self.state.cssBeforeFullscreen = undefined;
+
+            // hide the settings pane (for now)
+            self.rootElem.find('#cmeditor-script-easternpane').show();
 
 			self.codeMirror.refresh();
 			syncTabIndent(self);

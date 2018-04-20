@@ -4,3 +4,7 @@
 *
 *= require cmeditor-common
 */
+
+.CodeMirror-scroll {
+    margin-bottom: 0;
+}

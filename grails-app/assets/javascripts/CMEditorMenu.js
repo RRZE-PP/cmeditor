@@ -26,8 +26,6 @@ this.CMEditorMenu = (function(){
 		initDialogs(self);
 
 
-		self.menuBar = self.rootElem.find(".menu").menubar();
-
 		self.cmeditor.focus();
 
 		registerInstance(self.state.instanceName, self.state.instanceNo, self);
@@ -133,11 +131,7 @@ this.CMEditorMenu = (function(){
 				nameElem.val("");
 				folderElem.val("/");
 
-				var buttons = {};
-				buttons[self.options.menu.messages.buttons.cancel] = function(){
-					self.dialogs.newFileDialog.dialog("close");
-				};
-				buttons[self.options.menu.messages.buttons.create] = function(){
+                self.dialogs.newFileDialog.find("button.mainButton").unbind('click').click(function() {
 					var name = nameElem.val().trim();
 					var folder = folderElem.val().trim();
 
@@ -158,31 +152,34 @@ this.CMEditorMenu = (function(){
 					}
 
 					self.cmeditor.newDoc(unambigousName, folder);
-					self.dialogs.newFileDialog.dialog("close");
-				};
+					self.dialogs.newFileDialog.modal("hide");
+				});
 
-				self.dialogs.newFileDialog.dialog("option", "defaultButton", buttons[self.options.menu.messages.buttons.create]);
-				self.dialogs.newFileDialog.dialog("option", "buttons", buttons);
-				self.dialogs.newFileDialog.dialog("open");
+				self.dialogs.newFileDialog.modal('show');
 			},
 			open: function(cm) {
 
 				var errorMsg = self.dialogs.openDialog.find(".noFiles");
 				errorMsg.hide(0).siblings().remove();
 
+				var dialogContent = self.dialogs.openDialog.find('.modal-body');
+
 				var s = $("<select class=\"fileSelect\" name=\"cmeditor-menu-open-select\" multiple=\"multiple\" style=\"width:100%\"/><div class=\"fileSelectTree\" />");
 
 				if(self.options.ajax.listURL){
 					$.get(self.options.ajax.listURL, function(data){
 						if (data.status == "success") {
-							var available = false;
+							var available = (data.result.length > 0);
 							var buttons = {};
+
+							// prepare Select2
 							for(var i=0; i < data.result.length; ++i) {
 								s.append($("<option />", {value: data.result[i][self.options.mapping["idField"]], text: data.result[i][self.options.mapping["name"]]}));
-								available = true;
 							}
+
+							// prepare Filetree
 							if (available == true) {
-								s.appendTo(self.dialogs.openDialog);
+								s.appendTo(dialogContent);
 								self.dialogs.openDialog.find(".fileSelect").select2({placeholder: self.options.menu.messages.fileselectplaceholder,
 																			 allowClear: true});
 
@@ -192,9 +189,10 @@ this.CMEditorMenu = (function(){
 
 									var curPathElems = fileTreeData.dir.split("/");
 									var folders = {};
+									var files = [];
 
-									for(var i=0; i < data.result.length; ++i) {
-										if(typeof data.result[i][self.options.mapping["folder"]] !== "undefined" &&
+									for (var i=0; i < data.result.length; ++i) {
+										if (typeof data.result[i][self.options.mapping["folder"]] !== "undefined" &&
 											data.result[i][self.options.mapping["folder"]] !== null) {
 
 											var absPath = data.result[i][self.options.mapping["folder"]];
@@ -204,7 +202,7 @@ this.CMEditorMenu = (function(){
 												//this file is in the current folder
 												var fileName = data.result[i][self.options.mapping["name"]];
 												var fileId = data.result[i][self.options.mapping["idField"]];
-												val.append($('<li class="file ext_'+fileName+'"><a href="#" rel='+fileId+'>'+fileName+'</a></li>'));
+												files.push({fileId: fileId, fileName:fileName});
 											}else{
 												var pathElems = absPath.split("/");
 
@@ -218,7 +216,28 @@ this.CMEditorMenu = (function(){
 										}
 									}
 
-									for(absPath in folders){
+									var sortedFiles = files.sort(function(a, b) {
+										var nameA = a.fileName.toUpperCase();
+                                        var nameB = b.fileName.toUpperCase();
+
+                                        if (nameA < nameB) {
+                                            return -1;
+                                        }
+                                        if (nameA > nameB) {
+                                            return 1;
+                                        }
+
+                                        return 0;
+									});
+
+									for (var i = 0; i < sortedFiles.length; i++) {
+										var file = sortedFiles[i];
+                                        val.append($('<li class="file ext_'+file.fileName+'"><a href="#" rel='+file.fileId+'>'+file.fileName+'</a></li>'));
+									}
+
+									var sortedAbsPaths = Object.keys(folders).sort();
+									for (var i = 0; i < sortedAbsPaths.length; i++) {
+										var absPath = sortedAbsPaths[i];
 										val.append($('<li class="directory collapsed"><a href="#" rel="'+absPath+'"">'+folders[absPath]+'</a></li>'));
 									}
 
@@ -232,26 +251,19 @@ this.CMEditorMenu = (function(){
 								//workaround a width calculation bug in select2
 								self.dialogs.openDialog.find(".select2-search__field").css("width", "auto");
 
-								buttons[self.options.menu.messages.buttons.cancel] = function() {
-									 self.dialogs.openDialog.dialog( "close" );
-								};
-								buttons[self.options.menu.messages.buttons.open] = function() {
-									var vals = self.dialogs.openDialog.find(".fileSelect").val();
-									for (var i in vals) {
-										self.cmeditor.open(vals[i]);
-									}
-									self.dialogs.openDialog.dialog( "close" );
-								};
+                                self.dialogs.openDialog.find("button.mainButton").unbind('click').click(function() {
+                                    var vals = self.dialogs.openDialog.find(".fileSelect").val();
+                                    for (var i in vals) {
+                                        self.cmeditor.open(vals[i]);
+                                    }
+                                    self.dialogs.openDialog.modal('hide');
+                                });
+
 							} else {
-								buttons[self.options.menu.messages.buttons.cancel] = function() {
-									 self.dialogs.openDialog.dialog( "close" );
-								};
 								errorMsg.show(0)
 							}
 
-							self.dialogs.openDialog.dialog("option", "defaultButton", buttons[self.options.menu.messages.buttons.open]);
-							self.dialogs.openDialog.dialog("option", "buttons", buttons);
-							self.dialogs.openDialog.dialog("open");
+							self.dialogs.openDialog.modal('show');
 
 							//there is no focus method, so open and close once to set focus
 							self.dialogs.openDialog.find(".fileSelect").select2("open");
@@ -275,10 +287,7 @@ this.CMEditorMenu = (function(){
 				newFolderElem.val(oldFolder);
 
 				var buttons = {};
-				buttons[self.options.menu.messages.buttons.cancel] = function() {
-					self.dialogs.renameDialog.dialog("close");
-				};
-				buttons[self.options.menu.messages.buttons.rename] = function() {
+                self.dialogs.renameDialog.find("button.mainButton").unbind('click').click(function() {
 					var newName = newNameElem.val().trim();
 					var newFolder = newFolderElem.val().trim();
 
@@ -304,12 +313,10 @@ this.CMEditorMenu = (function(){
 						}
 					}
 
-					self.dialogs.renameDialog.dialog("close");
-				};
+					self.dialogs.renameDialog.modal("hide");
+				});
 
-				self.dialogs.renameDialog.dialog("option", "defaultButton", buttons[self.options.menu.messages.buttons.rename]);
-				self.dialogs.renameDialog.dialog("option", "buttons", buttons);
-				self.dialogs.renameDialog.dialog("open");
+				self.dialogs.renameDialog.modal("show");
 			},
 			delete: function(cm) { self.cmeditor.deleteDoc(); },
 			import: function(){
@@ -330,10 +337,7 @@ this.CMEditorMenu = (function(){
 				self.dialogs.importDialog.spinner.stop();
 
 				var buttons = {};
-				buttons[self.options.menu.messages.buttons.cancel] = function(){
-						self.dialogs.importDialog.dialog("close");
-				};
-				buttons[self.options.menu.messages.buttons.import] = function(){
+                self.dialogs.importDialog.find("button.mainButton").unbind('click').click(function() {
 					if(fileList === null || fileList.length === 0){
 						alert(self.options.menu.messages.errors.selectafile);
 						return;
@@ -356,7 +360,7 @@ this.CMEditorMenu = (function(){
 
 									filesToLoad--;
 									if(filesToLoad == 0){
-										self.dialogs.importDialog.dialog("close");
+										self.dialogs.importDialog.modal("hide");
 									}
 							}
 						}(fileList[i]);
@@ -364,11 +368,9 @@ this.CMEditorMenu = (function(){
 						fileReader.readAsText(fileList[i]);
 					}
 
-				};
+				});
 
-				self.dialogs.importDialog.dialog("option", "defaultButton", [self.options.menu.messages.buttons.import]);
-				self.dialogs.importDialog.dialog("option", "buttons", buttons);
-				self.dialogs.importDialog.dialog("open");
+				self.dialogs.importDialog.modal("show");
 			},
 			export: function(){
 				self.cmeditor.exportDoc();
@@ -417,10 +419,8 @@ this.CMEditorMenu = (function(){
 				self.dialogs.gotoDialog.find(".gotoLabel").text(" ("+first+".."+last+"):");
 
 				var buttons = {};
-				buttons[self.options.menu.messages.buttons.cancel] = function(){
-					self.dialogs.gotoDialog.dialog("close");
-				};
-				buttons[self.options.menu.messages.buttons.goto] = function(){
+
+                self.dialogs.gotoDialog.find("button.mainButton").unbind('click').click(function() {
 					var line = parseInt(input.val());
 
 					if(isNaN(line) || line < first || line > last){
@@ -428,18 +428,18 @@ this.CMEditorMenu = (function(){
 						return;
 					}
 
-					self.dialogs.gotoDialog.dialog("close");
+					self.dialogs.gotoDialog.modal("hide");
 					self.cmeditor.codeMirror.setCursor(line-1, 0);
-				}
+				});
 
-				self.dialogs.gotoDialog.dialog("option", "defaultButton", buttons[self.options.menu.messages.buttons.goto]);
-				self.dialogs.gotoDialog.dialog("option", "buttons", buttons);
-				self.dialogs.gotoDialog.dialog("open");
+				self.dialogs.gotoDialog.modal("show");
 			 },
 			fullscreen: function(cm) {
 				self.cmeditor.toggleFullscreen();
 		    }
-		}
+		};
+
+        self.menus.modesMenu = {}
 
 		//add available modes dynamically
 		var modesMenuElem = self.rootElem.find(".modesMenu");
@@ -447,7 +447,8 @@ this.CMEditorMenu = (function(){
 			self.options.availableModes = [];
 		}
 
-		for(var i=0; i < self.options.availableModes.length; i++){
+        self.options.availableModes.sort();
+		for (var i=0; i < self.options.availableModes.length; i++) {
 			var mode = self.options.availableModes[i];
 			var cmMode = CodeMirror.findModeByName(mode) || CodeMirror.findModeByMIME(mode);
 
@@ -455,20 +456,24 @@ this.CMEditorMenu = (function(){
 				log(self, "Could not add mode "+mode+", because no valid corresponding mode was found!");
 				continue;
 			}
-			self.menus.viewMenu["mode"+cmMode.name] = (function(cmMode){return function(){self.cmeditor.setMode(cmMode.name)}})(cmMode);
-			modesMenuElem.append('<li><a href="#" value="mode'+cmMode.name+'"><span></span>'+cmMode.name+'</a></li>');
+			self.menus.modesMenu["mode"+cmMode.name] = (function(cmMode){return function(){self.cmeditor.setMode(cmMode.name)}})(cmMode);
+			modesMenuElem.append('<a class="dropdown-item" href="#" value="mode'+cmMode.name+'">'+cmMode.name+'</a>');
 		}
+
+        modesMenuElem.append('<div class="dropdown-divider"></div>');
 
 		//treat overlays as modes
 		if (typeof self.options.overlayDefinitionsVar !== "undefined") {
-			for(var overlay in self.options.overlayDefinitionsVar) {
-				self.menus.viewMenu["mode"+overlay] = function(overlay) {
+			var sortedOverlays = Object.keys(self.options.overlayDefinitionsVar).sort();
+            for (var i = 0; i < sortedOverlays.length; i++) {
+				var overlay = sortedOverlays[i];
+				self.menus.modesMenu["mode"+overlay] = function(overlay) {
 					return function(cm) {
-					 self.cmeditor.setMode(overlay)
+					 	self.cmeditor.setMode(overlay)
 					};
 				}(overlay);
 
-				modesMenuElem.append($("<li><a href=\"#\" value=\"mode"+overlay+"\"><span></span>"+overlay+"</a></li>"));
+				modesMenuElem.append($("<a class='dropdown-item' href=\"#\" value=\"mode"+overlay+"\">"+overlay+"</a>"));
 			}
 		}
 
@@ -476,7 +481,7 @@ this.CMEditorMenu = (function(){
 		self.menus.optionsMenu = {
 			diffBeforeSave: function(cm) {
 				if(typeof self.cmeditor.setDoDiffBeforeSaving == "function")
-					self.cmeditor.setDoDiffBeforeSaving(self.rootElem.find(".optionsMenu a[value='diffBeforeSave']").children("span").hasClass("ui-icon-check")); },
+					self.cmeditor.setDoDiffBeforeSaving(self.rootElem.find(".optionsMenu a[value='diffBeforeSave']").hasClass("active")); },
 			bindingdefault: function(cm) { cm.setOption("keymap", "default"); cm.setOption("vimMode", false); },
 			bindingvim: function(cm) { cm.setOption("keymap", "vim"); cm.setOption("vimMode", true); },
 			bindingemacs: function(cm) { cm.setOption("keymap", "emacs"); cm.setOption("vimMode", false); },
@@ -494,7 +499,7 @@ this.CMEditorMenu = (function(){
 		for(var i=0; i < self.options.availableThemes.length; i++){
 			var theme = self.options.availableThemes[i];
 			self.menus.optionsMenu["theme"+theme] = getThemeCallback(self, theme);
-			themesMenuElem.append('<li><a href="#" value="theme'+theme+'"><span></span>'+theme+'</a></li>');
+			themesMenuElem.after('<a class="dropdown-item" data-group="themes" href="#" value="theme'+theme+'">'+theme+'</a>');
 		}
 	}
 
@@ -502,91 +507,66 @@ this.CMEditorMenu = (function(){
 	 * Initialises the modal dialogs
 	 */
 	function initDialogs(self){
+		var container = $('#dialogContainerElement');
+
+		var defaultDialogConf = { show: false, backdrop: false };
 		self.dialogs = {};
 
-		self.dialogs.donationDialog = self.rootElem.find(".donationDialog").dialog({
-					autoOpen: false,
-					height: 300,
-					buttons: {
-						Yes: function() { $( this ).dialog( "close" ); },
-						No: function() { $( this ).dialog( "close" ); },
-					}
-				});
-
-		self.dialogs.openDialog = self.rootElem.find(".openMenu").dialog({
-					autoOpen: false,
-					height: 500,
-					width: 500
-				});
-
-		self.dialogs.renameDialog = self.rootElem.find(".renameDialog").dialog({
-					autoOpen: false,
-					height: 300,
-					width: 500
-				});
-
-		self.dialogs.newFileDialog = self.rootElem.find(".newFileDialog").dialog({
-					autoOpen: false,
-					height: 300,
-					width: 500
-				});
-
-		self.dialogs.gotoDialog = self.rootElem.find(".gotoDialog").dialog({
-				autoOpen: false
-		});
-
-		self.dialogs.importDialog = self.rootElem.find(".importDialog").dialog({
-				autoOpen: false,
-				height: 300,
-				width: 500
-		});
+		self.dialogs.openDialog = container.find(".openMenu").modal(defaultDialogConf);
+		self.dialogs.renameDialog = container.find(".renameDialog").modal(defaultDialogConf);
+		self.dialogs.newFileDialog = container.find(".newFileDialog").modal(defaultDialogConf);
+		self.dialogs.gotoDialog = container.find(".gotoDialog").modal(defaultDialogConf);
+		self.dialogs.importDialog = container.find(".importDialog").modal(defaultDialogConf);
 
 		// .cmeditor-ui-dialog s have the defaultButton-thingie activated
-		$.each(self.dialogs, function(key, val){val.parent().addClass("cmeditor-ui-dialog")});
+		$.each(self.dialogs, function(key, val) {
+			val.parent().addClass("cmeditor-ui-dialog");
+		});
 	}
 
 	/*
 	 * Marks or grays out some menu items depending on their values
 	 */
 	function decorateMenuItems(self){
-		self.rootElem.find(".modesMenu a[value='mode"+self.options.mode+"']").children("span").addClass("ui-icon ui-icon-check");
+		self.rootElem.find(".modesMenu a[value='mode"+self.options.mode+"']").addClass("active");
 
 		if(self.options.useSession){
 			if (localStorage["cmeditor-menu-binding"])
-				self.rootElem.find(".optionsMenu a[value='binding"+localStorage["cmeditor-menu-binding"]+"']").children("span").addClass("ui-icon ui-icon-check");
+				self.rootElem.find(".optionsMenu a[value='binding"+localStorage["cmeditor-menu-binding"]+"']").addClass("active");
 			else
-				self.rootElem.find(".optionsMenu a[value='bindingdefault']").children("span").addClass("ui-icon ui-icon-check");
+				self.rootElem.find(".optionsMenu a[value='bindingdefault']").addClass("active");
 
 			if (localStorage['cmeditor-menu-theme'])
-				self.rootElem.find(".optionsMenu a[value='theme"+localStorage['cmeditor-menu-theme']+"']").children("span").addClass("ui-icon ui-icon-check");
+				self.rootElem.find(".optionsMenu a[value='theme"+localStorage['cmeditor-menu-theme']+"']").addClass("active");
 			else
-				self.rootElem.find(".optionsMenu a[value='themedefault']").children("span").addClass("ui-icon ui-icon-check");
+				self.rootElem.find(".optionsMenu a[value='themedefault']").addClass("active");
 
 			if (localStorage['cmeditor-menu-diffBeforeSave'] === true)
-				self.rootElem.find(".optionsMenu a[value='diffBeforeSave']").children("span").addClass("ui-icon ui-icon-check");
+				self.rootElem.find(".optionsMenu a[value='diffBeforeSave']").addClass("active");
 			else if (self.options.defaultDiffBeforeSave)
-				self.rootElem.find(".optionsMenu a[value='diffBeforeSave']").children("span").addClass("ui-icon ui-icon-check");
+				self.rootElem.find(".optionsMenu a[value='diffBeforeSave']").addClass("active");
 
 		}else{
-			self.rootElem.find(".optionsMenu a[value='binding"+self.options.binding+"']").children("span").addClass("ui-icon ui-icon-check");
-			self.rootElem.find(".optionsMenu a[value='theme"+self.options.theme+"']").children("span").addClass("ui-icon ui-icon-check");
+			self.rootElem.find(".optionsMenu a[value='binding"+self.options.binding+"']").addClass("active");
+			self.rootElem.find(".optionsMenu a[value='theme"+self.options.theme+"']").addClass("active");
 
 			if(self.options.defaultDiffBeforeSave){
-				self.rootElem.find(".optionsMenu a[value='diffBeforeSave']").children("span").addClass("ui-icon ui-icon-check");
+				self.rootElem.find(".optionsMenu a[value='diffBeforeSave']").addClass("active");
 			}
 		}
 
-		if(self.options.defaultReadOnly){
-			self.rootElem.find(".viewMenu a[value='readOnly'] .ui-icon").removeClass("ui-icon-blank").addClass("ui-icon-check");
+		if (self.options.defaultReadOnly) {
+			self.rootElem.find(".viewMenu a[value='readOnly']").addClass("active");
 		}
-		if(self.cmeditor.isReadOnly()){
+
+		if (self.cmeditor.isReadOnly()) {
 			//disable some additional elements, when the whole editor is readonly
-			self.rootElem.find(".viewMenu a[value='readOnly'] .ui-icon").removeClass("ui-icon-blank").addClass("ui-icon-check");
-			self.rootElem.find(".viewMenu a[value='readOnly']").parent().addClass("ui-state-disabled");
-			self.rootElem.find(".fileMenu a[value='new']").parent().addClass("ui-state-disabled");
-			self.rootElem.find(".fileMenu a[value='open']").parent().addClass("ui-state-disabled");
-			self.rootElem.find(".fileMenu a[value='import']").parent().addClass("ui-state-disabled");
-			self.rootElem.find(".fileMenu a[value='close']").parent().addClass("ui-state-disabled");
+			self.rootElem.find(".viewMenu a[value='readOnly']").addClass("active");
+			self.rootElem.find(".viewMenu a[value='readOnly']").addClass("disabled");
+			self.rootElem.find(".fileMenu a[value='new']").addClass("disabled");
+			self.rootElem.find(".fileMenu a[value='open']").addClass("disabled");
+			self.rootElem.find(".fileMenu a[value='import']").addClass("disabled");
+			self.rootElem.find(".fileMenu a[value='close']").addClass("disabled");
 		}
 
 		if(typeof self.cmeditor.diff != "function") {
@@ -603,7 +583,7 @@ this.CMEditorMenu = (function(){
 		self.rootElem.find(".fileMenu a").click(function(event) {
 			var value = $(this).attr("value");
 
-			if(typeof value === "undefined" || $(this).parent().hasClass("ui-state-disabled")){
+			if(typeof value === "undefined" || $(this).hasClass("disabled")){
 		    	event.preventDefault();
 				return;
 			}
@@ -612,14 +592,13 @@ this.CMEditorMenu = (function(){
 		    self.cmeditor.focus();
 
 		    if (found) found(self.cmeditor.getCodeMirror());
-
 			event.preventDefault();
 		});
 
 		self.rootElem.find(".viewMenu a").click(function(event) {
 			var value = $(this).attr("value");
 
-			if(typeof value === "undefined" || $(this).parent().hasClass("ui-state-disabled")){
+			if(typeof value === "undefined" || $(this).hasClass("disabled")){
 		    	event.preventDefault();
 				return;
 			}
@@ -628,32 +607,41 @@ this.CMEditorMenu = (function(){
 		    self.cmeditor.focus();
 
 		    if (found) found(self.cmeditor.getCodeMirror());
-
-		    if (value.indexOf("mode") == 0) {
-				$(this).parent().parent().find("span").removeClass("ui-icon ui-icon-check");
-				$(this).children("span").addClass("ui-icon ui-icon-check");
-		    }
-
 			event.preventDefault();
 		});
+
+        self.rootElem.find(".modesMenu a").click(function(event) {
+            var value = $(this).attr("value");
+
+            if(typeof value === "undefined" || $(this).hasClass("disabled")){
+                event.preventDefault();
+                return;
+            }
+
+            $(this).parent().find("a").removeClass("active");
+            $(this).addClass("active");
+
+            var found = self.menus.modesMenu[value];
+            self.cmeditor.focus();
+
+            if (found) found(self.cmeditor.getCodeMirror());
+            event.preventDefault();
+        });
 
 		self.rootElem.find(".optionsMenu a").click(function(event) {
 			var value = $(this).attr("value");
 
-			if(typeof value === "undefined" || $(this).parent().hasClass("ui-state-disabled")){
+			if(typeof value === "undefined" || $(this).hasClass("disabled")){
 		    	event.preventDefault();
 				return;
 			}
 
 			if (value.indexOf("diffBeforeSave") == 0) {
-				if ($(this).children("span").hasClass("ui-icon-check")) {
-					$(this).children("span").removeClass("ui-icon ui-icon-check");
-				} else {
-					$(this).children("span").addClass("ui-icon ui-icon-check");
-				}
+				$(this).toggleClass('active');
 			} else {
-				$(this).parent().parent().find("span").removeClass("ui-icon ui-icon-check");
-				$(this).children("span").addClass("ui-icon ui-icon-check");
+				var groupName = $(this).attr('data-group');
+				$(this).parent().find("a[data-group='"+groupName+"']").removeClass("active");
+				$(this).addClass("active");
 			}
 
 			var found = self.menus.optionsMenu[value];
@@ -664,7 +652,7 @@ this.CMEditorMenu = (function(){
 			if(self.options.useSession){
 			    if (value.indexOf("binding") == 0) {localStorage["cmeditor-menu-binding"] = value.substring(7);}
 			    if (value.indexOf("theme") == 0) {localStorage["cmeditor-menu-theme"] = value.substring(5);}
-			    if (value.indexOf("diffBeforeSave") == 0) {localStorage["cmeditor-menu-diffBeforeSave"] = $(this).children("span").hasClass("ui-icon-check");}
+			    if (value.indexOf("diffBeforeSave") == 0) {localStorage["cmeditor-menu-diffBeforeSave"] = $(this).hasClass("active");}
 			}
 		    //return false;
 		    event.preventDefault();
@@ -673,7 +661,7 @@ this.CMEditorMenu = (function(){
 		self.rootElem.find(".addonsMenu a").click(function(event) {
 			var value = $(this).attr("value");
 
-			if(typeof value === "undefined" || $(this).parent().hasClass("ui-state-disabled")){
+			if(typeof value === "undefined" || $(this).hasClass("disabled")){
 		    	event.preventDefault();
 				return;
 			}
@@ -699,16 +687,16 @@ this.CMEditorMenu = (function(){
 		var curMode = self.cmeditor.getCurrentCMEditorMode();
 		var cmMode = CodeMirror.findModeByName(curMode) || CodeMirror.findModeByMIME(curMode) || {name: curMode};
 
-		self.rootElem.find(".modesMenu").find("span").removeClass("ui-icon ui-icon-check");
+		self.rootElem.find(".modesMenu").find('a').removeClass("active");
 		if(typeof cmMode !== "undefined")
-			self.rootElem.find(".modesMenu a[value='mode"+cmMode.name+"']").children("span").addClass("ui-icon ui-icon-check");
+			self.rootElem.find(".modesMenu a[value='mode"+cmMode.name+"']").addClass("active");
 
 		if (isEditorOrDocReadOnly(self)) {
-			self.rootElem.find(".viewMenu a[value='readOnly'] .ui-icon").removeClass("ui-icon-blank").addClass("ui-icon-check");
-			self.rootElem.find(".disabledWhenReadOnly").parent().addClass("ui-state-disabled");
+			self.rootElem.find(".viewMenu a[value='readOnly']").addClass("active");
+			self.rootElem.find(".disabledWhenReadOnly").addClass("disabled");
 		} else {
-			self.rootElem.find(".viewMenu a[value='readOnly'] .ui-icon").removeClass("ui-icon-check").addClass("ui-icon-blank");
-			self.rootElem.find(".disabledWhenReadOnly").parent().removeClass("ui-state-disabled");
+			self.rootElem.find(".viewMenu a[value='readOnly']").removeClass("active");
+			self.rootElem.find(".disabledWhenReadOnly").removeClass("disabled");
 		}
 
 	}
@@ -726,16 +714,16 @@ this.CMEditorMenu = (function(){
 			self.menus.userAddedMenus = {};
 
 		if(typeof self.menus.userAddedMenus[menuName] === "undefined"){
-			var menuEntry = $("<li class='userAddedRootMenu'><a href='#'>"+menuName+"</a><ul class='userAddedMenu'></ul></li>");
-			self.rootElem.find(".cmeditor-menubar").append(menuEntry);
+			var menuEntry = $("<li class='nav-item dropdown'>" +
+				"<a class='dropdown-toggle nav-link userAddedRootMenu' href='#' id='UserAddedMenu_"+menuName+"' role='button' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>"+menuName+"</a>" +
+				"<div class='dropdown-menu userAddedMenu' aria-labelledby='UserAddedMenu_'"+menuName+"'></div>" +
+				"</li>");
+			self.rootElem.find(".cmeditor-menubar").find('ul.navbar-nav').append(menuEntry);
 
 			self.menus.userAddedMenus[menuName] = menuEntry;
 
 			menuEntry._cmeditor_menu_isAUserAddedMenu = true;
 		}
-
-		self.menuBar.menubar("destroy");
-		self.menuBar = self.rootElem.find(".menu").menubar();
 
 		return self.menus.userAddedMenus[menuName];
 	}
@@ -757,23 +745,19 @@ this.CMEditorMenu = (function(){
 			return null;
 		}
 
-		if(superMenu.children(".userAddedMenu").length === 0)
-			superMenu.append($("<ul class='userAddedMenu'></ul>"));
+		// if(superMenu.children(".userAddedMenu").length === 0)
+		// 	superMenu.append($("<ul class='userAddedMenu'></ul>"));
 
-		var subMenuEntry = $("<li></li>");
-		var subMenuLink = $("<a href='#'><span></span>"+entryName+"</a>");
+		var subMenuEntry = $("<a class='dropdown-item' href='#'><span></span>"+entryName+"</a>");
 
 		if(typeof callbackFunction === "function")
-			subMenuLink.on("click", callbackFunction);
+            subMenuEntry.on("click", callbackFunction);
 		else
-			subMenuLink.on("click", function(e){e.preventDefault()});
+            subMenuEntry.on("click", function(e){e.preventDefault()});
 
-		superMenu.children(".userAddedMenu").append(subMenuEntry.append(subMenuLink));
+		superMenu.children(".userAddedMenu").append(subMenuEntry);
 
 		subMenuEntry._cmeditor_menu_isAUserAddedMenu = true;
-
-		self.menuBar.menubar("destroy");
-		self.menuBar = self.rootElem.find(".menu").menubar();
 
 		return subMenuEntry;
 	}
