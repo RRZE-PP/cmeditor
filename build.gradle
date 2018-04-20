@@ -14,7 +14,7 @@ buildscript {
 project.ext.bintrayUser = bintray_user
 project.ext.bintrayKey = bintray_api_key
 
-version "2.6.5"
+version "2.7.0"
 group "org.grails.plugins"
 
 apply plugin:"eclipse"
@@ -70,10 +70,10 @@ grailsPublish {
         name = 'Apache-2.0'
     }
     title = "CMEditor"
-    desc = "CMEditor is a simple way to use the popular CodeMirror web editor in grails applications. You can use it to edit pretty much anything that can be mapped to a file-like object. I.e. something with a filename and text-content. If your model requires additional fields this is supported, too. \
-    For example managing your library could be done by mapping filename to \"$author - $title\". The tabbed editor then could manage everything: Author, title, publication year and - of course - the books content in a nice-to-use CodeMirror editor. You could even edit multiple books simultaneously. \
+    desc = """CMEditor is a simple way to use the popular CodeMirror web editor in grails applications. You can use it to edit pretty much anything that can be mapped to a file-like object. I.e. something with a filename and text-content. If your model requires additional fields this is supported, too.
+    For example managing your library could be done by mapping filename to \"$author - $title\". The tabbed editor then could manage everything: Author, title, publication year and - of course - the books content in a nice-to-use CodeMirror editor. You could even edit multiple books simultaneously.
     Check out our demo grails project at https://github.com/RRZE-PP/grails-cmeditor-demo. \
-    "
+    """
     developers = ["t-animal":"Tilman Adler", frnktrgr:"Frank Tröger"]
     portalUser = ""
     portalPassword = ""

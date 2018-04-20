@@ -175,4 +175,39 @@ class CmeditorTagLib {
 							 availableModes: availableModes,
 							 availableThemes: availableThemes])
 	}
+	
+	def menuItem = { attrs, body ->
+		def value = attrs.value
+		def codePrefix = attrs.codePrefix ?: 'cmeditor.menu.menus.'
+		def msg = attrs.code ? g.message(code:(codePrefix + attrs.code)) : (attrs.msg ?: 'TITLE?!')
+		
+		def classes = ["dropdown-item"]
+		if (attrs.disabled) {
+			classes << "disabled"
+		}
+		
+		if (attrs.active) {
+			classes << "active"
+		}
+		
+		def dataAttrs = ""
+		dataAttrs += " data-group='${attrs.group ?: 'default'}'"
+		
+		out << "<a class='${classes.join(' ')}' href='#' value='${value}' $dataAttrs>"
+		
+		def icon = attrs.icon
+		if (icon) {
+			def iconFamily = attrs.iconFamily ?: 'fas'
+			out << "<i class='$iconFamily fa-fw $icon'></i>&nbsp;"
+		} else {
+			out << "<i class='fa-fw'></i>&nbsp;"
+		}
+		
+		out << "${msg}</a>"
+	}
+	
+	def menuDivider = { attrs, body ->
+		out << '<div class="dropdown-divider"></div>'
+	}
+	
 }
