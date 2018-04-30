@@ -1116,22 +1116,24 @@ this.CMEditor = (function(){
 	 * Parameters: message String: The message to be displayed
 	 */
 	function displayMessage(self, message) {
-		if(typeof self.state.messagesToDisplay === "undefined" || self.state.messagesToDisplay.length === 0){
+		if (typeof self.state.messagesToDisplay === "undefined" || self.state.messagesToDisplay.length === 0) {
 			self.state.messagesToDisplay = [message];
-		}else{
+		} else {
 			self.state.messagesToDisplay.push(message);
 			return;
 		}
 
-		function displayRemainingMessages(){
-			if(self.state.messagesToDisplay.length === 0)
+		function displayRemainingMessages() {
+			if (self.state.messagesToDisplay.length === 0)
 				return;
-			self.rootElem.find(".cmeditor-tab-message").text(self.state.messagesToDisplay[0])
-			                .toggle("slide", {"direction":"up"})
-			                .delay(3000)
-			                .toggle({effect: "slide",
-			                         direction: "up",
-			                         complete: function(){self.state.messagesToDisplay.shift(); displayRemainingMessages()}});
+
+			self.rootElem.find(".cmeditor-tab-message")
+				.text(self.state.messagesToDisplay[0])
+			    .fadeIn()
+			    .delay(3000)
+			    .fadeOut(200, function() {
+			    	self.state.messagesToDisplay.shift(); displayRemainingMessages()
+			    });
 		}
 
 		displayRemainingMessages();

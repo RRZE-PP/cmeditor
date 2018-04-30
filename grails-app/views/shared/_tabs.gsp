@@ -2,13 +2,16 @@
 	<div class="loadingSpinner" style="background-color:#555;opacity:0.8; z-index:10000; height:100%;width:100%;position:absolute;top:0;left:0">&nbsp;</div>
 	<style></style>
 
+	<div class="cmeditor-tab-message alert alert-secondary"
+		 style="display:none; position: absolute; top: 15px; right: 15px; z-index: 99999" role="alert"></div>
+
+
 	<div class="loadingContainer" style="height:0px;overflow:hidden">
 		<div class="dialogContainer">
 			<g:render template="diffDialog" contextPath="/shared/" />
 			<g:render template="warningDialog" contextPath="/shared/" />
 		</div>
 		<div id="cmeditor-${name}-northernpane">
-			<div class="cmeditor-tab-message" style="display:none;"></div>
 
 			<g:if test="${options.menu}">
 					<g:render template="/shared/menu" plugin="cmeditor" model="[name:name, options:options]"></g:render>
