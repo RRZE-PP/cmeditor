@@ -3,11 +3,9 @@ $(document).delegate('.cmeditor-ui-dialog', 'keyup', function(e) {
 
 	tagName = (tagName === 'input' && e.target.type === 'button') ? 'button' : tagName;
 
-	if (e.which === $.ui.keyCode.ENTER && tagName !== 'textarea' && tagName !== 'select' && tagName !== 'button') {
-		var options = $(this).children(".ui-dialog-content").dialog("option");
-		if(typeof options.defaultButton !== "undefined")
-			options.defaultButton();
-
+	// 13 is ENTER
+	if (e.which === 13 && tagName !== 'textarea' && tagName !== 'select' && tagName !== 'button') {
+        $(this).find('.mainButton').click();
 		return false;
 	}
 });
