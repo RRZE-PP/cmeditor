@@ -1100,7 +1100,7 @@ this.CMEditor = (function(){
 	 *                                                the user hits enter while the dialog has focus
 	 */
 	function diff(self) {
-        self.dialogs.diffDialog.find("button.mainButton").click(function() {
+        self.dialogs.diffDialog.find("button.mainButton").unbind('click').click(function() {
             ajax_update(self);
             executeHooks(self, "postSaveDoc", self, []);
             self.dialogs.diffDialog.modal('hide');
