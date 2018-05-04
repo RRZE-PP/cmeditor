@@ -1,4 +1,3 @@
-//= require jquery/jquery.ui.menubar
 //= require select2-4.0.0/dist/js/select2.min.js
 
 if(typeof String.prototype.endsWith === "undefined")
@@ -496,6 +495,7 @@ this.CMEditorMenu = (function(){
 		function getThemeCallback(self, theme){
 			return function(cm){CMEditor.loadTheme(theme, function(){self.cmeditor.codeMirror.setOption("theme", theme); self.cmeditor.copyCMTheme();})};
 		}
+		self.options.availableThemes.sort().reverse();
 		for(var i=0; i < self.options.availableThemes.length; i++){
 			var theme = self.options.availableThemes[i];
 			self.menus.optionsMenu["theme"+theme] = getThemeCallback(self, theme);

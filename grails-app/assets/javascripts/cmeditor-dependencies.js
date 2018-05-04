@@ -1,12 +1,8 @@
-//= require jquery-ui.min
-
 //= require jsdifflib
 
 //= require spin-2.3.2/spin.min
 
 //= require FileSaver-1.1.20150716/FileSaver.min
-
-//= require jquery-layout-1.4.0/jquery.layout-latest
 
 // after our pull request was merged upstream, this can be changed to dist/...min.js
 //= require jqueryfiletree-2.0.1/src/jQueryFileTree

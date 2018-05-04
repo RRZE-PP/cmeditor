@@ -63,9 +63,9 @@
 
 				<cmeditor:menuItem value="dummyBindings" code="options.bindings" disabled="true" />
 				<cmeditor:menuItem value="bindingdefault" code="options.bindings.default" group="bindings" />
-				<cmeditor:menuItem value="bindingvim" code="options.bindings.vim" group="bindings" />
 				<cmeditor:menuItem value="bindingemacs" code="options.bindings.emacs" group="bindings" />
 				<cmeditor:menuItem value="bindingsublime" code="options.bindings.sublime" group="bindings" />
+				<cmeditor:menuItem value="bindingvim" code="options.bindings.vim" group="bindings" />
 
 				<cmeditor:menuDivider />
 				<a class="dropdown-item disabled themesMenu" href="#"><span></span><g:message code="cmeditor.menu.menus.options.themes" /></a>

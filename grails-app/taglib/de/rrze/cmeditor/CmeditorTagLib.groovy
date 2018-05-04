@@ -55,6 +55,7 @@ class CmeditorTagLib {
 		def availableThemes = [
 			"default",
 			"eclipse",
+			"idea",
 			"lesser-dark",
 			"monokai",
 			"night",
@@ -141,6 +142,7 @@ class CmeditorTagLib {
 		def availableThemes = [
 			"default",
 			"eclipse",
+			"idea",
 			"lesser-dark",
 			"monokai",
 			"night",
