@@ -433,6 +433,9 @@ this.CMEditorMenu = (function(){
 
 				self.dialogs.gotoDialog.modal("show");
 			 },
+			showLog: function(cm) {
+				$('#logContainer').toggle();
+			},
 			fullscreen: function(cm) {
 				self.cmeditor.toggleFullscreen();
 		    }

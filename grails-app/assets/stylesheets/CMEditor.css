@@ -8,3 +8,11 @@
 .CodeMirror-scroll {
     margin-bottom: 0;
 }
+
+#logContainer {
+    height: 60px;
+    font-family: monospace;
+    white-space: pre-line;
+    border: thin solid #aaa;
+    overflow: auto;
+}

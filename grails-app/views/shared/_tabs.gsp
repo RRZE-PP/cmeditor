@@ -26,6 +26,7 @@
 				<ul class="docs tabs"></ul>
 
 				<textarea class="cmTarget"></textarea>
+				<div id="logContainer" style="display: none;"></div>
 			</div>
 		</div>
 	</div>

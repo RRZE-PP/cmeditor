@@ -44,6 +44,7 @@
 				<cmeditor:menuItem value="readOnly" code="view.readonly" icon="fa-lock" iconFamily="fas"/>
 				<cmeditor:menuItem value="diff" code="view.diff" icon="fa-exchange-alt" iconFamily="fas"/>
 				<cmeditor:menuItem value="goto" code="view.goto" icon="fa-location-arrow" iconFamily="fas"/>
+				<cmeditor:menuItem value="showLog" code="view.log" icon="fa-list" iconFamily="fas"/>
 				<cmeditor:menuItem value="fullscreen" code="view.fullscreen" icon="fa-expand-arrows-alt" iconFamily="fas"/>
 			</div>
 		</li>

@@ -1127,6 +1127,8 @@ this.CMEditor = (function(){
 			if (self.state.messagesToDisplay.length === 0)
 				return;
 
+            addMessageToLogContainer(message);
+
 			self.rootElem.find(".cmeditor-tab-message")
 				.text(self.state.messagesToDisplay[0])
 			    .fadeIn()
@@ -1137,6 +1139,21 @@ this.CMEditor = (function(){
 		}
 
 		displayRemainingMessages();
+	}
+
+	function addMessageToLogContainer(message) {
+		var log = $('#logContainer');
+		var d = new Date();
+		var h = d.getHours(),
+			m = d.getMinutes(),
+			s = d.getSeconds(),
+			j = d.getMilliseconds();
+
+		// readable code at its finest :D
+		var time = h + ':' + (m < 10 ? '0': '') + m + ':' + (s < 10 ? '0' : '') + s + '.'
+			+ (j < 100 ? '0' : '') + (j < 10 ? '0' : '') + j;
+
+		log.html(time + ' ' + message + '\n' + log.html());
 	}
 
 	/* (Public)
