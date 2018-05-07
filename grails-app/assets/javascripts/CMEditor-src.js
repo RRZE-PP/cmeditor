@@ -921,24 +921,26 @@ this.CMEditor = (function(){
 	 * and optionally further buttons which can trigger functions
 	 *
 	 * Parameters: message String: A message to display
-	 *             additionalButtons Object (optional): keys: Button labels
-	 *                                                  values: callbacks for button click
+	 *             defaultButtonText String (optional): the caption of the default Button
+	 *             callback function (optional): function to be executed upon clicking the default button
 	 */
-	function showWarning(self, message, additionalButtons){
-		var buttons = {};
-		buttons[self.options.messages.buttons.cancel] = function() {
-			$(this).dialog("close");
-		};
-
-		if (additionalButtons) {
-			for (var name in additionalButtons) {
-				buttons[name] = additionalButtons[name];
-			}
+	function showWarning(self, message, defaultButtonText, callback) {
+		var daDialog = self.dialogs.warningDialog;
+        daDialog.find('.modal-body').text(message);
+		if (defaultButtonText !== undefined) {
+            daDialog.find('.mainButton').text(defaultButtonText);
+            daDialog.find('.mainButton').show();
+		} else {
+            daDialog.find('.mainButton').hide();
 		}
 
-		self.dialogs.warningDialog.text(message);
-		self.dialogs.warningDialog.dialog("option", "buttons", buttons);
-		self.dialogs.warningDialog.dialog("open");
+		if (callback !== undefined) {
+            daDialog.find('.mainButton').unbind('click').click(function(ev) {
+				callback(ev);
+            });
+		}
+
+		self.dialogs.warningDialog.modal("show");
 	}
 
 	/*
@@ -1060,13 +1062,11 @@ this.CMEditor = (function(){
 		executeHooks(self, "preCloseDoc", self, [doc]);
 
 		if (closeThis.isChanged()) {
-			var button = {};
-			button[self.options.messages.buttons.close] = function() {
-				removeDocument(self, closeThis);
-				updateTabText(self);
-				$(this).dialog("close");
-			};
-			showWarning(self, self.options.messages.warnings.changesWillBeLost, button);
+			showWarning(self, self.options.messages.warnings.changesWillBeLost, 'Close', function(ev) {
+                removeDocument(self, closeThis);
+                updateTabText(self);
+                self.dialogs.warningDialog.modal('hide');
+            });
 		} else {
 			removeDocument(self, closeThis);
 			updateTabText(self);
@@ -1082,13 +1082,11 @@ this.CMEditor = (function(){
 	function deleteDoc(self) {
 		executeHooks(self, "preDeleteDoc", self, []);
 
-		var button = {};
-		button[self.options.messages.buttons.delete] = function() {
-			ajax_delete(self);
-			$(this).dialog("close");
-			executeHooks(self, "postDeleteDoc", self, []);
-		};
-		showWarning(self, self.options.messages.warnings.deleteFile, button);
+		showWarning(self, self.options.messages.warnings.deleteFile, 'Delete', function (ev) {
+            ajax_delete(self);
+            self.dialogs.warningDialog.modal("hide");
+            executeHooks(self, "postDeleteDoc", self, []);
+        });
 	}
 
 	/* (Public)
