@@ -1,4 +1,4 @@
-<div class="modal fade openMenu" tabindex="-1" role="dialog">
+<div id="cmEditorOpenDialog" class="modal fade openMenu" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -17,3 +17,9 @@
         </div>
     </div>
 </div>
+
+<script>
+    $('#cmEditorOpenDialog').on('shown.bs.modal', function () {
+        $('.fileSelect').select2('open');
+    })
+</script>

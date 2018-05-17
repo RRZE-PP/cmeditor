@@ -1,4 +1,4 @@
-<div class="modal fade gotoDialog" tabindex="-1" role="dialog">
+<div id="cmGotoDialog" class="modal fade gotoDialog" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -8,7 +8,7 @@
                 </button>
             </div>
             <div class="modal-body">
-                <g:message code="cmeditor.menu.dialogs.goto.prompt" /><p class="gotoLabel"></p><input type="number" autofocus="autofocus"/><p class="gotoError">&nbsp;</p>
+                <g:message code="cmeditor.menu.dialogs.goto.prompt" /><p class="gotoLabel"></p><input name="gotoLineNumber" type="number" autofocus="autofocus"/><p class="gotoError">&nbsp;</p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -17,3 +17,9 @@
         </div>
     </div>
 </div>
+
+<script type="text/javascript">
+    $('#cmGotoDialog').on('shown.bs.modal', function () {
+        $('#cmGotoDialog').find('input[name="gotoLineNumber"]').trigger('focus')
+    })
+</script>

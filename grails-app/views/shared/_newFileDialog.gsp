@@ -1,4 +1,4 @@
-<div class="modal fade newFileDialog" tabindex="-1" role="dialog">
+<div id ="cmEditorNewFileDialog" class="modal fade newFileDialog" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -18,3 +18,9 @@
         </div>
     </div>
 </div>
+
+<script>
+    $('#cmEditorNewFileDialog').on('shown.bs.modal', function () {
+        $('#cmEditorNewFileDialog').find('input[name="name"]').trigger('focus')
+    })
+</script>

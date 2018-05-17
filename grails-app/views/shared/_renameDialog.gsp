@@ -1,4 +1,4 @@
-<div class="modal fade renameDialog" tabindex="-1" role="dialog">
+<div id="cmRenameDialog" class="modal fade renameDialog" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -8,7 +8,7 @@
                 </button>
             </div>
             <div class="modal-body">
-                <g:message code="cmeditor.menu.dialogs.rename.newname" /><input type="text" name="newName"  autofocus="autofocus" /> <br />
+                <g:message code="cmeditor.menu.dialogs.rename.newname" /><input type="text" name="newName" autofocus="autofocus" /> <br />
                 <g:message code="cmeditor.menu.dialogs.rename.newfolder" /> <input type="text" name="newFolder" /> (<g:message code="cmeditor.menu.dialogs.rename.emptytohide" />)
             </div>
             <div class="modal-footer">
@@ -18,3 +18,9 @@
         </div>
     </div>
 </div>
+
+<script type="text/javascript">
+    $('#cmRenameDialog').on('shown.bs.modal', function () {
+        $('#cmRenameDialog').find('input[name="newName"]').trigger('focus')
+    })
+</script>

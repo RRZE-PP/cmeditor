@@ -1,3 +1,7 @@
 /*
 *= require jsdifflib/diffview.css
 */
+
+table.diff {
+    width: 100%;
+}
