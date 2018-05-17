@@ -1,6 +1,4 @@
 /*
-*= require jquery-theme
-*= require jquery/jquery.ui.menubar
 *= require select2-4.0.0/dist/css/select2.min.css
 */
 /* TODO: move menu specific stuff from cmeditor-common.css to here, this currently works because this is not standalone */
