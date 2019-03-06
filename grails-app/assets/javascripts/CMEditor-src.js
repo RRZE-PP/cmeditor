@@ -159,17 +159,17 @@ this.CMEditor = (function(){
 	 * Parameters: identifier (String|Number): the instance name or number
 	 */
 	var getInstance = clazz.getInstance = function(identifier){
-	 	if(typeof identifier == "number")
-	 		return clazz.instancesNumber[identifier];
-	 	else
-	 		return clazz.instancesString[identifier];
+		if(typeof identifier == "number")
+			return clazz.instancesNumber[identifier];
+		else
+			return clazz.instancesString[identifier];
 	}
 
 	/*
 	 * Returns all instances of this class
 	 */
 	var getInstances = clazz.getInstances = function(){
-	 	return clazz.instances;
+		return clazz.instances;
 	}
 
 	/*
@@ -280,7 +280,7 @@ this.CMEditor = (function(){
 			self.state.overlays = [];
 			for(var name in options.overlayDefinitionsVar) {
 				cmeditorall_add_overlay_definition(name, options.overlayDefinitionsVar[name]["baseMode"],
-				                                       options.overlayDefinitionsVar[name]["definition"]);
+					options.overlayDefinitionsVar[name]["definition"]);
 				self.state.overlays.push(name);
 			}
 			CodeMirror.commands.autocomplete = function(cm, getHints, hintOptions) {
@@ -421,7 +421,9 @@ this.CMEditor = (function(){
 					executeHooks(self, "postPerformDeleteDoc", self, [data, response]);
 				},
 				error:function(XMLHttpRequest,textStatus,errorThrown){
-					displayMessage(self, self.options.messages.errorIntro +" "+ textStatus +" " + errorThrown);
+					displayMessage(self,
+						'<div class="cmeditor-error-message">'+self.options.messages.errorIntro+'</div>' +
+						XMLHttpRequest.responseText, true);
 					log(self, "Could not delete this file from the server", "WARNING", data);
 				}
 			});
@@ -452,10 +454,10 @@ this.CMEditor = (function(){
 			success: function(response){
 				if (response.status == "success" && response.result) {
 					var newDoc = new Doc(response.result[self.options.mapping.name],
-					                        response.result[self.options.mapping.folder] || null,
-					                        response.result[self.options.mapping.mode] || self.options.defaultMode,
-					                        response.result[self.options.mapping.content],
-					                        readWrite ? false : ((self.options.readOnly || self.options.defaultReadOnly) ? true : false));
+						response.result[self.options.mapping.folder] || null,
+						response.result[self.options.mapping.mode] || self.options.defaultMode,
+						response.result[self.options.mapping.content],
+						readWrite ? false : ((self.options.readOnly || self.options.defaultReadOnly) ? true : false));
 					newDoc.setID(response.result[self.options.mapping.idField]);
 
 					//insert custom data, if it is present in the provided data
@@ -488,7 +490,11 @@ this.CMEditor = (function(){
 				executeHooks(self, "postPerformLoadDoc", self, [data, response]);
 			},
 
-		error:function(XMLHttpRequest,textStatus,errorThrown){displayMessage(self, self.options.messages.errorIntro +" "+ textStatus +" " + errorThrown);},
+			error:function(XMLHttpRequest,textStatus,errorThrown){
+				displayMessage(self,
+					'<div class="cmeditor-error-message">'+self.options.messages.errorIntro+'</div>' +
+					XMLHttpRequest.responseText, true);
+			},
 		});
 	}
 
@@ -574,7 +580,9 @@ this.CMEditor = (function(){
 					executeHooks(self, "postPerformSaveDoc", self, [data, response]);
 				},
 				error:function(XMLHttpRequest,textStatus,errorThrown){
-					displayMessage(self, self.options.messages.errorIntro + " " + textStatus +" " + errorThrown);
+					displayMessage(self,
+						'<div class="cmeditor-error-message">'+self.options.messages.errorIntro+'</div>' +
+						XMLHttpRequest.responseText, true);
 					log(self, "Could not save this document to the server.", "WARNING", data);
 				}
 			});
@@ -781,7 +789,7 @@ this.CMEditor = (function(){
 			var name = getUnambiguousName(self, self.options.messages.untitledDocName);
 
 			var newDoc = new Doc(name, "/", self.options.defaultMode, self.options.defaultContent,
-									(self.options.readOnly||self.options.defaultReadOnly)?true:false);
+				(self.options.readOnly||self.options.defaultReadOnly)?true:false);
 
 
 			//insert custom data, if it is present in the provided data
@@ -926,18 +934,18 @@ this.CMEditor = (function(){
 	 */
 	function showWarning(self, message, defaultButtonText, callback) {
 		var daDialog = self.dialogs.warningDialog;
-        daDialog.find('.modal-body').text(message);
+		daDialog.find('.modal-body').text(message);
 		if (defaultButtonText !== undefined) {
-            daDialog.find('.mainButton').text(defaultButtonText);
-            daDialog.find('.mainButton').show();
+			daDialog.find('.mainButton').text(defaultButtonText);
+			daDialog.find('.mainButton').show();
 		} else {
-            daDialog.find('.mainButton').hide();
+			daDialog.find('.mainButton').hide();
 		}
 
 		if (callback !== undefined) {
-            daDialog.find('.mainButton').unbind('click').click(function(ev) {
+			daDialog.find('.mainButton').unbind('click').click(function(ev) {
 				callback(ev);
-            });
+			});
 		}
 
 		self.dialogs.warningDialog.modal("show");
@@ -1063,10 +1071,10 @@ this.CMEditor = (function(){
 
 		if (closeThis.isChanged()) {
 			showWarning(self, self.options.messages.warnings.changesWillBeLost, 'Close', function(ev) {
-                removeDocument(self, closeThis);
-                updateTabText(self);
-                self.dialogs.warningDialog.modal('hide');
-            });
+				removeDocument(self, closeThis);
+				updateTabText(self);
+				self.dialogs.warningDialog.modal('hide');
+			});
 		} else {
 			removeDocument(self, closeThis);
 			updateTabText(self);
@@ -1083,10 +1091,10 @@ this.CMEditor = (function(){
 		executeHooks(self, "preDeleteDoc", self, []);
 
 		showWarning(self, self.options.messages.warnings.deleteFile, 'Delete', function (ev) {
-            ajax_delete(self);
-            self.dialogs.warningDialog.modal("hide");
-            executeHooks(self, "postDeleteDoc", self, []);
-        });
+			ajax_delete(self);
+			self.dialogs.warningDialog.modal("hide");
+			executeHooks(self, "postDeleteDoc", self, []);
+		});
 	}
 
 	/* (Public)
@@ -1098,22 +1106,30 @@ this.CMEditor = (function(){
 	 *                                                the user hits enter while the dialog has focus
 	 */
 	function diff(self) {
-        self.dialogs.diffDialog.find("button.mainButton").unbind('click').click(function() {
-            ajax_update(self);
-            executeHooks(self, "postSaveDoc", self, []);
-            self.dialogs.diffDialog.modal('hide');
-        });
+		self.dialogs.diffDialog.find("button.mainButton").unbind('click').click(function() {
+			ajax_update(self);
+			executeHooks(self, "postSaveDoc", self, []);
+			self.dialogs.diffDialog.modal('hide');
+		});
 
 		decorateDiffDialog(self);
 		self.dialogs.diffDialog.modal("show");
 	}
 
 	/* (Public)
-	 * Displays a message for 3 seconds
+	 * Displays a message for x seconds
 	 *
 	 * Parameters: message String: The message to be displayed
 	 */
-	function displayMessage(self, message) {
+	function displayMessage(self, message, error = false) {
+
+		var secs = 3;
+		var msgClass = 'alert-success';
+		if (error == true){
+			secs = 8;
+			msgClass = "alert-danger";
+		}
+
 		if (typeof self.state.messagesToDisplay === "undefined" || self.state.messagesToDisplay.length === 0) {
 			self.state.messagesToDisplay = [message];
 		} else {
@@ -1125,15 +1141,18 @@ this.CMEditor = (function(){
 			if (self.state.messagesToDisplay.length === 0)
 				return;
 
-            addMessageToLogContainer(message);
+			addMessageToLogContainer(message);
+
 
 			self.rootElem.find(".cmeditor-tab-message")
-				.text(self.state.messagesToDisplay[0])
-			    .fadeIn()
-			    .delay(3000)
-			    .fadeOut(200, function() {
-			    	self.state.messagesToDisplay.shift(); displayRemainingMessages()
-			    });
+				.removeClass('alert-secondary alert-success alert-danger')
+				.addClass(msgClass)
+				.html(self.state.messagesToDisplay[0])
+				.fadeIn(300)
+				.delay(secs*1000)
+				.fadeOut(1000, function() {
+					self.state.messagesToDisplay.shift(); displayRemainingMessages()
+				});
 		}
 
 		displayRemainingMessages();
@@ -1201,8 +1220,8 @@ this.CMEditor = (function(){
 					if (json.status == "success" && json.result) {
 						for(var i=0; i<json.result.length; i++){
 							if((typeof folder === "undefined" || folder === null
-									|| json.result[i][self.options.mapping["folder"]] === folder
-									|| json.result[i][self.options.mapping["folder"]] === null)){
+								|| json.result[i][self.options.mapping["folder"]] === folder
+								|| json.result[i][self.options.mapping["folder"]] === null)){
 								namesOnServer.push(json.result[i][self.options.mapping["name"]]);
 							}
 						}
@@ -1252,10 +1271,10 @@ this.CMEditor = (function(){
 		}
 
 		var newDoc = new Doc(fileName,
-		                        "/imported/",
-		                        fileMode || self.options.defaultMode,
-		                        fileContent,
-		                        (self.options.readOnly || self.options.defaultReadOnly) ? true : false);
+			"/imported/",
+			fileMode || self.options.defaultMode,
+			fileContent,
+			(self.options.readOnly || self.options.defaultReadOnly) ? true : false);
 		insertNewDocument(self, newDoc);
 	}
 
@@ -1296,7 +1315,7 @@ this.CMEditor = (function(){
 		}
 
 		var newDoc = new Doc(fileName, folder, self.options.defaultMode, self.options.defaultContent,
-								(self.options.readOnly || self.options.defaultReadOnly) ? true:false);
+			(self.options.readOnly || self.options.defaultReadOnly) ? true:false);
 
 
 		insertNewDocument(self, newDoc);
@@ -1381,8 +1400,8 @@ this.CMEditor = (function(){
 			}
 		}
 		ajax_load(self, fileId, readWrite, function(newDoc){
-												insertNewDocument(self, newDoc);
-												executeHooks(self, "postOpenDoc", self, [newDoc]);
+			insertNewDocument(self, newDoc);
+			executeHooks(self, "postOpenDoc", self, [newDoc]);
 		});
 	}
 
@@ -1464,10 +1483,10 @@ this.CMEditor = (function(){
 	 */
 	function setMode(self, mode){
 		function setOverlayMode(){
-		    log(self, "Setting a custom mode (overlay):", "DEBUG", mode)
-		    self.codeMirror.setOption("mode", mode);
-		    self.state.curDoc.setMode(mode);
-		    update(self);
+			log(self, "Setting a custom mode (overlay):", "DEBUG", mode)
+			self.codeMirror.setOption("mode", mode);
+			self.state.curDoc.setMode(mode);
+			update(self);
 		}
 		if(self.state.overlays && self.state.overlays.indexOf(mode) !== -1){
 			var baseMode = self.options.overlayDefinitionsVar[mode]["baseMode"];
@@ -1508,10 +1527,10 @@ this.CMEditor = (function(){
 			executeHooks(self, "preEnterFullscreen", self, []);
 
 			self.state.cssBeforeFullscreen = {"position": self.rootElem.css("position"),
-			                                  "top":  self.rootElem.css("top"),
-			                                  "left":  self.rootElem.css("left"),
-			                                  "height":  self.rootElem.css("height"),
-			                                  "width":  self.rootElem.css("width")};
+				"top":  self.rootElem.css("top"),
+				"left":  self.rootElem.css("left"),
+				"height":  self.rootElem.css("height"),
+				"width":  self.rootElem.css("width")};
 			self.state.oldDocumentOverflow = document.documentElement.style.overflow;
 			document.documentElement.style.overflow = "hidden";
 			self.rootElem.css({"position": "fixed", "top": "0", "left": "0", "height": "100%", "width": "100%"});
@@ -1532,8 +1551,8 @@ this.CMEditor = (function(){
 			document.documentElement.style.overflow = self.state.oldDocumentOverflow;
 			self.state.cssBeforeFullscreen = undefined;
 
-            // hide the settings pane (for now)
-            self.rootElem.find('#cmeditor-script-easternpane').show();
+			// hide the settings pane (for now)
+			self.rootElem.find('#cmeditor-script-easternpane').show();
 
 			self.codeMirror.refresh();
 			syncTabIndent(self);
@@ -1625,25 +1644,25 @@ this.CMEditor = (function(){
 
 	//public methods, deprecated; use the corresponding from above
 	CMEditor.prototype.close                     = function(){log("using close is deprecated. use closeDoc instead", "WARNING");
-                                                              Array.prototype.unshift.call(arguments, this); return close.apply(this, arguments)};
+		Array.prototype.unshift.call(arguments, this); return close.apply(this, arguments)};
 	CMEditor.prototype.delete                    = function(){log("using delete is deprecated. use deleteDoc instead", "WARNING");
-                                                              Array.prototype.unshift.call(arguments, this); return deleteDoc.apply(this, arguments)};
+		Array.prototype.unshift.call(arguments, this); return deleteDoc.apply(this, arguments)};
 	CMEditor.prototype.get_name                  = function(){log("using get_name is deprecated. use getUnambiguousName instead", "WARNING");
-                                                              Array.prototype.unshift.call(arguments, this); return getUnambiguousName.apply(this, arguments)};
+		Array.prototype.unshift.call(arguments, this); return getUnambiguousName.apply(this, arguments)};
 	CMEditor.prototype.get_mode                  = function(){log("using get_mode is deprecated. use getCurrentCMEditorMode instead", "WARNING");
-                                                              Array.prototype.unshift.call(arguments, this); return getCurrentCMEditorMode.apply(this, arguments)};
+		Array.prototype.unshift.call(arguments, this); return getCurrentCMEditorMode.apply(this, arguments)};
 	CMEditor.prototype.new                       = function(){log("using new is deprecated. use newDoc instead", "WARNING");
-                                                              Array.prototype.unshift.call(arguments, this); return newDoc.apply(this, arguments)};
+		Array.prototype.unshift.call(arguments, this); return newDoc.apply(this, arguments)};
 	CMEditor.prototype.set_diff_before_save      = function(){log("using set_diff_before_save is deprecated. use setDoDiffBeforeSaving instead", "WARNING");
-                                                              Array.prototype.unshift.call(arguments, this); return setDoDiffBeforeSaving.apply(this, arguments)};
+		Array.prototype.unshift.call(arguments, this); return setDoDiffBeforeSaving.apply(this, arguments)};
 	CMEditor.prototype.save                      = function(){log("using save is deprecated. use saveDoc instead", "WARNING");
-                                                              Array.prototype.unshift.call(arguments, this); return save.apply(this, arguments)};
+		Array.prototype.unshift.call(arguments, this); return save.apply(this, arguments)};
 	CMEditor.prototype.saveas                    = function(){log("using saveas is deprecated. use saveDocAs instead", "WARNING");
-                                                              Array.prototype.unshift.call(arguments, this); return saveas.apply(this, arguments)};
+		Array.prototype.unshift.call(arguments, this); return saveas.apply(this, arguments)};
 	CMEditor.prototype.rename_doc                = function(){log("using rename_doc is deprecated. use renameDoc instead", "WARNING");
-                                                              Array.prototype.unshift.call(arguments, this); return rename.apply(this, arguments)};
+		Array.prototype.unshift.call(arguments, this); return rename.apply(this, arguments)};
 	CMEditor.prototype.update_message            = function(){log("using update_message is deprecated. use displayMessage instead", "WARNING");
-                                                              Array.prototype.unshift.call(arguments, this); return displayMessage.apply(this, arguments)};
+		Array.prototype.unshift.call(arguments, this); return displayMessage.apply(this, arguments)};
 
 	var Doc = CMEditor.Doc = function Doc(name, folder, mode, content, readOnly, cmDoc){
 		this.content = content;
@@ -1688,10 +1707,10 @@ this.CMEditor = (function(){
 		}
 
 		return this.folder !== this.savedState.folder
-				|| this.idField !== this.savedState.idField
-				|| this.mode !== this.savedState.mode
-				|| this.content !== this.savedState.content
-				|| this.name !== this.savedState.name;
+			|| this.idField !== this.savedState.idField
+			|| this.mode !== this.savedState.mode
+			|| this.content !== this.savedState.content
+			|| this.name !== this.savedState.name;
 	}
 
 	//Getter
