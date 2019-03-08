@@ -1,17 +1,20 @@
 buildscript {
-    ext { grailsVersion = project.grailsVersion }
-    repositories { mavenLocal() }
+    ext {
+        grailsVersion = project.grailsVersion
+    }
+    repositories {
+        mavenLocal()
+    }
     dependencies {
         classpath "org.grails:grails-gradle-plugin:$grailsVersion"
         classpath "com.bertramlabs.plugins:asset-pipeline-gradle:2.14.2"
     }
 }
 
-
 //project.ext.bintrayUser = bintray_user
 //project.ext.bintrayKey = bintray_api_key
 
-version "2.7.5_rrze"
+version "2.7.7_rrze"
 group "org.grails.plugins"
 
 apply plugin:"eclipse"
@@ -20,7 +23,6 @@ apply plugin:"org.grails.grails-plugin"
 apply plugin:"org.grails.grails-plugin-publish"
 apply plugin:"org.grails.grails-gsp"
 apply plugin:"asset-pipeline"
-apply plugin:"org.grails.grails-doc"
 apply from:repo_publish_config
 
 ext {

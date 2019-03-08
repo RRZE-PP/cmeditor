@@ -140,14 +140,14 @@ this.CMEditorMenu = (function(){
 					}
 					if(folder === ""){
 						folder = null;
-						self.cmeditor.displayMessage(self.options.menu.messages.hints.filewillbehidden);
+						self.cmeditor.displayMessage(self.options.menu.messages.hints.filewillbehidden, "warn");
 					}else{
 						folder = folder.endsWith("/")?folder:folder+"/"
 					}
 
 					var unambigousName = self.cmeditor.getUnambiguousName(name, folder);
 					if(name !== unambigousName){
-						self.cmeditor.displayMessage(self.options.menu.messages.hints.numberappended);
+						self.cmeditor.displayMessage(self.options.menu.messages.hints.numberappended, "warn");
 					}
 
 					self.cmeditor.newDoc(unambigousName, folder);
@@ -268,9 +268,14 @@ this.CMEditorMenu = (function(){
 							self.dialogs.openDialog.find(".fileSelect").select2("open");
 							self.dialogs.openDialog.find(".fileSelect").select2("close");
 						} else {
-							self.cmeditor.displayMessage(data.msg ? data.msg : "An unknown error occured");
+							self.cmeditor.displayMessage(data.msg ? data.msg : "An unknown error occured", "error");
 						}
-					}).fail(function(XMLHttpRequest,textStatus,errorThrown){self.cmeditor.displayMessage(self.options.menu.messages.errorIntro+" "+ textStatus +" " + errorThrown);});
+					}).fail(function(XMLHttpRequest,textStatus,errorThrown){
+						self.cmeditor.displayMessage(self,
+							'<div class="cmeditor-error-message">'+self.options.messages.errorIntro+'</div>' +
+							XMLHttpRequest.responseText, "error");
+
+					});
 				}
 			},
 			save: function(cm) { self.cmeditor.saveDoc(); },
@@ -296,7 +301,7 @@ this.CMEditorMenu = (function(){
 					}
 					if(newFolder === ""){
 						newFolder = null;
-						self.cmeditor.displayMessage(self.options.menu.messages.hints.filewillbehidden);
+						self.cmeditor.displayMessage(self.options.menu.messages.hints.filewillbehidden, "warn");
 					}else{
 						newFolder = newFolder.endsWith("/")?newFolder:newFolder+"/";
 					}
@@ -308,7 +313,7 @@ this.CMEditorMenu = (function(){
 						self.cmeditor.renameDoc(unambigousName);
 
 						if(newName !== unambigousName){
-							self.cmeditor.displayMessage(self.options.menu.messages.hints.numberappended);
+							self.cmeditor.displayMessage(self.options.menu.messages.hints.numberappended, "warn");
 						}
 					}
 
@@ -352,7 +357,7 @@ this.CMEditorMenu = (function(){
 							return function(e){
 									var unambigousName = self.cmeditor.getUnambiguousName(origFile.name, "/imported/");
 									if(origFile.name !== unambigousName){
-										self.cmeditor.displayMessage(self.options.menu.messages.hints.numberappended);
+										self.cmeditor.displayMessage(self.options.menu.messages.hints.numberappended, "warn");
 									}
 
 									self.cmeditor.importDoc(unambigousName, e.target.result, origFile.type);

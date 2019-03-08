@@ -1,4 +1,4 @@
-//= require cmeditor-dependencies
+//= require cmeditor-dependencies.js
 
 this.CMEditor = (function(){
 	"use strict";
@@ -393,7 +393,7 @@ this.CMEditor = (function(){
 		executeHooks(self, "prePerformDeleteDoc", self, []);
 
 		if(isReadOnly(self) || self.state.curDoc.isReadOnly()){
-			displayMessage(self, self.options.messages.hints.noDeleteReadOnly);
+			displayMessage(self, self.options.messages.hints.noDeleteReadOnly, "warn");
 			return;
 		}
 
@@ -415,7 +415,7 @@ this.CMEditor = (function(){
 						log(self, "Message was:" + response.msg, "DEBUG");
 					}
 					if(response.msg)
-						displayMessage(self, response.msg, textStatus);
+						displayMessage(self, response.msg, textStatus, "info");
 					log(self, "Currently serving these documents locally:", "DEBUG", self.state.docs)
 
 					executeHooks(self, "postPerformDeleteDoc", self, [data, response]);
@@ -423,7 +423,7 @@ this.CMEditor = (function(){
 				error:function(XMLHttpRequest,textStatus,errorThrown){
 					displayMessage(self,
 						'<div class="cmeditor-error-message">'+self.options.messages.errorIntro+'</div>' +
-						XMLHttpRequest.responseText, true);
+						XMLHttpRequest.responseText, "error");
 					log(self, "Could not delete this file from the server", "WARNING", data);
 				}
 			});
@@ -483,9 +483,9 @@ this.CMEditor = (function(){
 					finishedCallback(newDoc);
 
 					if(response.msg)
-						displayMessage(self, response.msg);
+						displayMessage(self, response.msg, "info");
 				} else {
-					displayMessage(self, response.msg ? response.msg : "An unknown error occured");
+					displayMessage(self, response.msg ? response.msg : "An unknown error occured", "error");
 				}
 				executeHooks(self, "postPerformLoadDoc", self, [data, response]);
 			},
@@ -493,7 +493,7 @@ this.CMEditor = (function(){
 			error:function(XMLHttpRequest,textStatus,errorThrown){
 				displayMessage(self,
 					'<div class="cmeditor-error-message">'+self.options.messages.errorIntro+'</div>' +
-					XMLHttpRequest.responseText, true);
+					XMLHttpRequest.responseText, "error");
 			},
 		});
 	}
@@ -575,14 +575,14 @@ this.CMEditor = (function(){
 						log(self, "Could not save this document to the server.", "WARNING", response);
 					}
 					if(response.msg)
-						displayMessage(self, response.msg, textStatus);
+						displayMessage(self, response.msg, textStatus, "info");
 
 					executeHooks(self, "postPerformSaveDoc", self, [data, response]);
 				},
 				error:function(XMLHttpRequest,textStatus,errorThrown){
 					displayMessage(self,
 						'<div class="cmeditor-error-message">'+self.options.messages.errorIntro+'</div>' +
-						XMLHttpRequest.responseText, true);
+						XMLHttpRequest.responseText, "error");
 					log(self, "Could not save this document to the server.", "WARNING", data);
 				}
 			});
@@ -1121,13 +1121,17 @@ this.CMEditor = (function(){
 	 *
 	 * Parameters: message String: The message to be displayed
 	 */
-	function displayMessage(self, message, error = false) {
+	function displayMessage(self, message, type) {
 
 		var secs = 3;
 		var msgClass = 'alert-success';
-		if (error == true){
+
+		if (type == 'error'){
 			secs = 8;
 			msgClass = "alert-danger";
+		}if (type == 'warn'){
+			secs = 6;
+			msgClass = "alert-warning";
 		}
 
 		if (typeof self.state.messagesToDisplay === "undefined" || self.state.messagesToDisplay.length === 0) {
@@ -1145,7 +1149,7 @@ this.CMEditor = (function(){
 
 
 			self.rootElem.find(".cmeditor-tab-message")
-				.removeClass('alert-secondary alert-success alert-danger')
+				.removeClass('alert-secondary alert-success alert-danger alert-warning')
 				.addClass(msgClass)
 				.html(self.state.messagesToDisplay[0])
 				.fadeIn(300)
@@ -1266,7 +1270,7 @@ this.CMEditor = (function(){
 	 */
 	function importDoc(self, fileName, fileContent, fileMode){
 		if(isReadOnly(self)){
-			displayMessage(self, self.options.messages.hints.editorIsReadOnly);
+			displayMessage(self, self.options.messages.hints.editorIsReadOnly, "warn");
 			return;
 		}
 
@@ -1291,7 +1295,7 @@ this.CMEditor = (function(){
 	 */
 	function moveDoc(self, newFolder){
 		if(isReadOnly(self) || self.state.curDoc.isReadOnly()){
-			displayMessage(self, self.options.messages.hints.noMoveReadOnly);
+			displayMessage(self, self.options.messages.hints.noMoveReadOnly, "warn");
 			return;
 		}
 
@@ -1310,7 +1314,7 @@ this.CMEditor = (function(){
 	 */
 	function newDoc(self, fileName, folder) {
 		if(isReadOnly(self)){
-			displayMessage(self, self.options.messages.hints.editorIsReadOnly);
+			displayMessage(self, self.options.messages.hints.editorIsReadOnly, "warn");
 			return;
 		}
 
@@ -1389,7 +1393,7 @@ this.CMEditor = (function(){
 	function open(self, fileId, readWrite) {
 		executeHooks(self, "preOpenDoc", self, [fileId]);
 		if(isReadOnly(self)){
-			displayMessage(self, self.options.messages.hints.editorIsReadOnly);
+			displayMessage(self, self.options.messages.hints.editorIsReadOnly, "warn");
 			return;
 		}
 
@@ -1412,7 +1416,7 @@ this.CMEditor = (function(){
 	 */
 	function rename(self, newName) {
 		if(isReadOnly(self) || self.state.curDoc.isReadOnly()){
-			displayMessage(self, self.options.messages.hints.noRenameReadOnly);
+			displayMessage(self, self.options.messages.hints.noRenameReadOnly, "warn");
 			return;
 		}
 
@@ -1434,7 +1438,7 @@ this.CMEditor = (function(){
 		executeHooks(self, "preSaveDoc", self, []);
 
 		if(isReadOnly(self) || self.state.curDoc.isReadOnly()){
-			displayMessage(self, self.options.messages.hints.noSaveReadOnly);
+			displayMessage(self, self.options.messages.hints.noSaveReadOnly, "warn");
 			return;
 		}
 
@@ -1454,7 +1458,7 @@ this.CMEditor = (function(){
 	 */
 	function saveas(self) {
 		if(isReadOnly(self) || self.state.curDoc.isReadOnly()){
-			displayMessage(self, self.options.messages.hints.noSaveReadOnly);
+			displayMessage(self, self.options.messages.hints.noSaveReadOnly, "warn");
 			return;
 		}
 
@@ -1512,7 +1516,7 @@ this.CMEditor = (function(){
 		}
 
 		log(self, "Could not load this unknown mode: "+mode, "WARNING");
-		displayMessage(self, self.options.messages.hints.noSuchMode);
+		displayMessage(self, self.options.messages.hints.noSuchMode, "warn");
 	}
 
 	/* (Public)

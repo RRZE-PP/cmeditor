@@ -1,4 +1,4 @@
-//=require cmeditor-dependencies
+//=require cmeditor-dependencies.js
 
 this.textAreaCMEditor = function (){
 	"use strict";
@@ -428,7 +428,7 @@ this.textAreaCMEditor = function (){
 
 		if(cmMode === null || cmMode === undefined){
 			log(self, "Could not load this unknown mode: "+mode, "WARNING");
-			displayMessage(self, "Unknown mode");
+			displayMessage(self, "Unknown mode", "error");
 			return;
 		}
 

@@ -1,2 +1,2 @@
-//= require jsdifflib/difflib
-//= require jsdifflib/diffview
+//= require jsdifflib/difflib.js
+//= require jsdifflib/diffview.js
