@@ -16,3 +16,9 @@
     border: thin solid #aaa;
     overflow: auto;
 }
+
+.scrollable-menu {
+     height: auto;
+     max-height: 600px;
+     overflow-x: hidden;
+}

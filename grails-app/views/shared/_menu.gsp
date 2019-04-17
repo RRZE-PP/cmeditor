@@ -20,7 +20,7 @@
 			<a href="#" class="nav-link dropdown-toggle" id="fileMenu" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 				<g:message code="cmeditor.menu.menus.file" />
 			</a>
-			<div class="fileMenu dropdown-menu" aria-labelledby="fileMenu">
+			<div class="fileMenu dropdown-menu scrollable-menu" aria-labelledby="fileMenu">
 				<g:if test="${options.menuFile}">
 					<cmeditor:menuItem value="new" code="file.new" icon="fa-file" iconFamily="far"/>
 					<cmeditor:menuItem value="open" code="file.open" icon="fa-folder-open" iconFamily="far"/>
@@ -40,7 +40,7 @@
 			<a href="#" class="nav-link dropdown-toggle" id="viewMenu" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 				<g:message code="cmeditor.menu.menus.view" />
 			</a>
-			<div class="viewMenu dropdown-menu" aria-labelledby="viewMenu">
+			<div class="viewMenu dropdown-menu scrollable-menu" aria-labelledby="viewMenu">
 				<cmeditor:menuItem value="readOnly" code="view.readonly" icon="fa-lock" iconFamily="fas"/>
 				<cmeditor:menuItem value="diff" code="view.diff" icon="fa-exchange-alt" iconFamily="fas"/>
 				<cmeditor:menuItem value="goto" code="view.goto" icon="fa-location-arrow" iconFamily="fas"/>
@@ -53,12 +53,12 @@
 			<a href="#" class="nav-link dropdown-toggle" id="modesMenu" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 				<g:message code="cmeditor.menu.menus.view.mode" />
 			</a>
-			<div class="modesMenu dropdown-menu" aria-labelledby="modesMenu"></div>
+			<div class="modesMenu dropdown-menu scrollable-menu" aria-labelledby="modesMenu"></div>
 		</li>
 		<li class="nav-item dropdown">
 			<a href="#" class="nav-link dropdown-toggle" id="optionsMenu" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 				<span class="'ui-button-text-icon-secondary"></span><g:message code="cmeditor.menu.menus.options" /></a>
-			<div class="optionsMenu dropdown-menu" aria-labelledby="optionsMenu">
+			<div class="optionsMenu dropdown-menu scrollable-menu" aria-labelledby="optionsMenu">
 				<cmeditor:menuItem value="diffBeforeSave" code="options.diffbeforesave" active="true" />
 				<cmeditor:menuDivider />
 

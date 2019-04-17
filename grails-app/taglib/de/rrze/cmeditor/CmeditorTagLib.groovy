@@ -177,6 +177,14 @@ class CmeditorTagLib {
 							 availableModes: availableModes,
 							 availableThemes: availableThemes])
 	}
+
+	/**
+	 * .scrollable-menu {*     height: auto;
+	 *     max-height: 200px;
+	 *     overflow-x: hidden;
+	 * }
+	 *
+	 */
 	
 	def menuItem = { attrs, body ->
 		def value = attrs.value
@@ -209,7 +217,7 @@ class CmeditorTagLib {
 	}
 	
 	def menuDivider = { attrs, body ->
-		out << '<div class="dropdown-divider"></div>'
+		out << '<div class="dropdown-divider disabled"></div>'
 	}
 	
 }

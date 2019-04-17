@@ -263,10 +263,6 @@ this.CMEditorMenu = (function(){
 							}
 
 							self.dialogs.openDialog.modal('show');
-
-							//there is no focus method, so open and close once to set focus
-							self.dialogs.openDialog.find(".fileSelect").select2("open");
-							self.dialogs.openDialog.find(".fileSelect").select2("close");
 						} else {
 							self.cmeditor.displayMessage(data.msg ? data.msg : "An unknown error occured", "error");
 						}
@@ -467,7 +463,7 @@ this.CMEditorMenu = (function(){
 			modesMenuElem.append('<a class="dropdown-item" href="#" value="mode'+cmMode.name+'">'+cmMode.name+'</a>');
 		}
 
-        modesMenuElem.append('<div class="dropdown-divider"></div>');
+        modesMenuElem.append('<div class="dropdown-divider disabled"></div>');
 
 		//treat overlays as modes
 		if (typeof self.options.overlayDefinitionsVar !== "undefined") {
@@ -724,7 +720,7 @@ this.CMEditorMenu = (function(){
 		if(typeof self.menus.userAddedMenus[menuName] === "undefined"){
 			var menuEntry = $("<li class='nav-item dropdown'>" +
 				"<a class='dropdown-toggle nav-link userAddedRootMenu' href='#' id='UserAddedMenu_"+menuName+"' role='button' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>"+menuName+"</a>" +
-				"<div class='dropdown-menu userAddedMenu' aria-labelledby='UserAddedMenu_'"+menuName+"'></div>" +
+				"<div class='dropdown-menu userAddedMenu scrollable-menu' aria-labelledby='UserAddedMenu_'"+menuName+"'></div>" +
 				"</li>");
 			self.rootElem.find(".cmeditor-menubar").find('ul.navbar-nav').append(menuEntry);
 
@@ -770,10 +766,41 @@ this.CMEditorMenu = (function(){
 		return subMenuEntry;
 	}
 
+	/* (Public)
+	 *
+	 * Appends a submenu entry divider
+	 *
+	 * Parameters: superMenu Object: a handle returned by this method or `addRootMenuEntry`
+	 *             menuName String: the new menu entry's name
+	 *             callbackFunction function (optional): if supplied, this function will be called
+	 *                                                   when the entry is clicked
+	 *
+	 * Returns: A handle which can be used to add new sub-submenu entries with this method
+	 */
+	function addSubMenuDivider(self, superMenu){
+		if(typeof superMenu._cmeditor_menu_isAUserAddedMenu === "undefined"){
+			console.log("Warning: superMenu is not a valid menu entry");
+			return null;
+		}
+
+		// if(superMenu.children(".userAddedMenu").length === 0)
+		// 	superMenu.append($("<ul class='userAddedMenu'></ul>"));
+
+		var subMenuEntry = $("<a class='dropdown-item disabled' href='#'><div class='dropdown-divider disabled'></div></a>");
+		subMenuEntry.on("click", function(e){e.preventDefault()});
+
+		superMenu.children(".userAddedMenu").append(subMenuEntry);
+
+		subMenuEntry._cmeditor_menu_isAUserAddedMenu = true;
+
+		return subMenuEntry;
+	}
+
 	CMEditorMenu.prototype.constructor = CMEditorMenu;
 	CMEditorMenu.prototype.update = function(){update(this)};
 	CMEditorMenu.prototype.addRootMenuEntry = function(){Array.prototype.unshift.call(arguments, this); return addRootMenuEntry.apply(this, arguments)};
 	CMEditorMenu.prototype.addSubMenuEntry = function(){Array.prototype.unshift.call(arguments, this); return addSubMenuEntry.apply(this, arguments)};
+	CMEditorMenu.prototype.addSubMenuDivider = function(){Array.prototype.unshift.call(arguments, this); return addSubMenuDivider.apply(this, arguments)};
 
 	return CMEditorMenu;
 })();
