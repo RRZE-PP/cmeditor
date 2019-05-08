@@ -17,9 +17,3 @@
         </div>
     </div>
 </div>
-
-<script>
-    $('#cmEditorOpenDialog').on('shown.bs.modal', function () {
-        $('.fileSelect').select2('open');
-    })
-</script>
