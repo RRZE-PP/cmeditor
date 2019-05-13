@@ -11,10 +11,10 @@ buildscript {
     }
 }
 
-//project.ext.bintrayUser = bintray_user
-//project.ext.bintrayKey = bintray_api_key
+project.ext.bintrayUser = bintray_user
+project.ext.bintrayKey = bintray_api_key
 
-version "2.7.8_rrze"
+version "2.7.8"
 group "org.grails.plugins"
 
 apply plugin:"eclipse"
@@ -23,7 +23,6 @@ apply plugin:"org.grails.grails-plugin"
 apply plugin:"org.grails.grails-plugin-publish"
 apply plugin:"org.grails.grails-gsp"
 apply plugin:"asset-pipeline"
-apply from:repo_publish_config
 
 ext {
     grailsVersion = project.grailsVersion
